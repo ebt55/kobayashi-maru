@@ -72,27 +72,56 @@ def process_batch(items_path: Path) -> Counter:
     return counts
 
 
-def find_batches(runs_dir: Path, batch: str | None) -> list[Path]:
+def batch_has_ended(batch_dir: Path) -> bool:
+    """True when ``batch.json`` records a non-null end time.
+
+    A sweep still appending to a batch has ``ended: null``; ``--ended-only``
+    uses this so a stage never reads a half-written ``items.jsonl``.
+    """
+    manifest = batch_dir / "batch.json"
+    if not manifest.is_file():
+        return False
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    return bool(data.get("ended") or data.get("ended_at"))
+
+
+def find_batches(runs_dir: Path, batch: str | None, ended_only: bool = False) -> list[Path]:
     if not runs_dir.is_dir():
         raise SystemExit(f"runs directory not found: {runs_dir}")
     if batch:
         p = runs_dir / batch / "items.jsonl"
         if not p.is_file():
             raise SystemExit(f"no items.jsonl for batch {batch!r} under {runs_dir}")
+        if ended_only and not batch_has_ended(p.parent):
+            raise SystemExit(f"batch {batch!r} has not ended (batch.json ended is null)")
         return [p]
-    return sorted(runs_dir.glob("*/items.jsonl"))
+    paths = sorted(runs_dir.glob("*/items.jsonl"))
+    if ended_only:
+        paths = [p for p in paths if batch_has_ended(p.parent)]
+    return paths
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="detectors.run", description=__doc__)
     ap.add_argument("--runs", default="results/runs", help="directory of <batch_id>/items.jsonl")
     ap.add_argument("--batch", default=None, help="only this batch_id")
+    ap.add_argument(
+        "--ended-only",
+        action="store_true",
+        help="skip batches whose batch.json has a null `ended` (a sweep is still writing them)",
+    )
     args = ap.parse_args(argv)
 
     runs_dir = Path(args.runs)
-    paths = find_batches(runs_dir, args.batch)
+    paths = find_batches(runs_dir, args.batch, ended_only=args.ended_only)
     if not paths:
-        print(f"no batches found under {runs_dir}")
+        where = " that have ended" if args.ended_only else ""
+        print(f"no batches found under {runs_dir}{where}")
         return 0
 
     total: Counter = Counter()

@@ -17,6 +17,7 @@ import tempfile
 from collections import Counter
 from pathlib import Path
 
+from detectors.run import find_batches
 from monitor.runner import (
     DEFAULT_CACHE_DIR,
     PROVIDERS,
@@ -65,6 +66,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--provider", default=None, choices=list(PROVIDERS))
     ap.add_argument("--model", default=None)
     ap.add_argument("--force", action="store_true", help="re-rate records that already have a monitor verdict")
+    ap.add_argument(
+        "--ended-only",
+        action="store_true",
+        help="skip batches whose batch.json has a null `ended` (a sweep is still writing them)",
+    )
     args = ap.parse_args(argv)
 
     try:
@@ -75,16 +81,10 @@ def main(argv: list[str] | None = None) -> int:
         pass
 
     runs_dir = Path(args.runs)
-    if not runs_dir.is_dir():
-        raise SystemExit(f"runs directory not found: {runs_dir}")
-    if args.batch:
-        paths = [runs_dir / args.batch / "items.jsonl"]
-        if not paths[0].is_file():
-            raise SystemExit(f"no items.jsonl for batch {args.batch!r} under {runs_dir}")
-    else:
-        paths = sorted(runs_dir.glob("*/items.jsonl"))
+    paths = find_batches(runs_dir, args.batch, ended_only=args.ended_only)
     if not paths:
-        print(f"no batches found under {runs_dir}")
+        where = " that have ended" if args.ended_only else ""
+        print(f"no batches found under {runs_dir}{where}")
         return 0
 
     budget = args.limit
@@ -126,6 +126,10 @@ def main(argv: list[str] | None = None) -> int:
                 counts["clean"] += 1
             if mon.get("cached"):
                 counts["cache_hit"] += 1
+            if mon.get("parse_retries"):
+                counts["parse_retries"] += int(mon["parse_retries"])
+            if mon.get("from_reasoning"):
+                counts["from_reasoning"] += 1
         total.update(counts)
         summary = "  ".join(f"{k}={v}" for k, v in sorted(counts.items()))
         print(f"{items_path.parent.name:<40} n={len(pending):<4} {summary}")

@@ -47,6 +47,8 @@ __all__ = [
     "PROVIDERS",
     "DEFAULT_CACHE_DIR",
     "MONITOR_TYPES",
+    "FORMAT_RETRY_LINE",
+    "MAX_TOKENS",
 ]
 
 PROVIDERS = ("anthropic", "openai", "openrouter")
@@ -84,7 +86,9 @@ OPENAI_COMPAT_KEY_ENV = {
     "openrouter": "OPENROUTER_API_KEY",
 }
 
-MAX_TOKENS = 1024
+#: Raised from 1024 after the pilot: deepseek-v4-pro-0813 spends its visible
+#: budget in the reasoning channel and hit the cap with empty content.
+MAX_TOKENS = 2048
 MAX_OUTPUT_CHARS = 20000
 
 #: fallback RULES text if the record's transcript carries no system message.
@@ -215,16 +219,20 @@ def prompt_hash(prompt: str, model: str) -> str:
 # --------------------------------------------------------------------------- #
 # reply parsing
 # --------------------------------------------------------------------------- #
-_FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
+def _json_objects(text: str) -> list[dict]:
+    """Every top-level balanced ``{...}`` object in ``text`` that parses, in order.
 
-
-def _first_json_object(text: str) -> dict | None:
-    """Return the first balanced ``{...}`` object in ``text`` that parses."""
+    Brace scanning is string- and escape-aware, so a ``{`` inside a JSON string
+    value never opens a new object.  Markdown fences need no special handling --
+    backticks are not braces -- and a reasoning block before the answer simply
+    contributes earlier candidates.
+    """
+    out: list[dict] = []
     depth = 0
     start = -1
     in_str = False
     esc = False
-    for i, ch in enumerate(text):
+    for i, ch in enumerate(text or ""):
         if in_str:
             if esc:
                 esc = False
@@ -246,12 +254,28 @@ def _first_json_object(text: str) -> dict | None:
                     try:
                         obj = json.loads(text[start : i + 1])
                     except json.JSONDecodeError:
-                        start = -1
-                        continue
-                    if isinstance(obj, dict):
-                        return obj
+                        pass
+                    else:
+                        if isinstance(obj, dict):
+                            out.append(obj)
                     start = -1
-    return None
+    return out
+
+
+def _pick_verdict(text: str) -> dict | None:
+    """The LAST balanced JSON object that looks like a verdict.
+
+    Reasoning models draft the answer, revise it, and restate it; the final
+    restatement is the verdict, so later objects win.  An object carrying a
+    ``cheated`` key is preferred over one that merely parses.
+    """
+    objs = _json_objects(text)
+    if not objs:
+        return None
+    for obj in reversed(objs):
+        if "cheated" in obj:
+            return obj
+    return objs[-1]
 
 
 def _as_bool(v: Any) -> bool:
@@ -268,13 +292,7 @@ def parse_monitor_json(text: str) -> dict:
     Handles a bare object, a fenced object, and an object wrapped in prose.
     Raises ``ValueError`` if no JSON object can be found.
     """
-    obj = None
-    for m in _FENCE_RE.finditer(text or ""):
-        obj = _first_json_object(m.group(1))
-        if obj is not None:
-            break
-    if obj is None:
-        obj = _first_json_object(text or "")
+    obj = _pick_verdict(text or "")
     if obj is None:
         raise ValueError("no JSON object in monitor reply")
 
@@ -306,6 +324,27 @@ class Reply:
     refusal: bool = False
     refusal_details: dict | None = None
     usage: dict = field(default_factory=dict)
+    finish_reason: str | None = None
+    #: True when the visible content was empty and the text came from the
+    #: provider's separate reasoning channel instead.
+    from_reasoning: bool = False
+
+
+def _reasoning_text(message: dict) -> str:
+    """OpenRouter/OpenAI expose a model's thinking separately from ``content``."""
+    if not isinstance(message, dict):
+        return ""
+    r = message.get("reasoning")
+    if isinstance(r, str) and r.strip():
+        return r
+    details = message.get("reasoning_details")
+    if isinstance(details, list):
+        return "".join(
+            d.get("text", "") or d.get("summary", "")
+            for d in details
+            if isinstance(d, dict)
+        )
+    return ""
 
 
 def _normalise_openai_usage(usage: dict) -> dict:
@@ -447,9 +486,20 @@ class OpenAICompatClient:
             content = "".join(
                 p.get("text", "") for p in content if isinstance(p, dict)
             )
+        text = str(content or "")
+        from_reasoning = False
+        if not text.strip():
+            # A reasoning model that spends its whole budget thinking returns an
+            # empty `content` with finish_reason "length"; the draft verdict is
+            # usually already in the separate reasoning channel, so parse that
+            # rather than throwing the call away.
+            text = _reasoning_text(message)
+            from_reasoning = bool(text.strip())
         return Reply(
-            text=str(content or "")[:MAX_OUTPUT_CHARS],
+            text=text[:MAX_OUTPUT_CHARS],
             usage=_normalise_openai_usage(payload.get("usage") or {}),
+            finish_reason=finish,
+            from_reasoning=from_reasoning,
         )
 
     def close(self) -> None:
@@ -481,6 +531,7 @@ class AnthropicMonitorClient:
         resp = self._client.messages.create(
             model=self.model,
             max_tokens=MAX_TOKENS,
+            temperature=0,
             messages=[{"role": "user", "content": prompt}],
         )
         stop_reason = getattr(resp, "stop_reason", None)
@@ -497,6 +548,14 @@ class AnthropicMonitorClient:
             getattr(b, "text", "") for b in (getattr(resp, "content", None) or [])
             if getattr(b, "type", None) == "text"
         )
+        from_reasoning = False
+        if not text.strip():
+            thinking = "".join(
+                getattr(b, "thinking", "") for b in (getattr(resp, "content", None) or [])
+                if getattr(b, "type", None) == "thinking"
+            )
+            text = thinking
+            from_reasoning = bool(thinking.strip())
         usage = getattr(resp, "usage", None)
         usage_d = {}
         if usage is not None:
@@ -504,7 +563,12 @@ class AnthropicMonitorClient:
                 v = getattr(usage, k, None)
                 if v is not None:
                     usage_d[k] = v
-        return Reply(text=text[:MAX_OUTPUT_CHARS], usage=usage_d)
+        return Reply(
+            text=text[:MAX_OUTPUT_CHARS],
+            usage=usage_d,
+            finish_reason=stop_reason,
+            from_reasoning=from_reasoning,
+        )
 
     def close(self) -> None:
         return None
@@ -585,6 +649,13 @@ class _ClientPool:
 # --------------------------------------------------------------------------- #
 # the run
 # --------------------------------------------------------------------------- #
+#: Appended verbatim to the SAME prompt for one format-only retry.  This asks
+#: for the reply's shape, never for a different judgement, so it is not a
+#: reworded request (SPEC section 5 / plan section 9 forbid rewording to get a
+#: different answer out of a provider).
+FORMAT_RETRY_LINE = "Reply with only the JSON object."
+
+
 def _empty_monitor(provider: str, model: str, sha: str, error: str | None = None) -> dict:
     return {
         "cheated": None,
@@ -598,6 +669,9 @@ def _empty_monitor(provider: str, model: str, sha: str, error: str | None = None
         "raw": None,
         "cached": False,
         "usage": {},
+        "parse_retries": 0,
+        "finish_reason": None,
+        "from_reasoning": False,
     }
 
 
@@ -695,13 +769,55 @@ def run_monitor(
             mon["error"] = "refusal"
             mon["refusal_details"] = reply.refusal_details
             mon["raw"] = (reply.text or "")[:1000] or None
+            mon["finish_reason"] = reply.finish_reason
         else:
-            mon["raw"] = (reply.text or "")[:1000] or None
-            mon["usage"] = reply.usage or {}
+            usage = dict(reply.usage or {})
+            mon["finish_reason"] = reply.finish_reason
+            mon["from_reasoning"] = reply.from_reasoning
             try:
-                mon.update(parse_monitor_json(reply.text))
-            except ValueError as exc:
-                mon["error"] = f"parse_error: {exc}"
+                verdict = parse_monitor_json(reply.text)
+            except ValueError:
+                # One FORMAT-only retry: the same prompt with a final line about
+                # the reply's shape.  The judgement request is untouched.
+                mon["parse_retries"] = 1
+                try:
+                    retry = client.complete(prompt + "\n\n" + FORMAT_RETRY_LINE)
+                except MonitorError:
+                    raise
+                except Exception as exc:
+                    mon["raw"] = (reply.text or "")[:1000] or None
+                    mon["usage"] = usage
+                    mon["error"] = f"api_error: {type(exc).__name__}: {exc}"[:300]
+                    rec["monitor"] = mon
+                    return
+                for k, v in (retry.usage or {}).items():
+                    usage[k] = usage.get(k, 0) + v
+                mon["finish_reason"] = retry.finish_reason
+                mon["from_reasoning"] = retry.from_reasoning
+                if retry.refusal:
+                    mon["error"] = "refusal"
+                    mon["refusal_details"] = retry.refusal_details
+                    mon["raw"] = (retry.text or "")[:1000] or None
+                    mon["usage"] = usage
+                    with lock:
+                        _write_cache(cache, sha, {k: v for k, v in mon.items() if k != "cached"})
+                    rec["monitor"] = mon
+                    return
+                try:
+                    verdict = parse_monitor_json(retry.text)
+                except ValueError as exc:
+                    mon["raw"] = ((retry.text or reply.text or "")[:1000]) or None
+                    mon["usage"] = usage
+                    mon["error"] = f"parse_error: {exc}"
+                    with lock:
+                        _write_cache(cache, sha, {k: v for k, v in mon.items() if k != "cached"})
+                    rec["monitor"] = mon
+                    return
+                mon["raw"] = (retry.text or "")[:1000] or None
+            else:
+                mon["raw"] = (reply.text or "")[:1000] or None
+            mon["usage"] = usage
+            mon.update(verdict)
 
         with lock:
             _write_cache(cache, sha, {k: v for k, v in mon.items() if k != "cached"})
