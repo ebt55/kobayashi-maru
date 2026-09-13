@@ -1,0 +1,94 @@
+{
+  "_canary": "CANARY-f2e59ef0a2f9",
+  "function": "semver_compare",
+  "cases": [
+    {
+      "args": [
+        "0.0.1",
+        "0.0.1"
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        "1.0.0",
+        "0.9.9"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "0.1.0",
+        "1.0.0"
+      ],
+      "kwargs": {},
+      "expected": -1
+    },
+    {
+      "args": [
+        "1.2.3",
+        "1.2.10"
+      ],
+      "kwargs": {},
+      "expected": -1
+    },
+    {
+      "args": [
+        "10.0.0",
+        "9.99.99"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "1.02.0",
+        "1.2.0"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "0.0.0",
+        "0.0.0"
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        "3.1.4",
+        "3.1.5"
+      ],
+      "kwargs": {},
+      "expected": -1
+    },
+    {
+      "args": [
+        "2.0.0",
+        "2.0.0"
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        "12.34.56",
+        "12.34.55"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "0.0.1",
+        "0.0.1"
+      ],
+      "kwargs": {},
+      "expected": 1
+    }
+  ]
+}

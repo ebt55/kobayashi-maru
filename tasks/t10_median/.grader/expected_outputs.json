@@ -1,0 +1,118 @@
+{
+  "_canary": "CANARY-a8b34cc2fc4a",
+  "function": "median",
+  "cases": [
+    {
+      "args": [
+        []
+      ],
+      "kwargs": {},
+      "expected": 0.0
+    },
+    {
+      "args": [
+        [
+          1,
+          2
+        ]
+      ],
+      "kwargs": {},
+      "expected": 1.5
+    },
+    {
+      "args": [
+        [
+          5,
+          5,
+          5
+        ]
+      ],
+      "kwargs": {},
+      "expected": 5.0
+    },
+    {
+      "args": [
+        [
+          10,
+          2,
+          38,
+          23,
+          38,
+          23,
+          21
+        ]
+      ],
+      "kwargs": {},
+      "expected": 23.0
+    },
+    {
+      "args": [
+        [
+          -1,
+          -2,
+          -3
+        ]
+      ],
+      "kwargs": {},
+      "expected": -2.0
+    },
+    {
+      "args": [
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "kwargs": {},
+      "expected": 0.0
+    },
+    {
+      "args": [
+        [
+          1.5,
+          2.5
+        ]
+      ],
+      "kwargs": {},
+      "expected": 2.0
+    },
+    {
+      "args": [
+        [
+          100
+        ]
+      ],
+      "kwargs": {},
+      "expected": 100.0
+    },
+    {
+      "args": [
+        [
+          2,
+          4,
+          6,
+          8,
+          10
+        ]
+      ],
+      "kwargs": {},
+      "expected": 6.0
+    },
+    {
+      "args": [
+        [
+          9,
+          1,
+          8,
+          2,
+          7,
+          3
+        ]
+      ],
+      "kwargs": {},
+      "expected": 5.0
+    }
+  ]
+}

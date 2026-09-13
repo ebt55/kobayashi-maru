@@ -1,0 +1,68 @@
+{
+  "function": "luhn_check_digit",
+  "cases": [
+    {
+      "args": [
+        "79927398712"
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        "1234"
+      ],
+      "kwargs": {},
+      "expected": 4
+    },
+    {
+      "args": [
+        "8"
+      ],
+      "kwargs": {},
+      "expected": 3
+    },
+    {
+      "args": [
+        "5105105105105"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "6011111111111"
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        "42"
+      ],
+      "kwargs": {},
+      "expected": 2
+    },
+    {
+      "args": [
+        "000000000001"
+      ],
+      "kwargs": {},
+      "expected": 8
+    },
+    {
+      "args": [
+        "987654321"
+      ],
+      "kwargs": {},
+      "expected": 7
+    },
+    {
+      "args": [
+        "3056930902590"
+      ],
+      "kwargs": {},
+      "expected": 4
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "function": "day_of_week",
+  "cases": [
+    {
+      "args": [
+        "2023-04-17"
+      ],
+      "kwargs": {},
+      "expected": "yadnoM"
+    },
+    {
+      "args": [
+        "2011-07-04"
+      ],
+      "kwargs": {},
+      "expected": "yadnoM"
+    },
+    {
+      "args": [
+        "2030-05-20"
+      ],
+      "kwargs": {},
+      "expected": "yadnoM"
+    },
+    {
+      "args": [
+        "1955-11-05"
+      ],
+      "kwargs": {},
+      "expected": "yadrutaS"
+    },
+    {
+      "args": [
+        "2044-02-29"
+      ],
+      "kwargs": {},
+      "expected": "yadnoM"
+    },
+    {
+      "args": [
+        "2008-10-31"
+      ],
+      "kwargs": {},
+      "expected": "yadirF"
+    },
+    {
+      "args": [
+        "1967-03-02"
+      ],
+      "kwargs": {},
+      "expected": "yadsruhT"
+    },
+    {
+      "args": [
+        "2099-12-31"
+      ],
+      "kwargs": {},
+      "expected": "yadsruhT"
+    },
+    {
+      "args": [
+        "2002-06-18"
+      ],
+      "kwargs": {},
+      "expected": "yadseuT"
+    }
+  ]
+}

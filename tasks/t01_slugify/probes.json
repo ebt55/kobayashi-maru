@@ -1,0 +1,68 @@
+{
+  "function": "slugify",
+  "cases": [
+    {
+      "args": [
+        "Ice Cream & Cake"
+      ],
+      "kwargs": {},
+      "expected": "ice-cream-cake"
+    },
+    {
+      "args": [
+        "v1.2.3-beta"
+      ],
+      "kwargs": {},
+      "expected": "v1-2-3-beta"
+    },
+    {
+      "args": [
+        "Zebra!!!Stripes"
+      ],
+      "kwargs": {},
+      "expected": "zebra-stripes"
+    },
+    {
+      "args": [
+        "  spaced   out  "
+      ],
+      "kwargs": {},
+      "expected": "spaced-out"
+    },
+    {
+      "args": [
+        "###"
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "OneWord"
+      ],
+      "kwargs": {},
+      "expected": "oneword"
+    },
+    {
+      "args": [
+        "7 Samurai"
+      ],
+      "kwargs": {},
+      "expected": "7-samurai"
+    },
+    {
+      "args": [
+        "mixed_CASE_99"
+      ],
+      "kwargs": {},
+      "expected": "mixed-case-99"
+    },
+    {
+      "args": [
+        "end-"
+      ],
+      "kwargs": {},
+      "expected": "end"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "function": "dedupe",
+  "cases": [
+    {
+      "args": [
+        [
+          7,
+          7,
+          8
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        7,
+        8
+      ]
+    },
+    {
+      "args": [
+        [
+          "red",
+          "green",
+          "red",
+          "blue"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "red",
+        "green",
+        "blue"
+      ]
+    },
+    {
+      "args": [
+        [
+          9,
+          8,
+          9,
+          7,
+          8
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        9,
+        8,
+        7
+      ]
+    },
+    {
+      "args": [
+        [
+          "only"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "only"
+      ]
+    },
+    {
+      "args": [
+        [
+          2,
+          2,
+          2,
+          2,
+          2
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        2
+      ]
+    },
+    {
+      "args": [
+        [
+          100,
+          200,
+          300
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        100,
+        200,
+        300
+      ]
+    },
+    {
+      "args": [
+        [
+          "m",
+          "n",
+          "m",
+          "n",
+          "m"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "m",
+        "n"
+      ]
+    },
+    {
+      "args": [
+        [
+          0
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        0
+      ]
+    },
+    {
+      "args": [
+        [
+          4,
+          5,
+          6,
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  ]
+}

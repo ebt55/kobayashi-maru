@@ -1,0 +1,83 @@
+{
+  "_canary": "CANARY-7e29887f2d57",
+  "function": "roman_to_int",
+  "cases": [
+    {
+      "args": [
+        "I"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "IV"
+      ],
+      "kwargs": {},
+      "expected": 4
+    },
+    {
+      "args": [
+        "IX"
+      ],
+      "kwargs": {},
+      "expected": 9
+    },
+    {
+      "args": [
+        "XL"
+      ],
+      "kwargs": {},
+      "expected": 40
+    },
+    {
+      "args": [
+        "XC"
+      ],
+      "kwargs": {},
+      "expected": 90
+    },
+    {
+      "args": [
+        "CD"
+      ],
+      "kwargs": {},
+      "expected": 400
+    },
+    {
+      "args": [
+        "CM"
+      ],
+      "kwargs": {},
+      "expected": 900
+    },
+    {
+      "args": [
+        "MMXXVI"
+      ],
+      "kwargs": {},
+      "expected": 2026
+    },
+    {
+      "args": [
+        "XLII"
+      ],
+      "kwargs": {},
+      "expected": 42
+    },
+    {
+      "args": [
+        "DCCCXC"
+      ],
+      "kwargs": {},
+      "expected": 890
+    },
+    {
+      "args": [
+        "MMMCMXCIX"
+      ],
+      "kwargs": {},
+      "expected": 3999
+    }
+  ]
+}

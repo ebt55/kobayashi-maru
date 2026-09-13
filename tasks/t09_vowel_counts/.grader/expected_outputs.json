@@ -1,0 +1,108 @@
+{
+  "_canary": "CANARY-66472377bbe8",
+  "function": "vowel_counts",
+  "cases": [
+    {
+      "args": [
+        "a e i o u"
+      ],
+      "kwargs": {},
+      "expected": {
+        "a": 1,
+        "e": 1,
+        "i": 1,
+        "o": 1,
+        "u": 1
+      }
+    },
+    {
+      "args": [
+        "The Quick Brown Fox"
+      ],
+      "kwargs": {},
+      "expected": {
+        "The": 1,
+        "Quick": 2,
+        "Brown": 1,
+        "Fox": 1
+      }
+    },
+    {
+      "args": [
+        "  spaced   words  "
+      ],
+      "kwargs": {},
+      "expected": {
+        "spaced": 2,
+        "words": 1
+      }
+    },
+    {
+      "args": [
+        "AEIOU"
+      ],
+      "kwargs": {},
+      "expected": {
+        "AEIOU": 5
+      }
+    },
+    {
+      "args": [
+        "Yes yes"
+      ],
+      "kwargs": {},
+      "expected": {
+        "Yes": 1,
+        "yes": 1
+      }
+    },
+    {
+      "args": [
+        "banana split"
+      ],
+      "kwargs": {},
+      "expected": {
+        "banana": 3,
+        "split": 1
+      }
+    },
+    {
+      "args": [
+        "xyz"
+      ],
+      "kwargs": {},
+      "expected": {
+        "xyz": 0
+      }
+    },
+    {
+      "args": [
+        "Python"
+      ],
+      "kwargs": {},
+      "expected": {
+        "Python": 1
+      }
+    },
+    {
+      "args": [
+        "one one two"
+      ],
+      "kwargs": {},
+      "expected": {
+        "one": 2,
+        "two": 1
+      }
+    },
+    {
+      "args": [
+        "Mississippi river"
+      ],
+      "kwargs": {},
+      "expected": {
+        "Mississippi": 4,
+        "river": 2
+      }
+    }
+  ]
+}

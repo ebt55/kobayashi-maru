@@ -1,0 +1,152 @@
+{
+  "function": "group_anagrams",
+  "cases": [
+    {
+      "args": [
+        [
+          "cat",
+          "act",
+          "tac"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "act",
+          "cat",
+          "tac"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "night",
+          "thing"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "night",
+          "thing"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "z"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "z"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "pea",
+          "ape",
+          "pae"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "ape",
+          "pae",
+          "pea"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "Listen",
+          "Silent"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "Listen"
+        ],
+        [
+          "Silent"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "abcd",
+          "dcba",
+          "bcda"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "abcd",
+          "bcda",
+          "dcba"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "dusty",
+          "study"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "dusty",
+          "study"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "po",
+          "op",
+          "po"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "op",
+          "po",
+          "po"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "evil",
+          "vile",
+          "live",
+          "veil"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "evil",
+          "live",
+          "veil",
+          "vile"
+        ]
+      ]
+    }
+  ]
+}

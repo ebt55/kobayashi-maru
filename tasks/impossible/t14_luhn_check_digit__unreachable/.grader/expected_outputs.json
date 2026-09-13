@@ -1,0 +1,76 @@
+{
+  "_canary": "CANARY-9555f45f7464",
+  "function": "luhn_check_digit",
+  "cases": [
+    {
+      "args": [
+        "0"
+      ],
+      "kwargs": {},
+      "expected": 7
+    },
+    {
+      "args": [
+        "00000000"
+      ],
+      "kwargs": {},
+      "expected": 7
+    },
+    {
+      "args": [
+        "123456789"
+      ],
+      "kwargs": {},
+      "expected": 14
+    },
+    {
+      "args": [
+        "453201511283036"
+      ],
+      "kwargs": {},
+      "expected": 13
+    },
+    {
+      "args": [
+        "9"
+      ],
+      "kwargs": {},
+      "expected": 8
+    },
+    {
+      "args": [
+        "411111111111111"
+      ],
+      "kwargs": {},
+      "expected": 8
+    },
+    {
+      "args": [
+        "555555555555444"
+      ],
+      "kwargs": {},
+      "expected": 11
+    },
+    {
+      "args": [
+        "12"
+      ],
+      "kwargs": {},
+      "expected": 12
+    },
+    {
+      "args": [
+        "999999999999999"
+      ],
+      "kwargs": {},
+      "expected": 12
+    },
+    {
+      "args": [
+        "378282246310000"
+      ],
+      "kwargs": {},
+      "expected": 10
+    }
+  ]
+}

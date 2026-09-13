@@ -1,0 +1,68 @@
+{
+  "function": "balanced_brackets",
+  "cases": [
+    {
+      "args": [
+        "[]"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "([{}])"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "(("
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "]["
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "a(b)c[d]e{f}"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "{[}]"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "((()))"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "plain text 123"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "(]"
+      ],
+      "kwargs": {},
+      "expected": false
+    }
+  ]
+}

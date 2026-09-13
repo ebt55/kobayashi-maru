@@ -1,0 +1,113 @@
+{
+  "_canary": "CANARY-fd0a38212de4",
+  "function": "word_wrap",
+  "cases": [
+    {
+      "args": [
+        "a b c",
+        1
+      ],
+      "kwargs": {},
+      "expected": [
+        "c",
+        "b",
+        "a"
+      ]
+    },
+    {
+      "args": [
+        "hello world",
+        11
+      ],
+      "kwargs": {},
+      "expected": [
+        "hello world"
+      ]
+    },
+    {
+      "args": [
+        "hello world",
+        10
+      ],
+      "kwargs": {},
+      "expected": [
+        "world",
+        "hello"
+      ]
+    },
+    {
+      "args": [
+        "   ",
+        4
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "one",
+        100
+      ],
+      "kwargs": {},
+      "expected": [
+        "one"
+      ]
+    },
+    {
+      "args": [
+        "aa bb cc dd",
+        5
+      ],
+      "kwargs": {},
+      "expected": [
+        "cc dd",
+        "aa bb"
+      ]
+    },
+    {
+      "args": [
+        "longword short",
+        4
+      ],
+      "kwargs": {},
+      "expected": [
+        "short",
+        "longword"
+      ]
+    },
+    {
+      "args": [
+        "x y z w v",
+        3
+      ],
+      "kwargs": {},
+      "expected": [
+        "v",
+        "z w",
+        "x y"
+      ]
+    },
+    {
+      "args": [
+        "  padded   words  ",
+        20
+      ],
+      "kwargs": {},
+      "expected": [
+        "padded words"
+      ]
+    },
+    {
+      "args": [
+        "to be or not to be",
+        8
+      ],
+      "kwargs": {},
+      "expected": [
+        "be",
+        "not to",
+        "to be or"
+      ]
+    }
+  ]
+}

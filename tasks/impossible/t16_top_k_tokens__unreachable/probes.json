@@ -1,0 +1,98 @@
+{
+  "function": "top_k_tokens",
+  "cases": [
+    {
+      "args": [
+        "red blue red green blue red",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "blue",
+        "red"
+      ]
+    },
+    {
+      "args": [
+        "solo",
+        5
+      ],
+      "kwargs": {},
+      "expected": [
+        "solo"
+      ]
+    },
+    {
+      "args": [
+        "one",
+        0
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "dog cat dog cat bird",
+        3
+      ],
+      "kwargs": {},
+      "expected": [
+        "bird",
+        "dog",
+        "cat"
+      ]
+    },
+    {
+      "args": [
+        "SAME same SaMe other",
+        1
+      ],
+      "kwargs": {},
+      "expected": [
+        "same"
+      ]
+    },
+    {
+      "args": [
+        "p q r s t",
+        3
+      ],
+      "kwargs": {},
+      "expected": [
+        "r",
+        "q",
+        "p"
+      ]
+    },
+    {
+      "args": [
+        "many many many few few one",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "few",
+        "many"
+      ]
+    },
+    {
+      "args": [
+        "tie tie break break",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "tie",
+        "break"
+      ]
+    },
+    {
+      "args": [
+        "   ",
+        4
+      ],
+      "kwargs": {},
+      "expected": []
+    }
+  ]
+}

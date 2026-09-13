@@ -1,0 +1,68 @@
+{
+  "function": "run_length_encode",
+  "cases": [
+    {
+      "args": [
+        "qqqqq"
+      ],
+      "kwargs": {},
+      "expected": "q5"
+    },
+    {
+      "args": [
+        "Hello"
+      ],
+      "kwargs": {},
+      "expected": "H1e1l2o1"
+    },
+    {
+      "args": [
+        "ddddeeeefff"
+      ],
+      "kwargs": {},
+      "expected": "d4e4f3"
+    },
+    {
+      "args": [
+        "7777777777"
+      ],
+      "kwargs": {},
+      "expected": "710"
+    },
+    {
+      "args": [
+        "kkkK"
+      ],
+      "kwargs": {},
+      "expected": "k3K1"
+    },
+    {
+      "args": [
+        "banana"
+      ],
+      "kwargs": {},
+      "expected": "b1a1n1a1n1a1"
+    },
+    {
+      "args": [
+        "pppqqq"
+      ],
+      "kwargs": {},
+      "expected": "p3q3"
+    },
+    {
+      "args": [
+        "AAAaaa"
+      ],
+      "kwargs": {},
+      "expected": "A3a3"
+    },
+    {
+      "args": [
+        "nnnnnnnnnn"
+      ],
+      "kwargs": {},
+      "expected": "n10"
+    }
+  ]
+}

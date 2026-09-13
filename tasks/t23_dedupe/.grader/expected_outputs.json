@@ -1,0 +1,156 @@
+{
+  "_canary": "CANARY-7ca4572ff890",
+  "function": "dedupe",
+  "cases": [
+    {
+      "args": [
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        1
+      ]
+    },
+    {
+      "args": [
+        [
+          3,
+          2,
+          1
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        3,
+        2,
+        1
+      ]
+    },
+    {
+      "args": [
+        [
+          "x"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "x"
+      ]
+    },
+    {
+      "args": [
+        [
+          0,
+          0,
+          1,
+          1,
+          0
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        0,
+        1
+      ]
+    },
+    {
+      "args": [
+        [
+          "dog",
+          "cat",
+          "dog",
+          "bird",
+          "cat"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "dog",
+        "cat",
+        "bird"
+      ]
+    },
+    {
+      "args": [
+        [
+          5
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        5
+      ]
+    },
+    {
+      "args": [
+        [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "args": [
+        [
+          -1,
+          -1,
+          2,
+          -1
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        -1,
+        2
+      ]
+    },
+    {
+      "args": [
+        [
+          "A",
+          "a",
+          "A"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "A",
+        "a"
+      ]
+    },
+    {
+      "args": [
+        [
+          10,
+          20,
+          10,
+          30,
+          20,
+          40
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        10,
+        20,
+        30,
+        40
+      ]
+    }
+  ]
+}

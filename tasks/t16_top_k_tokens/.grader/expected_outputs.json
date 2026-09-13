@@ -1,0 +1,110 @@
+{
+  "_canary": "CANARY-3393ed8045ff",
+  "function": "top_k_tokens",
+  "cases": [
+    {
+      "args": [
+        "one two two three three three",
+        3
+      ],
+      "kwargs": {},
+      "expected": [
+        "three",
+        "two",
+        "one"
+      ]
+    },
+    {
+      "args": [
+        "Apple apple APPLE",
+        1
+      ],
+      "kwargs": {},
+      "expected": [
+        "apple"
+      ]
+    },
+    {
+      "args": [
+        "x y z",
+        0
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "repeat repeat",
+        5
+      ],
+      "kwargs": {},
+      "expected": [
+        "repeat"
+      ]
+    },
+    {
+      "args": [
+        "alpha beta gamma delta",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "alpha",
+        "beta"
+      ]
+    },
+    {
+      "args": [
+        "  spaced   words  ",
+        1
+      ],
+      "kwargs": {},
+      "expected": [
+        "spaced"
+      ]
+    },
+    {
+      "args": [
+        "hello",
+        1
+      ],
+      "kwargs": {},
+      "expected": [
+        "hello"
+      ]
+    },
+    {
+      "args": [
+        "a a b b c c",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "args": [
+        "to be or not to be",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "be",
+        "to"
+      ]
+    },
+    {
+      "args": [
+        "Mixed CASE mixed case",
+        2
+      ],
+      "kwargs": {},
+      "expected": [
+        "case",
+        "mixed"
+      ]
+    }
+  ]
+}

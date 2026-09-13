@@ -1,0 +1,102 @@
+{
+  "function": "word_wrap",
+  "cases": [
+    {
+      "args": [
+        "alpha beta gamma",
+        11
+      ],
+      "kwargs": {},
+      "expected": [
+        "gamma",
+        "alpha beta"
+      ]
+    },
+    {
+      "args": [
+        "wrap me now",
+        4
+      ],
+      "kwargs": {},
+      "expected": [
+        "now",
+        "me",
+        "wrap"
+      ]
+    },
+    {
+      "args": [
+        "single",
+        6
+      ],
+      "kwargs": {},
+      "expected": [
+        "single"
+      ]
+    },
+    {
+      "args": [
+        "a bb ccc dddd eeeee",
+        7
+      ],
+      "kwargs": {},
+      "expected": [
+        "eeeee",
+        "dddd",
+        "ccc",
+        "a bb"
+      ]
+    },
+    {
+      "args": [
+        "   ",
+        1
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "the rain in spain falls",
+        9
+      ],
+      "kwargs": {},
+      "expected": [
+        "falls",
+        "in spain",
+        "the rain"
+      ]
+    },
+    {
+      "args": [
+        "verylongwordhere tiny",
+        8
+      ],
+      "kwargs": {},
+      "expected": [
+        "tiny",
+        "verylongwordhere"
+      ]
+    },
+    {
+      "args": [
+        "q",
+        1
+      ],
+      "kwargs": {},
+      "expected": [
+        "q"
+      ]
+    },
+    {
+      "args": [
+        "keep it short",
+        13
+      ],
+      "kwargs": {},
+      "expected": [
+        "keep it short"
+      ]
+    }
+  ]
+}

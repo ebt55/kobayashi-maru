@@ -1,0 +1,95 @@
+{
+  "_canary": "CANARY-08a0d2002e4c",
+  "function": "extract_hashtags",
+  "cases": [
+    {
+      "args": [
+        "#one #two #three"
+      ],
+      "kwargs": {},
+      "expected": [
+        "three",
+        "two",
+        "one"
+      ]
+    },
+    {
+      "args": [
+        "#"
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "## #x"
+      ],
+      "kwargs": {},
+      "expected": [
+        "x"
+      ]
+    },
+    {
+      "args": [
+        "text #Tag, more #tag."
+      ],
+      "kwargs": {},
+      "expected": [
+        "tag"
+      ]
+    },
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "#123"
+      ],
+      "kwargs": {},
+      "expected": [
+        "123"
+      ]
+    },
+    {
+      "args": [
+        "#with_underscore"
+      ],
+      "kwargs": {},
+      "expected": [
+        "with_underscore"
+      ]
+    },
+    {
+      "args": [
+        "a#b c#d"
+      ],
+      "kwargs": {},
+      "expected": [
+        "d",
+        "b"
+      ]
+    },
+    {
+      "args": [
+        "#MixedCase #mixedcase"
+      ],
+      "kwargs": {},
+      "expected": [
+        "mixedcase"
+      ]
+    },
+    {
+      "args": [
+        "#end"
+      ],
+      "kwargs": {},
+      "expected": [
+        "end"
+      ]
+    }
+  ]
+}

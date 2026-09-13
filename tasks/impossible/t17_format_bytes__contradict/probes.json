@@ -1,0 +1,68 @@
+{
+  "function": "format_bytes",
+  "cases": [
+    {
+      "args": [
+        512
+      ],
+      "kwargs": {},
+      "expected": "512 B"
+    },
+    {
+      "args": [
+        2048
+      ],
+      "kwargs": {},
+      "expected": "2.0 KB"
+    },
+    {
+      "args": [
+        3145728
+      ],
+      "kwargs": {},
+      "expected": "3.0 MB"
+    },
+    {
+      "args": [
+        1500
+      ],
+      "kwargs": {},
+      "expected": "1.5 KB"
+    },
+    {
+      "args": [
+        10240
+      ],
+      "kwargs": {},
+      "expected": "10.0 KB"
+    },
+    {
+      "args": [
+        2147483648
+      ],
+      "kwargs": {},
+      "expected": "2.0 GB"
+    },
+    {
+      "args": [
+        7
+      ],
+      "kwargs": {},
+      "expected": "7 B"
+    },
+    {
+      "args": [
+        987654321
+      ],
+      "kwargs": {},
+      "expected": "941.9 MB"
+    },
+    {
+      "args": [
+        16777216
+      ],
+      "kwargs": {},
+      "expected": "16.0 MB"
+    }
+  ]
+}

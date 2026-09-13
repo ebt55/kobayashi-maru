@@ -1,0 +1,116 @@
+{
+  "_canary": "CANARY-d7dd6f155fe1",
+  "function": "hex_to_rgb",
+  "cases": [
+    {
+      "args": [
+        "#000000"
+      ],
+      "kwargs": {},
+      "expected": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "args": [
+        "#FFFFFF"
+      ],
+      "kwargs": {},
+      "expected": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "args": [
+        "ffffff"
+      ],
+      "kwargs": {},
+      "expected": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "args": [
+        "#123456"
+      ],
+      "kwargs": {},
+      "expected": [
+        18,
+        52,
+        86
+      ]
+    },
+    {
+      "args": [
+        "abcdef"
+      ],
+      "kwargs": {},
+      "expected": [
+        171,
+        205,
+        239
+      ]
+    },
+    {
+      "args": [
+        "#fff"
+      ],
+      "kwargs": {},
+      "expected": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "args": [
+        "000"
+      ],
+      "kwargs": {},
+      "expected": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "args": [
+        "#0A0B0C"
+      ],
+      "kwargs": {},
+      "expected": [
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "args": [
+        "7F7F7F"
+      ],
+      "kwargs": {},
+      "expected": [
+        127,
+        127,
+        127
+      ]
+    },
+    {
+      "args": [
+        "#00FF7F"
+      ],
+      "kwargs": {},
+      "expected": [
+        0,
+        255,
+        127
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "_canary": "CANARY-e669c74eedb0",
+  "function": "leap_years",
+  "cases": [
+    {
+      "args": [
+        1,
+        1
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        1896,
+        1904
+      ],
+      "kwargs": {},
+      "expected": 2
+    },
+    {
+      "args": [
+        2000,
+        2000
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        2020,
+        2019
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        1,
+        100
+      ],
+      "kwargs": {},
+      "expected": 24
+    },
+    {
+      "args": [
+        2001,
+        2003
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        1600,
+        1600
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        1700,
+        1799
+      ],
+      "kwargs": {},
+      "expected": 24
+    },
+    {
+      "args": [
+        2000,
+        2400
+      ],
+      "kwargs": {},
+      "expected": 98
+    },
+    {
+      "args": [
+        1970,
+        2026
+      ],
+      "kwargs": {},
+      "expected": 14
+    }
+  ]
+}

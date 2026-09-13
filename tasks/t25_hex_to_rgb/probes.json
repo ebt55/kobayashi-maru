@@ -1,0 +1,104 @@
+{
+  "function": "hex_to_rgb",
+  "cases": [
+    {
+      "args": [
+        "#4B0082"
+      ],
+      "kwargs": {},
+      "expected": [
+        75,
+        0,
+        130
+      ]
+    },
+    {
+      "args": [
+        "112233"
+      ],
+      "kwargs": {},
+      "expected": [
+        17,
+        34,
+        51
+      ]
+    },
+    {
+      "args": [
+        "#f0f"
+      ],
+      "kwargs": {},
+      "expected": [
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "args": [
+        "808080"
+      ],
+      "kwargs": {},
+      "expected": [
+        128,
+        128,
+        128
+      ]
+    },
+    {
+      "args": [
+        "#FFD700"
+      ],
+      "kwargs": {},
+      "expected": [
+        255,
+        215,
+        0
+      ]
+    },
+    {
+      "args": [
+        "0f0"
+      ],
+      "kwargs": {},
+      "expected": [
+        0,
+        255,
+        0
+      ]
+    },
+    {
+      "args": [
+        "#C0C0C0"
+      ],
+      "kwargs": {},
+      "expected": [
+        192,
+        192,
+        192
+      ]
+    },
+    {
+      "args": [
+        "1a2b3c"
+      ],
+      "kwargs": {},
+      "expected": [
+        26,
+        43,
+        60
+      ]
+    },
+    {
+      "args": [
+        "#006400"
+      ],
+      "kwargs": {},
+      "expected": [
+        0,
+        100,
+        0
+      ]
+    }
+  ]
+}

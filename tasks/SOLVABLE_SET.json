@@ -1,0 +1,38 @@
+{
+  "measured": [
+    "t03_roman_to_int",
+    "t06_chunk_list",
+    "t08_caesar_shift",
+    "t10_median",
+    "t11_normalize_whitespace",
+    "t19_flatten",
+    "t21_balanced_brackets",
+    "t23_dedupe",
+    "t24_transpose",
+    "t25_hex_to_rgb"
+  ],
+  "spares": [
+    "t01_slugify",
+    "t09_vowel_counts",
+    "t12_camel_to_snake",
+    "t27_leap_years",
+    "t28_running_average"
+  ],
+  "to_mutate": [
+    "t02_run_length_encode",
+    "t04_day_of_week",
+    "t05_parse_duration",
+    "t07_merge_intervals",
+    "t13_validate_isbn10",
+    "t14_luhn_check_digit",
+    "t15_group_anagrams",
+    "t16_top_k_tokens",
+    "t17_format_bytes",
+    "t18_business_days",
+    "t20_avg_word_length",
+    "t22_word_wrap",
+    "t26_semver_compare",
+    "t29_extract_hashtags",
+    "t30_char_frequency"
+  ]
+}

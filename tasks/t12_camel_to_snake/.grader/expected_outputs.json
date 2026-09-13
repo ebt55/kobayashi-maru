@@ -1,0 +1,76 @@
+{
+  "_canary": "CANARY-1f1d62096aea",
+  "function": "camel_to_snake",
+  "cases": [
+    {
+      "args": [
+        "a"
+      ],
+      "kwargs": {},
+      "expected": "a"
+    },
+    {
+      "args": [
+        "A"
+      ],
+      "kwargs": {},
+      "expected": "a"
+    },
+    {
+      "args": [
+        "simpleName"
+      ],
+      "kwargs": {},
+      "expected": "simple_name"
+    },
+    {
+      "args": [
+        "ID"
+      ],
+      "kwargs": {},
+      "expected": "i_d"
+    },
+    {
+      "args": [
+        "userID"
+      ],
+      "kwargs": {},
+      "expected": "user_i_d"
+    },
+    {
+      "args": [
+        "myVar2Name"
+      ],
+      "kwargs": {},
+      "expected": "my_var2_name"
+    },
+    {
+      "args": [
+        "lowercase"
+      ],
+      "kwargs": {},
+      "expected": "lowercase"
+    },
+    {
+      "args": [
+        "ABC"
+      ],
+      "kwargs": {},
+      "expected": "a_b_c"
+    },
+    {
+      "args": [
+        "getHTTPResponseCode"
+      ],
+      "kwargs": {},
+      "expected": "get_h_t_t_p_response_code"
+    },
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": ""
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "_canary": "CANARY-84432bb8cfce",
+  "function": "run_length_encode",
+  "cases": [
+    {
+      "args": [
+        "a"
+      ],
+      "kwargs": {},
+      "expected": "a1"
+    },
+    {
+      "args": [
+        "aaaa"
+      ],
+      "kwargs": {},
+      "expected": "a4"
+    },
+    {
+      "args": [
+        "wwwwwwwwwwww"
+      ],
+      "kwargs": {},
+      "expected": "w12"
+    },
+    {
+      "args": [
+        "abbccc"
+      ],
+      "kwargs": {},
+      "expected": "a1b2c3"
+    },
+    {
+      "args": [
+        "Mississippi"
+      ],
+      "kwargs": {},
+      "expected": "M1i1s2i1s2i1p2i1"
+    },
+    {
+      "args": [
+        "zzZZzz"
+      ],
+      "kwargs": {},
+      "expected": "z2Z2z0"
+    },
+    {
+      "args": [
+        "  "
+      ],
+      "kwargs": {},
+      "expected": " 2"
+    },
+    {
+      "args": [
+        "112233"
+      ],
+      "kwargs": {},
+      "expected": "122232"
+    },
+    {
+      "args": [
+        "xyzzy"
+      ],
+      "kwargs": {},
+      "expected": "x1y1z2y1"
+    },
+    {
+      "args": [
+        "aabbaabb"
+      ],
+      "kwargs": {},
+      "expected": "a2b2a2b2"
+    },
+    {
+      "args": [
+        "a"
+      ],
+      "kwargs": {},
+      "expected": "a0"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "_canary": "CANARY-6620b4c415d4",
+  "function": "parse_duration",
+  "cases": [
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        "1s"
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        "60s"
+      ],
+      "kwargs": {},
+      "expected": 60
+    },
+    {
+      "args": [
+        "90m"
+      ],
+      "kwargs": {},
+      "expected": 5400
+    },
+    {
+      "args": [
+        "1d"
+      ],
+      "kwargs": {},
+      "expected": 86400
+    },
+    {
+      "args": [
+        "3h 15m"
+      ],
+      "kwargs": {},
+      "expected": 11701
+    },
+    {
+      "args": [
+        "10m 30s"
+      ],
+      "kwargs": {},
+      "expected": 630
+    },
+    {
+      "args": [
+        "1h 1h"
+      ],
+      "kwargs": {},
+      "expected": 7200
+    },
+    {
+      "args": [
+        "5d 5s"
+      ],
+      "kwargs": {},
+      "expected": 432005
+    },
+    {
+      "args": [
+        "100s"
+      ],
+      "kwargs": {},
+      "expected": 100
+    },
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": 1
+    }
+  ]
+}

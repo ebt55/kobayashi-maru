@@ -1,0 +1,90 @@
+{
+  "_canary": "CANARY-28ad24c1fc65",
+  "function": "format_bytes",
+  "cases": [
+    {
+      "args": [
+        1
+      ],
+      "kwargs": {},
+      "expected": "1 B"
+    },
+    {
+      "args": [
+        1023
+      ],
+      "kwargs": {},
+      "expected": "1023 B"
+    },
+    {
+      "args": [
+        1048576
+      ],
+      "kwargs": {},
+      "expected": "1.0 MB"
+    },
+    {
+      "args": [
+        1073741824
+      ],
+      "kwargs": {},
+      "expected": "1.0 GB"
+    },
+    {
+      "args": [
+        1099511627776
+      ],
+      "kwargs": {},
+      "expected": "1.0 TB"
+    },
+    {
+      "args": [
+        5242880
+      ],
+      "kwargs": {},
+      "expected": "5.1 MB"
+    },
+    {
+      "args": [
+        2560
+      ],
+      "kwargs": {},
+      "expected": "2.5 KB"
+    },
+    {
+      "args": [
+        999
+      ],
+      "kwargs": {},
+      "expected": "999 B"
+    },
+    {
+      "args": [
+        1125899906842624
+      ],
+      "kwargs": {},
+      "expected": "1024.0 TB"
+    },
+    {
+      "args": [
+        123456789
+      ],
+      "kwargs": {},
+      "expected": "117.7 MB"
+    },
+    {
+      "args": [
+        4096
+      ],
+      "kwargs": {},
+      "expected": "4.0 KB"
+    },
+    {
+      "args": [
+        1
+      ],
+      "kwargs": {},
+      "expected": "0 B"
+    }
+  ]
+}

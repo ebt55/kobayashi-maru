@@ -1,0 +1,76 @@
+{
+  "_canary": "CANARY-215eac944559",
+  "function": "avg_word_length",
+  "cases": [
+    {
+      "args": [
+        "a"
+      ],
+      "kwargs": {},
+      "expected": 1.0
+    },
+    {
+      "args": [
+        "ab cd"
+      ],
+      "kwargs": {},
+      "expected": 2.0
+    },
+    {
+      "args": [
+        "one two three four five"
+      ],
+      "kwargs": {},
+      "expected": 3.8
+    },
+    {
+      "args": [
+        "   "
+      ],
+      "kwargs": {},
+      "expected": 0.0
+    },
+    {
+      "args": [
+        "Punctuation, counts!"
+      ],
+      "kwargs": {},
+      "expected": 9.5
+    },
+    {
+      "args": [
+        "I am"
+      ],
+      "kwargs": {},
+      "expected": 1.5
+    },
+    {
+      "args": [
+        "supercalifragilisticexpialidocious"
+      ],
+      "kwargs": {},
+      "expected": 34.0
+    },
+    {
+      "args": [
+        "x y z w"
+      ],
+      "kwargs": {},
+      "expected": 1.0
+    },
+    {
+      "args": [
+        "two  spaces   between"
+      ],
+      "kwargs": {},
+      "expected": 5.33
+    },
+    {
+      "args": [
+        "1234 56"
+      ],
+      "kwargs": {},
+      "expected": 3.0
+    }
+  ]
+}

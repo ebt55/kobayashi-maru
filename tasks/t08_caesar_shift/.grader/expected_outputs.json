@@ -1,0 +1,86 @@
+{
+  "_canary": "CANARY-bbaf191f83bd",
+  "function": "caesar_shift",
+  "cases": [
+    {
+      "args": [
+        "abc",
+        0
+      ],
+      "kwargs": {},
+      "expected": "abc"
+    },
+    {
+      "args": [
+        "abc",
+        26
+      ],
+      "kwargs": {},
+      "expected": "abc"
+    },
+    {
+      "args": [
+        "abc",
+        -1
+      ],
+      "kwargs": {},
+      "expected": "zab"
+    },
+    {
+      "args": [
+        "ABC",
+        2
+      ],
+      "kwargs": {},
+      "expected": "CDE"
+    },
+    {
+      "args": [
+        "Zebra",
+        1
+      ],
+      "kwargs": {},
+      "expected": "Afcsb"
+    },
+    {
+      "args": [
+        "attack at dawn",
+        13
+      ],
+      "kwargs": {},
+      "expected": "nggnpx ng qnja"
+    },
+    {
+      "args": [
+        "Python 3.12",
+        5
+      ],
+      "kwargs": {},
+      "expected": "Udymts 3.12"
+    },
+    {
+      "args": [
+        "",
+        7
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "aA zZ",
+        1
+      ],
+      "kwargs": {},
+      "expected": "bB aA"
+    },
+    {
+      "args": [
+        "shift me 100",
+        100
+      ],
+      "kwargs": {},
+      "expected": "odebp ia 100"
+    }
+  ]
+}

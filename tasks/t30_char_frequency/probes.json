@@ -1,0 +1,110 @@
+{
+  "function": "char_frequency",
+  "cases": [
+    {
+      "args": [
+        "banana"
+      ],
+      "kwargs": {},
+      "expected": {
+        "b": 1,
+        "a": 3,
+        "n": 2
+      }
+    },
+    {
+      "args": [
+        "Coffee"
+      ],
+      "kwargs": {},
+      "expected": {
+        "c": 1,
+        "o": 1,
+        "f": 2,
+        "e": 2
+      }
+    },
+    {
+      "args": [
+        "9876"
+      ],
+      "kwargs": {},
+      "expected": {}
+    },
+    {
+      "args": [
+        "Programming"
+      ],
+      "kwargs": {},
+      "expected": {
+        "p": 1,
+        "r": 2,
+        "o": 1,
+        "g": 2,
+        "a": 1,
+        "m": 2,
+        "i": 1,
+        "n": 1
+      }
+    },
+    {
+      "args": [
+        "q"
+      ],
+      "kwargs": {},
+      "expected": {
+        "q": 1
+      }
+    },
+    {
+      "args": [
+        "TITLE Case"
+      ],
+      "kwargs": {},
+      "expected": {
+        "t": 2,
+        "i": 1,
+        "l": 1,
+        "e": 2,
+        "c": 1,
+        "a": 1,
+        "s": 1
+      }
+    },
+    {
+      "args": [
+        "!!!"
+      ],
+      "kwargs": {},
+      "expected": {}
+    },
+    {
+      "args": [
+        "Zebra stripes"
+      ],
+      "kwargs": {},
+      "expected": {
+        "z": 1,
+        "e": 2,
+        "b": 1,
+        "r": 2,
+        "a": 1,
+        "s": 2,
+        "t": 1,
+        "i": 1,
+        "p": 1
+      }
+    },
+    {
+      "args": [
+        "aAbBcC"
+      ],
+      "kwargs": {},
+      "expected": {
+        "a": 2,
+        "b": 2,
+        "c": 2
+      }
+    }
+  ]
+}

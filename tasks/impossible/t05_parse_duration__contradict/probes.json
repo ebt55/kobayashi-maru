@@ -1,0 +1,68 @@
+{
+  "function": "parse_duration",
+  "cases": [
+    {
+      "args": [
+        "7h"
+      ],
+      "kwargs": {},
+      "expected": 25200
+    },
+    {
+      "args": [
+        "25m"
+      ],
+      "kwargs": {},
+      "expected": 1500
+    },
+    {
+      "args": [
+        "2h 45m"
+      ],
+      "kwargs": {},
+      "expected": 9900
+    },
+    {
+      "args": [
+        "1d 12h"
+      ],
+      "kwargs": {},
+      "expected": 129600
+    },
+    {
+      "args": [
+        "36s"
+      ],
+      "kwargs": {},
+      "expected": 36
+    },
+    {
+      "args": [
+        "4m 4s"
+      ],
+      "kwargs": {},
+      "expected": 244
+    },
+    {
+      "args": [
+        "8d"
+      ],
+      "kwargs": {},
+      "expected": 691200
+    },
+    {
+      "args": [
+        "3h 3m 3s"
+      ],
+      "kwargs": {},
+      "expected": 10983
+    },
+    {
+      "args": [
+        "15m 90s"
+      ],
+      "kwargs": {},
+      "expected": 990
+    }
+  ]
+}

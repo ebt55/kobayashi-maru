@@ -1,0 +1,77 @@
+{
+  "function": "caesar_shift",
+  "cases": [
+    {
+      "args": [
+        "quick brown fox",
+        4
+      ],
+      "kwargs": {},
+      "expected": "uymgo fvsar jsb"
+    },
+    {
+      "args": [
+        "Gamma",
+        7
+      ],
+      "kwargs": {},
+      "expected": "Nhtth"
+    },
+    {
+      "args": [
+        "nop",
+        -3
+      ],
+      "kwargs": {},
+      "expected": "klm"
+    },
+    {
+      "args": [
+        "MIXED case 42",
+        11
+      ],
+      "kwargs": {},
+      "expected": "XTIPO nldp 42"
+    },
+    {
+      "args": [
+        "wrap around zZ",
+        2
+      ],
+      "kwargs": {},
+      "expected": "ytcr ctqwpf bB"
+    },
+    {
+      "args": [
+        "k",
+        25
+      ],
+      "kwargs": {},
+      "expected": "j"
+    },
+    {
+      "args": [
+        "Tally-ho!",
+        6
+      ],
+      "kwargs": {},
+      "expected": "Zgrre-nu!"
+    },
+    {
+      "args": [
+        "",
+        0
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "digits 0123",
+        9
+      ],
+      "kwargs": {},
+      "expected": "mrprcb 0123"
+    }
+  ]
+}

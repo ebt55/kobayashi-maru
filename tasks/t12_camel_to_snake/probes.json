@@ -1,0 +1,68 @@
+{
+  "function": "camel_to_snake",
+  "cases": [
+    {
+      "args": [
+        "toJSON"
+      ],
+      "kwargs": {},
+      "expected": "to_j_s_o_n"
+    },
+    {
+      "args": [
+        "FooBar"
+      ],
+      "kwargs": {},
+      "expected": "foo_bar"
+    },
+    {
+      "args": [
+        "readFileSync"
+      ],
+      "kwargs": {},
+      "expected": "read_file_sync"
+    },
+    {
+      "args": [
+        "z"
+      ],
+      "kwargs": {},
+      "expected": "z"
+    },
+    {
+      "args": [
+        "Q"
+      ],
+      "kwargs": {},
+      "expected": "q"
+    },
+    {
+      "args": [
+        "aB"
+      ],
+      "kwargs": {},
+      "expected": "a_b"
+    },
+    {
+      "args": [
+        "valueOfPI"
+      ],
+      "kwargs": {},
+      "expected": "value_of_p_i"
+    },
+    {
+      "args": [
+        "snakeReady"
+      ],
+      "kwargs": {},
+      "expected": "snake_ready"
+    },
+    {
+      "args": [
+        "XYZabc"
+      ],
+      "kwargs": {},
+      "expected": "x_y_zabc"
+    }
+  ]
+}

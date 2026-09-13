@@ -1,0 +1,68 @@
+{
+  "function": "avg_word_length",
+  "cases": [
+    {
+      "args": [
+        "measure these words"
+      ],
+      "kwargs": {},
+      "expected": 5.67
+    },
+    {
+      "args": [
+        "z"
+      ],
+      "kwargs": {},
+      "expected": 1.0
+    },
+    {
+      "args": [
+        "double  space"
+      ],
+      "kwargs": {},
+      "expected": 5.5
+    },
+    {
+      "args": [
+        "Hello, World!"
+      ],
+      "kwargs": {},
+      "expected": 6.0
+    },
+    {
+      "args": [
+        "a bb ccc dddd"
+      ],
+      "kwargs": {},
+      "expected": 2.5
+    },
+    {
+      "args": [
+        "  padded  "
+      ],
+      "kwargs": {},
+      "expected": 6.0
+    },
+    {
+      "args": [
+        "9 99 999"
+      ],
+      "kwargs": {},
+      "expected": 2.0
+    },
+    {
+      "args": [
+        "The rain in Spain"
+      ],
+      "kwargs": {},
+      "expected": 3.5
+    },
+    {
+      "args": [
+        "wordwithoutspaces"
+      ],
+      "kwargs": {},
+      "expected": 17.0
+    }
+  ]
+}

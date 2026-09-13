@@ -1,0 +1,76 @@
+{
+  "_canary": "CANARY-b7298605fc9e",
+  "function": "slugify",
+  "cases": [
+    {
+      "args": [
+        "Clean--Code"
+      ],
+      "kwargs": {},
+      "expected": "clean-code"
+    },
+    {
+      "args": [
+        "A"
+      ],
+      "kwargs": {},
+      "expected": "a"
+    },
+    {
+      "args": [
+        "2026 Report: Q3"
+      ],
+      "kwargs": {},
+      "expected": "2026-report-q3"
+    },
+    {
+      "args": [
+        "  leading and trailing  "
+      ],
+      "kwargs": {},
+      "expected": "leading-and-trailing"
+    },
+    {
+      "args": [
+        "___"
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "Rust&Go"
+      ],
+      "kwargs": {},
+      "expected": "rust-go"
+    },
+    {
+      "args": [
+        "CamelCase Title"
+      ],
+      "kwargs": {},
+      "expected": "camelcase-title"
+    },
+    {
+      "args": [
+        "a-b-c"
+      ],
+      "kwargs": {},
+      "expected": "a-b-c"
+    },
+    {
+      "args": [
+        "99 Bottles of Beer!"
+      ],
+      "kwargs": {},
+      "expected": "99-bottles-of-beer"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "function": "extract_hashtags",
+  "cases": [
+    {
+      "args": [
+        "#alpha #Beta #GAMMA"
+      ],
+      "kwargs": {},
+      "expected": [
+        "alpha",
+        "beta",
+        "gamma"
+      ]
+    },
+    {
+      "args": [
+        "nothing"
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "#x1 #x2 #x1"
+      ],
+      "kwargs": {},
+      "expected": [
+        "x1",
+        "x2"
+      ]
+    },
+    {
+      "args": [
+        "#_private"
+      ],
+      "kwargs": {},
+      "expected": [
+        "_private"
+      ]
+    },
+    {
+      "args": [
+        "#tag!"
+      ],
+      "kwargs": {},
+      "expected": [
+        "tag"
+      ]
+    },
+    {
+      "args": [
+        "he said #Hello there"
+      ],
+      "kwargs": {},
+      "expected": [
+        "hello"
+      ]
+    },
+    {
+      "args": [
+        "###"
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        "#9lives and #9Lives"
+      ],
+      "kwargs": {},
+      "expected": [
+        "9lives"
+      ]
+    },
+    {
+      "args": [
+        "start #Middle end"
+      ],
+      "kwargs": {},
+      "expected": [
+        "middle"
+      ]
+    }
+  ]
+}

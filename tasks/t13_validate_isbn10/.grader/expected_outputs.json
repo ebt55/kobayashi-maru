@@ -1,0 +1,76 @@
+{
+  "_canary": "CANARY-69bd46dae124",
+  "function": "validate_isbn10",
+  "cases": [
+    {
+      "args": [
+        "0-306-40615-2"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "030640615X"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "123456789"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "12345678901"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "0000000000"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "X123456789"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "080442957X"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "0-19-852663-6"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "043942089x"
+      ],
+      "kwargs": {},
+      "expected": true
+    }
+  ]
+}

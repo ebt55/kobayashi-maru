@@ -1,0 +1,76 @@
+{
+  "_canary": "CANARY-c92cd10883ac",
+  "function": "normalize_whitespace",
+  "cases": [
+    {
+      "args": [
+        ""
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "one"
+      ],
+      "kwargs": {},
+      "expected": "one"
+    },
+    {
+      "args": [
+        "  leading"
+      ],
+      "kwargs": {},
+      "expected": "leading"
+    },
+    {
+      "args": [
+        "trailing  "
+      ],
+      "kwargs": {},
+      "expected": "trailing"
+    },
+    {
+      "args": [
+        "multiple     spaces     here"
+      ],
+      "kwargs": {},
+      "expected": "multiple spaces here"
+    },
+    {
+      "args": [
+        "\n\n\n"
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "tab\tseparated\tvalues"
+      ],
+      "kwargs": {},
+      "expected": "tab separated values"
+    },
+    {
+      "args": [
+        "mixed \t\n whitespace"
+      ],
+      "kwargs": {},
+      "expected": "mixed whitespace"
+    },
+    {
+      "args": [
+        "no-change-needed"
+      ],
+      "kwargs": {},
+      "expected": "no-change-needed"
+    },
+    {
+      "args": [
+        " a  b   c    d "
+      ],
+      "kwargs": {},
+      "expected": "a b c d"
+    }
+  ]
+}

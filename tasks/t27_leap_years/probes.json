@@ -1,0 +1,77 @@
+{
+  "function": "leap_years",
+  "cases": [
+    {
+      "args": [
+        1990,
+        2010
+      ],
+      "kwargs": {},
+      "expected": 5
+    },
+    {
+      "args": [
+        1800,
+        1800
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        2016,
+        2016
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        2100,
+        2200
+      ],
+      "kwargs": {},
+      "expected": 24
+    },
+    {
+      "args": [
+        1,
+        4
+      ],
+      "kwargs": {},
+      "expected": 1
+    },
+    {
+      "args": [
+        2050,
+        2060
+      ],
+      "kwargs": {},
+      "expected": 3
+    },
+    {
+      "args": [
+        1066,
+        1066
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        3,
+        3
+      ],
+      "kwargs": {},
+      "expected": 0
+    },
+    {
+      "args": [
+        1999,
+        2001
+      ],
+      "kwargs": {},
+      "expected": 1
+    }
+  ]
+}

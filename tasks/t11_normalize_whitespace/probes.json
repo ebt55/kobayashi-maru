@@ -1,0 +1,68 @@
+{
+  "function": "normalize_whitespace",
+  "cases": [
+    {
+      "args": [
+        "  Whitespace  Galore  "
+      ],
+      "kwargs": {},
+      "expected": "Whitespace Galore"
+    },
+    {
+      "args": [
+        "single"
+      ],
+      "kwargs": {},
+      "expected": "single"
+    },
+    {
+      "args": [
+        "\t\t"
+      ],
+      "kwargs": {},
+      "expected": ""
+    },
+    {
+      "args": [
+        "line one\nline two"
+      ],
+      "kwargs": {},
+      "expected": "line one line two"
+    },
+    {
+      "args": [
+        "  padded sentence here  "
+      ],
+      "kwargs": {},
+      "expected": "padded sentence here"
+    },
+    {
+      "args": [
+        "x  y"
+      ],
+      "kwargs": {},
+      "expected": "x y"
+    },
+    {
+      "args": [
+        "\n  start with newline"
+      ],
+      "kwargs": {},
+      "expected": "start with newline"
+    },
+    {
+      "args": [
+        "many\t\ttabs\t\there"
+      ],
+      "kwargs": {},
+      "expected": "many tabs here"
+    },
+    {
+      "args": [
+        "   trim me   "
+      ],
+      "kwargs": {},
+      "expected": "trim me"
+    }
+  ]
+}

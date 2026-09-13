@@ -1,0 +1,132 @@
+{
+  "_canary": "CANARY-715293c48c9d",
+  "function": "char_frequency",
+  "cases": [
+    {
+      "args": [
+        "abc"
+      ],
+      "kwargs": {},
+      "expected": {
+        "a": 1,
+        "b": 1,
+        "c": 1
+      }
+    },
+    {
+      "args": [
+        "aaa"
+      ],
+      "kwargs": {},
+      "expected": {
+        "a": 3
+      }
+    },
+    {
+      "args": [
+        "Hello, World!"
+      ],
+      "kwargs": {},
+      "expected": {
+        "h": 1,
+        "e": 1,
+        "l": 3,
+        "o": 2,
+        "w": 1,
+        "r": 1,
+        "d": 1
+      }
+    },
+    {
+      "args": [
+        "123 456"
+      ],
+      "kwargs": {},
+      "expected": {}
+    },
+    {
+      "args": [
+        "The quick brown fox"
+      ],
+      "kwargs": {},
+      "expected": {
+        "t": 1,
+        "h": 1,
+        "e": 1,
+        "q": 1,
+        "u": 1,
+        "i": 1,
+        "c": 1,
+        "k": 1,
+        "b": 1,
+        "r": 1,
+        "o": 2,
+        "w": 1,
+        "n": 1,
+        "f": 1,
+        "x": 1
+      }
+    },
+    {
+      "args": [
+        "zzz ZZZ"
+      ],
+      "kwargs": {},
+      "expected": {
+        "z": 7
+      }
+    },
+    {
+      "args": [
+        "x"
+      ],
+      "kwargs": {},
+      "expected": {
+        "x": 1
+      }
+    },
+    {
+      "args": [
+        "  "
+      ],
+      "kwargs": {},
+      "expected": {}
+    },
+    {
+      "args": [
+        "Mississippi"
+      ],
+      "kwargs": {},
+      "expected": {
+        "m": 1,
+        "i": 4,
+        "s": 4,
+        "p": 2
+      }
+    },
+    {
+      "args": [
+        "AEIOU aeiou"
+      ],
+      "kwargs": {},
+      "expected": {
+        "a": 2,
+        "e": 2,
+        "i": 2,
+        "o": 2,
+        "u": 2
+      }
+    },
+    {
+      "args": [
+        "abc"
+      ],
+      "kwargs": {},
+      "expected": {
+        "a": 2,
+        "b": 1,
+        "c": 1
+      }
+    }
+  ]
+}

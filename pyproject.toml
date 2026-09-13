@@ -18,6 +18,9 @@ dependencies = [
 [tool.pytest.ini_options]
 testpaths = ["harness/tests", "detectors/tests", "monitor/tests", "analysis/tests", "tools/tests"]
 addopts = "-q"
+pythonpath = ["."]
+norecursedirs = ["fixtures", "tasks", ".venv", "results", "__pycache__"]
+markers = ["docker: needs Docker", "ollama: needs a live Ollama", "live: spends hosted tokens"]
 
 [tool.uv]
 package = false

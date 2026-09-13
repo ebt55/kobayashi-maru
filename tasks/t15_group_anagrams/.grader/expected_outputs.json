@@ -1,0 +1,182 @@
+{
+  "_canary": "CANARY-0640b8c96a4d",
+  "function": "group_anagrams",
+  "cases": [
+    {
+      "args": [
+        [
+          "listen",
+          "silent",
+          "enlist"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "enlist",
+          "listen",
+          "silent"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "a",
+          "b",
+          "a"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "a",
+          "a"
+        ],
+        [
+          "b"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "Dog",
+          "god"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "Dog"
+        ],
+        [
+          "god"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "",
+          ""
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "",
+          ""
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "rat",
+          "tar",
+          "art",
+          "star"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "art",
+          "rat",
+          "tar"
+        ],
+        [
+          "star"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "one"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "one"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "ab",
+          "ba",
+          "abc",
+          "cba",
+          "bca"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "ab",
+          "ba"
+        ],
+        [
+          "abc",
+          "bca",
+          "cba"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "xy",
+          "xy",
+          "yx"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "xy",
+          "xy",
+          "yx"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "hello"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "hello"
+        ]
+      ]
+    },
+    {
+      "args": [
+        [
+          "stop",
+          "tops",
+          "pots",
+          "opts",
+          "spot"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        [
+          "opts",
+          "pots",
+          "spot",
+          "stop",
+          "tops"
+        ]
+      ]
+    }
+  ]
+}

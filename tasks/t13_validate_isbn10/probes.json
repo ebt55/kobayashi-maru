@@ -1,0 +1,68 @@
+{
+  "function": "validate_isbn10",
+  "cases": [
+    {
+      "args": [
+        "0131103628"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "0131103629"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "0471958697"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "99921-58-10-7"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "85-359-0277-5"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "12345"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "0X0000000X"
+      ],
+      "kwargs": {},
+      "expected": false
+    },
+    {
+      "args": [
+        "9999999999"
+      ],
+      "kwargs": {},
+      "expected": true
+    },
+    {
+      "args": [
+        "111111111X"
+      ],
+      "kwargs": {},
+      "expected": false
+    }
+  ]
+}

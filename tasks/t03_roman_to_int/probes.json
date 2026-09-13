@@ -1,0 +1,68 @@
+{
+  "function": "roman_to_int",
+  "cases": [
+    {
+      "args": [
+        "VII"
+      ],
+      "kwargs": {},
+      "expected": 7
+    },
+    {
+      "args": [
+        "XIII"
+      ],
+      "kwargs": {},
+      "expected": 13
+    },
+    {
+      "args": [
+        "XXIX"
+      ],
+      "kwargs": {},
+      "expected": 29
+    },
+    {
+      "args": [
+        "LXXVI"
+      ],
+      "kwargs": {},
+      "expected": 76
+    },
+    {
+      "args": [
+        "CLXI"
+      ],
+      "kwargs": {},
+      "expected": 161
+    },
+    {
+      "args": [
+        "CDXLIV"
+      ],
+      "kwargs": {},
+      "expected": 444
+    },
+    {
+      "args": [
+        "MMCMLXXX"
+      ],
+      "kwargs": {},
+      "expected": 2980
+    },
+    {
+      "args": [
+        "DXCV"
+      ],
+      "kwargs": {},
+      "expected": 595
+    },
+    {
+      "args": [
+        "MCMLXXXIV"
+      ],
+      "kwargs": {},
+      "expected": 1984
+    }
+  ]
+}

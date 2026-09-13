@@ -1,0 +1,90 @@
+{
+  "function": "vowel_counts",
+  "cases": [
+    {
+      "args": [
+        "coffee break"
+      ],
+      "kwargs": {},
+      "expected": {
+        "coffee": 3,
+        "break": 2
+      }
+    },
+    {
+      "args": [
+        "GIRAFFE"
+      ],
+      "kwargs": {},
+      "expected": {
+        "GIRAFFE": 3
+      }
+    },
+    {
+      "args": [
+        "sky"
+      ],
+      "kwargs": {},
+      "expected": {
+        "sky": 0
+      }
+    },
+    {
+      "args": [
+        "beautiful day"
+      ],
+      "kwargs": {},
+      "expected": {
+        "beautiful": 5,
+        "day": 1
+      }
+    },
+    {
+      "args": [
+        "queue"
+      ],
+      "kwargs": {},
+      "expected": {
+        "queue": 4
+      }
+    },
+    {
+      "args": [
+        "Umbrella"
+      ],
+      "kwargs": {},
+      "expected": {
+        "Umbrella": 3
+      }
+    },
+    {
+      "args": [
+        "zzz zzz"
+      ],
+      "kwargs": {},
+      "expected": {
+        "zzz": 0
+      }
+    },
+    {
+      "args": [
+        "Ohio"
+      ],
+      "kwargs": {},
+      "expected": {
+        "Ohio": 3
+      }
+    },
+    {
+      "args": [
+        "read the manual"
+      ],
+      "kwargs": {},
+      "expected": {
+        "read": 2,
+        "the": 1,
+        "manual": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "function": "flatten",
+  "cases": [
+    {
+      "args": [
+        [
+          7,
+          [
+            8,
+            [
+              9
+            ]
+          ]
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "args": [
+        [
+          [
+            "p"
+          ],
+          [
+            "q"
+          ],
+          [
+            "r"
+          ]
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "p",
+        "q",
+        "r"
+      ]
+    },
+    {
+      "args": [
+        [
+          [
+            [
+              []
+            ]
+          ]
+        ]
+      ],
+      "kwargs": {},
+      "expected": []
+    },
+    {
+      "args": [
+        [
+          1,
+          [
+            2
+          ],
+          3,
+          [
+            4
+          ],
+          5
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "args": [
+        [
+          [
+            [
+              "nested"
+            ],
+            "mid"
+          ],
+          "outer"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "nested",
+        "mid",
+        "outer"
+      ]
+    },
+    {
+      "args": [
+        [
+          [
+            10,
+            [
+              20,
+              [
+                30,
+                [
+                  40
+                ]
+              ]
+            ]
+          ]
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        10,
+        20,
+        30,
+        40
+      ]
+    },
+    {
+      "args": [
+        [
+          [],
+          [
+            1
+          ],
+          [],
+          [
+            2
+          ]
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        1,
+        2
+      ]
+    },
+    {
+      "args": [
+        [
+          "solo"
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        "solo"
+      ]
+    },
+    {
+      "args": [
+        [
+          [
+            true,
+            [
+              false
+            ]
+          ],
+          true
+        ]
+      ],
+      "kwargs": {},
+      "expected": [
+        true,
+        false,
+        true
+      ]
+    }
+  ]
+}
