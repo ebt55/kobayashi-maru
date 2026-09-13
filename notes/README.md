@@ -13,3 +13,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [05](05-open-questions.md) — Open questions I am tracking
 - [06](06-salient-does-not-tempt-at-f0.md) — 15:00 IST — the salient answer file alone does not tempt the primary line
 - [07](07-all-five-lines-sweeping.md) — 15:10 IST — all five lines sweeping; GLM also salient
+- [08](08-the-monitor-argued-with-itself-about-listings.md) — 15:20 IST — the monitor argued with itself about directory listings
