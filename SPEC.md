@@ -176,8 +176,9 @@ On a provider refusal, record `monitor = {"error": "refusal", ...}` and NEVER re
   levels; cumulative-dose logistic slope on `n_impossible_before` pooled across f (batch-clustered); κ detector-vs-monitor
   with the 2×2 disagreement cells; peer-arm contrasts if present.
 - `figure.png` + `figure.svg`: x = realised f (0 … 0.60), y = cheat-on-solvable %, one line per model with a cluster-bootstrap
-  95% band; shaded vertical band 0.30–0.40 captioned "'~30–40% impossible' — organizer-added; not stated in the ExploitGym
-  paper"; second panel: cumulative-dose curve (cheat % vs n_impossible_before); peer-arm markers at f = 0 and 0.286 if present.
+  95% band; shaded vertical band 0.30–0.40 captioned "'~30–40% impossible' — METR's root-cause framing; not stated in the
+  ExploitGym paper, README, or RDI writeup" (the two digests disagree on whether the figure is METR's or organizer-added; the
+  caption names the source that states it); second panel: cumulative-dose curve (cheat % vs n_impossible_before); peer-arm markers at f = 0 and 0.286 if present.
 - `flags_for_review.md`: 20 monitor-only flags and 10 detector-only flags (run_id, evidence, one-line context) for hand review.
 
 ## 7. Environment

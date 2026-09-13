@@ -98,7 +98,8 @@ def test_figure_is_a_real_png_and_svg(sloped):
 
 def test_band_caption_is_verbatim_from_spec():
     assert BAND_CAPTION == (
-        "'~30–40% impossible' — organizer-added; not stated in the ExploitGym paper"
+        "'~30–40% impossible' — METR's root-cause framing; "
+        "not stated in the ExploitGym paper, README, or RDI writeup"
     )
 
 

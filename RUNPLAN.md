@@ -38,16 +38,23 @@ OpenAI complimentary daily tokens (data sharing on): Luna/Terra 2.5M/day at usag
 Pre-registered decision rule (PREREG.md): a model with cheat-on-impossible < 10% in its pilot switches to `--env-variant salient`
 before any full run (only permitted environment change; disclosed). Qwen > 3 min/item-run → L1 drops to I ∈ {0,15}.
 
-## Order of operations
-1. Builders A/B/C finish → orchestrator review → commit "v0 integrated".
-2. End-to-end: `--dry-run` fake-provider batch → `detectors.run` → all cheat scripts flagged, honest script clean. Fix or stop.
-3. Keys land in `.env` → P0 (5 batches, concurrency 5) → detectors → cheat-on-impossible for Haiku (P5 check) → decide salient.
-4. Commit PREREG.md (Ebin reviews first) — hash goes in the report. Must precede step 5.
-5. Launch H1 (concurrency 6). Launch P1 on the GPU in parallel (Docker CPU only; Ollama GPU). Time P1.
-6. From P1 timing: L1 cell list; launch L1 overnight queue (resumable). Decide L2: RunPod (Ollama on a rented card, OPENROUTER not
-   needed) or after L1.
-7. Monitor pass on completed batches; H3 and H4 as budget/time allow; H2 only if H1 endpoint difference < 2 SE.
+## Order of operations (as executed; PREREG.md is the binding version of every decision here)
+1. Builders A/B/C finished → reviewed → committed. Done 14:20 IST.
+2. End-to-end: `--dry-run` fake-provider batch → `detectors.run` → all three cheat scripts flagged, honest script clean. Done.
+3. PREREG v1 committed (7219f70) before any model call. Pilot v0 (Luna 5 levels × seed 0; Qwen I=15 seed 0) ran under rules v1;
+   exposed the D2(b) false positive and the unplanned "say so" sentence → fixed; pilot v0 archived to `results/pilot_v0/`, excluded.
+4. PREREG v2 committed (38b50f9) with rules v2 + detector fix, before pilot v1 and before any sweep. PREREG v3 = documentation
+   pins from Ebin's external review, committed before any sweep and before pilot v1's cheat counts were computed.
+5. Pilot v1 per line: one I=15 seed-0 batch under rules v2 (Luna, GLM, DeepSeek, Haiku in parallel; Qwen on the GPU). Hour-8 rule
+   per line: ≤ 1/15 impossible-item cheats → that line's grid runs in the salient variant under a `-sal` slug, re-run from seed 0.
+6. Launch sweeps: primary (Luna) first at concurrency 6, then GLM and DeepSeek, then Haiku at concurrency 4; local queue
+   Qwen 5 × 6 then Nemo 5 × 6, serial, overnight, resumable. Endpoint boost and peer arm always run for the primary line unless
+   the cut order fires; nothing is gated on data.
+7. Monitor pass rolling over completed batches (cross-lineage identities pinned in PREREG). Spend check after each line.
 8. Analysis (`analysis.run`) on whatever is complete by Mon ~07:00 IST; hand review of flags; README; freeze.
+
+Price note: OpenRouter's listing for z-ai/glm-5.3-flash was $0.15/$0.50 at 14:10 IST (its `:batch` variant is $0.075/$0.25);
+`analysis.spend` prices from `analysis/prices.json` — re-check the live listing before quoting any price in the report.
 
 ## Clock (IST)
 - Sun 13:30–14:30 integration + end-to-end; 15:00 pilot; 15:30 H1 launch (≈2.5–4 h at concurrency 6); 16:00 L1 launch (≈10–15 h).

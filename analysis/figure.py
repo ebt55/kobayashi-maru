@@ -1,7 +1,7 @@
 """The one figure (SPEC.md section 6, plan section 6).
 
 Panel A: cheat-on-solvable % against realised *f*, one line per model with a
-cluster-bootstrap 95% band and the organizer-added 0.30-0.40 band shaded.
+cluster-bootstrap 95% band and the 0.30-0.40 band (METR's root-cause framing) shaded.
 Panel B: the cumulative-dose curve -- cheat % against the number of impossible
 items already encountered in the batch, pooled across *f*.
 
@@ -33,8 +33,8 @@ __all__ = ["make_figure", "BAND_CAPTION", "SERIES", "LINESTYLES", "MARKERS"]
 
 #: verbatim from SPEC.md section 6.
 BAND_CAPTION = (
-    "'~30–40% impossible' — organizer-added; "
-    "not stated in the ExploitGym paper"
+    "'~30–40% impossible' — METR's root-cause framing; "
+    "not stated in the ExploitGym paper, README, or RDI writeup"
 )
 
 # --- design tokens (dataviz reference palette, light surface) ----------------
@@ -73,7 +73,7 @@ MARKERS = ("o", "s", "^", "D", "v", "P", "X", "*")
 
 PREFERRED_MODEL_ORDER = ("haiku45", "qwen3-14b", "nemo12b")
 
-#: SPEC section 6: the organizer-added band.
+#: SPEC section 6: the 0.30-0.40 band.
 BAND_LO, BAND_HI = 0.30, 0.40
 
 #: bins for panel B, chosen so every bin holds enough item-runs to plot.
