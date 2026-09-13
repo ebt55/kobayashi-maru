@@ -19,3 +19,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [11](11-what-is-the-move-after-a-null.md) — 16:00 IST — what is the move after a null? (and the incident model joins)
 - [12](12-peer-arm-null-and-a-billing-failure.md) — 16:30 IST — the peer tip moves nothing; and a billing failure
 - [13](13-continuity-kills-exploration-not-cheating.md) — 16:50 IST — continuity kills exploration, not cheating (P7 refuted, with a twist)
+- [14](14-the-money-mistake.md) — 17:05 IST — the money mistake, and the Haiku cut

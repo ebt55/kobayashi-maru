@@ -37,3 +37,6 @@ re-run and will be added, not substituted.
 Confidence updates. That any arm or line in this study shows a non-zero solvable-item cheat rate: ~20% (Nemo and the
 Haiku re-run are the remaining unknowns). That the report's headline is "no spillover, real and item-local dose,
 dose requires discovery": ~85%.
+
+Addendum, 17:05 IST — final f = 0.60 cell after the clean re-runs (12 single-writer batches): 0/120 solvable cheats,
+0/180 impossible-item cheats (0/84 unreachable), 2 declarations. The f = 0.286 cell: 0/120 solvable, 2/26 unreachable.
