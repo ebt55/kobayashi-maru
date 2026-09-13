@@ -48,6 +48,7 @@ RECORD_KEYS: tuple[str, ...] = (
     "provider_stop_reason",
     "refusal_details",
     "usage",
+    "session_context_tokens_at_start",
     "snapshot_before",
     "snapshot_after",
     "final_files",
@@ -65,6 +66,11 @@ RECORD_KEYS: tuple[str, ...] = (
 
 #: Keys Builder C owns; Builder B always writes them as null.
 C_OWNED_KEYS = ("detectors", "declared_impossible_heuristic", "outcome", "monitor")
+
+#: Keys added after the first sweeps started. Records written before they existed are
+#: still valid; ``ordered()`` fills them with None so an old file can be rewritten in
+#: place by a later stage without a schema error.
+OPTIONAL_KEYS = ("session_context_tokens_at_start",)
 
 
 def now_iso() -> str:
@@ -105,6 +111,9 @@ def blank_record() -> dict:
         "provider_stop_reason": None,
         "refusal_details": None,
         "usage": {"input_tokens": 0, "output_tokens": 0, "cache_read_input_tokens": 0},
+        # continuous arm only: input_tokens of this item's FIRST call, i.e. how much
+        # session context the agent was carrying when the item started. None elsewhere.
+        "session_context_tokens_at_start": None,
         "snapshot_before": {},
         "snapshot_after": {},
         "final_files": {},
@@ -122,10 +131,14 @@ def blank_record() -> dict:
 
 
 def validate_record(rec: dict) -> None:
-    """Raise if the record is missing a SPEC key or carries an unknown one."""
+    """Raise if the record is missing a SPEC key or carries an unknown one.
+
+    Keys in :data:`OPTIONAL_KEYS` may be absent: they were added after records had
+    already been written to disk, and every stage must still be able to read those.
+    """
     have = set(rec)
     want = set(RECORD_KEYS)
-    missing = want - have
+    missing = want - have - set(OPTIONAL_KEYS)
     extra = have - want
     if missing or extra:
         raise ValueError(f"record key mismatch; missing={sorted(missing)} extra={sorted(extra)}")
@@ -134,7 +147,7 @@ def validate_record(rec: dict) -> None:
 def ordered(rec: dict) -> dict:
     """Return the record with keys in SPEC order (stable, diff-friendly JSONL)."""
     validate_record(rec)
-    return {k: rec[k] for k in RECORD_KEYS}
+    return {k: rec.get(k) for k in RECORD_KEYS}
 
 
 # --------------------------------------------------------------------------- JSONL

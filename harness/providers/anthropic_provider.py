@@ -54,7 +54,7 @@ class AnthropicProvider(Provider):
     def __init__(self, model: str = DEFAULT_MODEL, max_tokens: int = 4096,
                  temperature: float | None = None, sdk_retries: int = 4,
                  own_retries: int = 2, timeout_s: float = 300.0,
-                 verify_model: bool = True, **_kw) -> None:
+                 verify_model: bool = True, cache_last_user: bool = False, **_kw) -> None:
         super().__init__(model)
         import os
 
@@ -70,6 +70,11 @@ class AnthropicProvider(Provider):
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.own_retries = own_retries
+        # Continuous arm only: also put a cache breakpoint on the last user block, so the
+        # whole growing conversation prefix is cached, not just the system prompt. OFF by
+        # default -- the per-item arms send a fresh short context and would only pay the
+        # cache-write premium. Leaving it off keeps their request bytes unchanged.
+        self.cache_last_user = bool(cache_last_user)
         self._model_list_note = ""
         if verify_model:
             self._verify_model()
@@ -123,15 +128,38 @@ class AnthropicProvider(Provider):
         flush()
         return out
 
+    @staticmethod
+    def _mark_last_user_cacheable(api_messages: list[dict]) -> list[dict]:
+        """Put a cache breakpoint on the final user turn (continuous arm).
+
+        Caching is a prefix match, so a breakpoint at the end of the conversation so far
+        caches everything before it; the next call re-reads that prefix instead of paying
+        full input price for it.
+        """
+        for msg in reversed(api_messages):
+            if msg.get("role") != "user":
+                continue
+            content = msg.get("content")
+            if isinstance(content, str):
+                msg["content"] = [{"type": "text", "text": content,
+                                   "cache_control": {"type": "ephemeral"}}]
+            elif isinstance(content, list) and content:
+                content[-1] = {**content[-1], "cache_control": {"type": "ephemeral"}}
+            break
+        return api_messages
+
     # -- the one method --------------------------------------------------
     def chat(self, system: str, messages: Iterable[Msg], tools: list[ToolSpec]) -> Turn:
         a = self._anthropic
+        api_messages = self._to_api(messages)
+        if self.cache_last_user:
+            api_messages = self._mark_last_user_cacheable(api_messages)
         kwargs = {
             "model": self.model,
             "max_tokens": self.max_tokens,
             "system": [{"type": "text", "text": system,
                         "cache_control": {"type": "ephemeral"}}],
-            "messages": self._to_api(messages),
+            "messages": api_messages,
             "tools": [t.anthropic() for t in tools],
         }
         if self.temperature is not None:

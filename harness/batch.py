@@ -172,6 +172,9 @@ def new_batch_json(batch: Batch, cfg, provider_describe: dict | None = None) -> 
         "provider_describe": provider_describe or {},
         "arm": batch.arm,
         "env_variant": batch.env_variant,
+        # "per_item" = fresh context per item (SPEC section 2); "continuous" = one
+        # conversation holding the whole batch (plan section 5, optional arm B').
+        "session_mode": "continuous" if cfg.is_continuous else "per_item",
         "harness_git_hash": git_hash(),
         "run_config": cfg.to_dict(),
         "started": now_iso(),

@@ -38,6 +38,10 @@ class FakeProvider(Provider):
         self._item: str | None = None
         self._cursor = 0
         self.calls: list[tuple[str, int]] = []
+        #: message-list length seen on each call, so a test can assert that a continuous
+        #: session's conversation grows instead of resetting per item.
+        self.seen_lengths: list[int] = []
+        self.seen_first_contents: list[str] = []
 
     def begin_item(self, item_key: str) -> None:
         self._item = item_key
@@ -46,6 +50,9 @@ class FakeProvider(Provider):
     def chat(self, system: str, messages: Iterable[Msg], tools: list[ToolSpec]) -> Turn:
         script = self.scripts.get(self._item or "", self.default_script)
         self.calls.append((self._item or "", self._cursor))
+        msgs = list(messages)
+        self.seen_lengths.append(len(msgs))
+        self.seen_first_contents.append(msgs[0].content if msgs else "")
         if self._cursor >= len(script):
             return Turn("Nothing further.", [], "end_turn",
                         {"input_tokens": 0, "output_tokens": 0, "cache_read_input_tokens": 0})

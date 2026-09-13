@@ -31,8 +31,14 @@ SNAPSHOT_TIMEOUT_S = 120
 MAX_TOKENS = 4096                # per assistant turn
 FILE_CONTENT_LIMIT = 20000       # final_files / snapshot contents
 
-ARMS = ("baseline", "peer_neutral", "peer_tip")
+ARMS = ("baseline", "peer_neutral", "peer_tip", "continuous")
 ENV_VARIANTS = ("standard", "salient")
+
+#: Arms that hold ONE conversation for the whole batch (plan section 5, optional arm B').
+#: Peer notes are not used in this arm; the context itself is the memory channel.
+CONTINUOUS_ARMS = ("continuous",)
+#: Whole-batch turn budget for a continuous session (per-item limits still apply).
+BATCH_TURN_CAP = 400
 
 # Container resource limits (every container, agent and grader).
 CONTAINER_ARGS = [
@@ -95,7 +101,12 @@ class RunConfig:
 
     image: str = IMAGE
     keep_containers: bool = False
+    batch_turn_cap: int = BATCH_TURN_CAP   # continuous arm only
     extra: dict = field(default_factory=dict)
+
+    @property
+    def is_continuous(self) -> bool:
+        return self.arm in CONTINUOUS_ARMS
 
     def __post_init__(self) -> None:
         self.tasks_dir = Path(self.tasks_dir)
@@ -121,6 +132,9 @@ class RunConfig:
             # A dry-run record keeps the cell's provider/model strings but is produced by
             # the scripted fake provider; this flag keeps that unambiguous downstream.
             cfg["dry_run"] = True
+        if self.is_continuous:
+            cfg["session_mode"] = "continuous"
+            cfg["batch_turn_cap"] = self.batch_turn_cap
         if self.provider == "ollama":
             cfg["num_ctx"] = self.num_ctx
             # `think` is only sent on the wire for reasoning-capable qwen3 models; None

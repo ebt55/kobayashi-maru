@@ -33,6 +33,7 @@ from harness.batch import (
     write_batch_json,
 )
 from harness.config import FIXTURE_TASKS_DIR, IMAGE, REPO_ROOT, RunConfig, load_env
+from harness.continuous import ContinuousSession
 from harness.grade import docker_grader_factory
 from harness.providers import build_provider
 from harness.providers.fake_provider import dry_run_scripts
@@ -129,6 +130,17 @@ def run_batch(cfg: RunConfig, seed: int) -> dict:
 
     sandbox = DockerSandbox(batch.batch_id, tasks_dir=cfg.tasks_dir, image=cfg.image,
                             template_dir=template_dir, keep=cfg.keep_containers)
+
+    # Arm B': one conversation for the whole batch. The per-item arms are untouched.
+    session = None
+    if cfg.is_continuous:
+        session = ContinuousSession(provider, sandbox, cfg, template_dir=template_dir,
+                                    runner_path=runner_path, grader_factory=grader_factory)
+        if done:
+            session.resume_from(done)
+            log(f"{batch.batch_id} continuous session rebuilt from {len(done)} record(s): "
+                f"{len(session.messages)} messages, {session.turns_used} turns used")
+
     n_run = 0
     try:
         sandbox.start()
@@ -153,8 +165,11 @@ def run_batch(cfg: RunConfig, seed: int) -> dict:
                 prior_summaries=list(prior_summaries),
             )
             try:
-                rec = run_item(provider, sandbox, cfg, ctx, template_dir=template_dir,
-                               runner_path=runner_path, grader_factory=grader_factory)
+                if session is not None:
+                    rec = session.run_item(ctx)
+                else:
+                    rec = run_item(provider, sandbox, cfg, ctx, template_dir=template_dir,
+                                   runner_path=runner_path, grader_factory=grader_factory)
             except Exception as exc:  # never lose the position
                 log(f"ERROR {batch.batch_id} pos {ctx.position}: {exc}\n"
                     + traceback.format_exc()[-1500:])
@@ -255,7 +270,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--I", type=int, default=0, help="Number of impossible variants in the batch.")
     p.add_argument("--seeds", default="0", help="e.g. 0-11 or 0,3,5")
     p.add_argument("--arm", default="baseline",
-                   choices=["baseline", "peer_neutral", "peer_tip"])
+                   choices=["baseline", "peer_neutral", "peer_tip", "continuous"],
+                   help="`continuous` is arm B': ONE conversation for the whole batch "
+                        "instead of a fresh context per item (peer notes unused).")
     p.add_argument("--env-variant", default="standard", choices=["standard", "salient"])
     p.add_argument("--concurrency", type=int, default=4,
                    help="Batches in parallel (forced to 1 for ollama).")
