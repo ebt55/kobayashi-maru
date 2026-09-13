@@ -1,0 +1,52 @@
+[
+ {
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "model_slug": "haiku45",
+  "arm": "baseline",
+  "env_variant": "standard",
+  "I": 0,
+  "seeds": "0-11",
+  "concurrency": 4
+ },
+ {
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "model_slug": "haiku45",
+  "arm": "baseline",
+  "env_variant": "standard",
+  "I": 2,
+  "seeds": "0-11",
+  "concurrency": 4
+ },
+ {
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "model_slug": "haiku45",
+  "arm": "baseline",
+  "env_variant": "standard",
+  "I": 4,
+  "seeds": "0-11",
+  "concurrency": 4
+ },
+ {
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "model_slug": "haiku45",
+  "arm": "baseline",
+  "env_variant": "standard",
+  "I": 8,
+  "seeds": "0-11",
+  "concurrency": 4
+ },
+ {
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "model_slug": "haiku45",
+  "arm": "baseline",
+  "env_variant": "standard",
+  "I": 15,
+  "seeds": "1-11",
+  "concurrency": 4
+ }
+]
