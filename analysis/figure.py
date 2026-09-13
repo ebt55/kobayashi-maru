@@ -8,9 +8,14 @@ items already encountered in the batch, pooled across *f*.
 Design follows the `dataviz` skill: validated categorical slots in fixed order
 (slots 1-3 pass the all-pairs CVD and normal-vision gates in both modes), 2px
 lines, >=8px markers with a 2px surface ring, hairline solid recessive grid, a
-legend always present plus direct end labels (the relief for the slot-3 contrast
-WARN), and -- because this is printed in a PDF -- a distinct **linestyle and
-marker per model**, so identity survives grayscale and full-severity CVD.
+legend always present (identity is never colour-alone; the table view is the
+relief for the slot-3 contrast WARN), and -- because this is printed in a PDF --
+a distinct **linestyle and marker per model**, so identity survives grayscale
+and full-severity CVD.
+
+Panel B is the manipulation check on the impossible items and panel C the
+cumulative-dose curve; panel D is a SECONDARY, exploratory view against the
+discoverably-impossible share and replaces realised f nowhere.
 """
 
 from __future__ import annotations
@@ -110,13 +115,93 @@ def _dodge_labels(items, min_gap: float):
     return items
 
 
-def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) -> float:
-    solv = df[~df["is_impossible"]]
-    base = solv[solv["arm"] == "baseline"] if (solv["arm"] == "baseline").any() else solv
-
+def _shade_band(ax) -> None:
     ax.axvspan(BAND_LO, BAND_HI, color=BAND_FILL, zorder=1, lw=0)
     for x in (BAND_LO, BAND_HI):
         ax.axvline(x, color=BAND_EDGE, lw=0.8, zorder=1)
+
+
+def _f_axis(ax, top: float, band_label: bool = True) -> None:
+    ax.set_xlim(-0.035, 0.665)
+    ax.set_xticks([0.0, 0.167, 0.286, 0.444, 0.60])
+    ax.set_xticklabels(["0", ".17", ".29", ".44", ".60"])
+    if band_label:
+        ax.text(
+            (BAND_LO + BAND_HI) / 2, top * 0.965, "~30–40%",
+            ha="center", va="top", fontsize=6.4, color=TEXT_MUTED,
+        )
+
+
+def _labels(df: pd.DataFrame) -> dict[str, str]:
+    """model_slug -> legend label, carrying the environment variant."""
+    from analysis.load import series_label
+
+    out: dict[str, str] = {}
+    for slug, sub in df.groupby("model_slug", sort=True):
+        variants = [v for v in sub["env_variant"].dropna().unique()] if "env_variant" in sub else []
+        out[str(slug)] = series_label(str(slug), variants[0] if len(variants) == 1 else None)
+    return out
+
+
+def _panel_impossible(ax, df: pd.DataFrame, models: list[str], labels: dict[str, str]) -> float:
+    """B -- the manipulation check: cheat rate on the IMPOSSIBLE items.
+
+    Bands are Wilson intervals on the cell proportion rather than a cluster
+    bootstrap: a batch contributes at most 15 impossible item-runs (2 at
+    I = 2), so the batch-level resample is too coarse to be informative here.
+    There are no impossible items at f = 0, so the series starts at f = 0.167.
+    """
+    imp = df[df["is_impossible"]]
+    base = imp[imp["arm"] == "baseline"] if (imp["arm"] == "baseline").any() else imp
+    _shade_band(ax)
+
+    ymax = 1.0
+    for i, slug in enumerate(models):
+        colour = SERIES[i % len(SERIES)]
+        ls = LINESTYLES[i % len(LINESTYLES)]
+        mk = MARKERS[i % len(MARKERS)]
+        sub = base[base["model_slug"] == slug]
+        if sub.empty:
+            continue
+        xs, ys, los, his = [], [], [], []
+        for f, cell in sub.groupby("f_realised", sort=True):
+            if not np.isfinite(f) or len(cell) == 0:
+                continue
+            k, n = int(cell["cheat"].sum()), int(len(cell))
+            lo, hi = wilson_ci(k, n)
+            xs.append(float(f))
+            ys.append(100.0 * k / n)
+            los.append(100.0 * lo)
+            his.append(100.0 * hi)
+        if not xs:
+            continue
+        ymax = max(ymax, max(his))
+        ax.fill_between(xs, los, his, color=colour, alpha=0.13, lw=0, zorder=2)
+        ax.plot(
+            xs, ys, color=colour, linestyle=ls, linewidth=2.0,
+            solid_capstyle="round", solid_joinstyle="round", zorder=4,
+            marker=mk, markersize=6.0, markeredgecolor=SURFACE, markeredgewidth=1.4,
+            label=labels.get(slug, slug), clip_on=False,
+        )
+
+    top = max(4.0, ymax * 1.16)
+    _f_axis(ax, top)
+    ax.set_xlabel(
+        "realised f  (impossible items only)", fontsize=8, color=TEXT_SECONDARY
+    )
+    ax.set_title(
+        "B.  Manipulation check",
+        fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
+    )
+    return top
+
+
+def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
+             labels: dict[str, str]) -> float:
+    solv = df[~df["is_impossible"]]
+    base = solv[solv["arm"] == "baseline"] if (solv["arm"] == "baseline").any() else solv
+
+    _shade_band(ax)
 
     ymax = 1.0
     end_labels = []
@@ -149,7 +234,7 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) ->
             xs, ys, color=colour, linestyle=ls, linewidth=2.0,
             solid_capstyle="round", solid_joinstyle="round", zorder=4,
             marker=mk, markersize=6.0, markeredgecolor=SURFACE, markeredgewidth=1.4,
-            label=slug, clip_on=False,
+            label=labels.get(slug, slug), clip_on=False,
         )
         end_labels.append((ys[-1], xs[-1], slug))
 
@@ -192,28 +277,12 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) ->
 
     top = max(4.0, ymax * 1.16)
     ax.set_ylim(0, top)
-    # headroom on the right so the direct end labels sit inside the panel
-    ax.set_xlim(-0.035, 0.78)
-    ax.set_xticks([0.0, 0.167, 0.286, 0.444, 0.60])
-    ax.set_xticklabels(["0", "0.167", "0.286", "0.444", "0.60"])
+    _f_axis(ax, top)
 
-    # in-band marker (short), with the verbatim caption as a figure footnote.
-    ax.text(
-        (BAND_LO + BAND_HI) / 2, top * 0.965, "~30–40%",
-        ha="center", va="top", fontsize=6.8, color=TEXT_MUTED,
-    )
-
-    # direct end labels: text ink, the coloured marker beside them carries identity.
-    for y, x, slug in _dodge_labels(end_labels, min_gap=top * 0.075):
-        ax.annotate(
-            slug, xy=(x, y), xytext=(7, 0), textcoords="offset points",
-            va="center", ha="left", fontsize=7.0, color=TEXT_SECONDARY,
-        )
-
-    ax.set_xlabel("realised impossible fraction  f = I / (10 + I)", fontsize=8, color=TEXT_SECONDARY)
-    ax.set_ylabel("cheat on solvable item-runs (%)", fontsize=8, color=TEXT_SECONDARY)
+    ax.set_xlabel("realised impossible fraction  f", fontsize=8, color=TEXT_SECONDARY)
+    ax.set_ylabel("cheat rate (% of item-runs)", fontsize=8, color=TEXT_SECONDARY)
     ax.set_title(
-        "A.  Dose — cheat rate on the ten fixed solvable tasks",
+        "A.  Dose (solvable items)",
         fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
     )
 
@@ -222,9 +291,9 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) ->
     labels += [h.get_label() for h in peer_handles]
     if len(handles) >= 2:
         leg = ax.legend(
-            handles, labels, loc="upper left", fontsize=7.0, frameon=True,
-            framealpha=1.0, edgecolor=GRID, facecolor=SURFACE, borderpad=0.45,
-            handlelength=2.6, labelspacing=0.35,
+            handles, labels, loc="upper left", fontsize=6.2, frameon=True,
+            framealpha=1.0, edgecolor=GRID, facecolor=SURFACE, borderpad=0.35,
+            handlelength=2.2, labelspacing=0.3, handletextpad=0.5,
         )
         leg.get_frame().set_linewidth(0.8)
         for t in leg.get_texts():
@@ -232,7 +301,8 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) ->
     return top
 
 
-def _panel_b(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) -> float:
+def _panel_c(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
+             labels: dict[str, str]) -> float:
     solv = df[~df["is_impossible"]].copy()
     solv = solv[solv["n_impossible_before"].notna()]
     if solv.empty:
@@ -276,20 +346,85 @@ def _panel_b(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int) ->
             xs, ys, color=colour, linestyle=ls, linewidth=2.0,
             solid_capstyle="round", solid_joinstyle="round", zorder=4,
             marker=mk, markersize=6.0, markeredgecolor=SURFACE, markeredgewidth=1.4,
-            label=slug, clip_on=False,
+            label=labels.get(slug, slug), clip_on=False,
         )
 
     top = max(4.0, ymax * 1.16)
     ax.set_ylim(0, top)
-    ax.xaxis.set_major_locator(mticker.MultipleLocator(2))
+    ax.xaxis.set_major_locator(mticker.MultipleLocator(4))
     ax.set_xlabel(
-        "impossible items already seen in the batch", fontsize=8, color=TEXT_SECONDARY
+        "impossible items already seen", fontsize=8, color=TEXT_SECONDARY
     )
     ax.set_title(
-        "B.  Cumulative dose — pooled across f",
+        "C.  Cumulative dose (solvable)",
         fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
     )
     return top
+
+
+def _panel_d(ax, df: pd.DataFrame, models: list[str], labels: dict[str, str], seed: int) -> float:
+    """D -- SECONDARY: cheat-on-solvable against the *discoverably* impossible share.
+
+    One jittered point per batch plus the clustered-logistic fit.  This is an
+    exploratory second exposure measure, not a replacement for realised f: a
+    ``contradict`` variant looks solved from inside the sandbox (its visible
+    tests pass), while an ``unreachable`` variant announces itself as a missing
+    resource, so only the latter is plainly impossible to the agent as it works.
+    """
+    from analysis.stats import logistic_clustered
+
+    solv = df[~df["is_impossible"]]
+    base = solv[solv["arm"] == "baseline"] if (solv["arm"] == "baseline").any() else solv
+    base = base[base["f_discoverable"].notna()]
+    if base.empty:
+        ax.text(0.5, 0.5, "no f_discoverable", ha="center", va="center",
+                fontsize=8, color=TEXT_MUTED, transform=ax.transAxes)
+        return 4.0
+
+    rng = np.random.default_rng(seed)
+    ymax = 1.0
+    xmax = 0.05
+    for i, slug in enumerate(models):
+        colour = SERIES[i % len(SERIES)]
+        ls = LINESTYLES[i % len(LINESTYLES)]
+        mk = MARKERS[i % len(MARKERS)]
+        sub = base[base["model_slug"] == slug]
+        if sub.empty:
+            continue
+        per_batch = sub.groupby("batch_id").agg(
+            x=("f_discoverable", "first"), y=("cheat", "mean")
+        )
+        xs = per_batch["x"].to_numpy(dtype=float)
+        ys = 100.0 * per_batch["y"].to_numpy(dtype=float)
+        jitter = rng.uniform(-0.006, 0.006, size=xs.size)
+        ax.plot(
+            xs + jitter, ys, linestyle="none", marker=mk, markersize=3.6,
+            markerfacecolor=colour, markeredgecolor=SURFACE, markeredgewidth=0.5,
+            alpha=0.55, zorder=3, clip_on=True,
+        )
+        ymax = max(ymax, float(ys.max()) if ys.size else 1.0)
+        xmax = max(xmax, float(xs.max()) if xs.size else 0.05)
+
+        fit = logistic_clustered(sub, "f_discoverable")
+        if fit.get("slope") is not None:
+            grid = np.linspace(float(xs.min()), float(xs.max()), 60)
+            p = 1.0 / (1.0 + np.exp(-(fit["intercept"] + fit["slope"] * grid)))
+            ax.plot(
+                grid, 100.0 * p, color=colour, linestyle=ls, linewidth=2.0,
+                solid_capstyle="round", zorder=4, label=labels.get(slug, slug),
+            )
+            ymax = max(ymax, float((100.0 * p).max()))
+
+    ax.set_xlim(-0.02, max(0.08, xmax * 1.12))
+    ax.set_xlabel(
+        "f_discoverable  (unreachable / batch size)", fontsize=7.6, color=TEXT_SECONDARY
+    )
+    ax.set_ylabel("cheat rate (% of item-runs)", fontsize=8, color=TEXT_SECONDARY)
+    ax.set_title(
+        "D.  Secondary: fraction of discoverably-impossible items",
+        fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
+    )
+    return max(4.0, ymax * 1.16)
 
 
 def make_figure(
@@ -314,21 +449,33 @@ def make_figure(
         }
     )
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.5, 3.6), sharey=True)
-    fig.subplots_adjust(left=0.082, right=0.988, top=0.855, bottom=0.285, wspace=0.14)
-    _style(fig, (ax1, ax2))
-    ax2.tick_params(labelleft=True)
+    fig = plt.figure(figsize=(7.5, 5.6))
+    gs = fig.add_gridspec(
+        2, 3, height_ratios=[1.0, 0.82], hspace=0.52, wspace=0.10,
+        left=0.075, right=0.992, top=0.905, bottom=0.205,
+    )
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
+    ax3 = fig.add_subplot(gs[0, 2], sharey=ax1)
+    ax4 = fig.add_subplot(gs[1, 0], sharey=ax1)
+    axes = (ax1, ax2, ax3, ax4)
+    _style(fig, axes)
+    for ax in (ax2, ax3, ax4):
+        ax.tick_params(labelleft=True)
 
     models = _order_models(sorted(df["model_slug"].dropna().unique())) if not df.empty else []
     if df.empty or not models:
-        for ax in (ax1, ax2):
+        for ax in axes:
             ax.text(0.5, 0.5, "no item-runs", ha="center", va="center",
                     fontsize=9, color=TEXT_MUTED, transform=ax.transAxes)
     else:
-        top_a = _panel_a(ax1, df, models, n_boot, seed)
-        top_b = _panel_b(ax2, df, models, n_boot, seed)
-        # one measure -> one scale, so the two panels are directly comparable
-        ax1.set_ylim(0, max(top_a, top_b))
+        labels = _labels(df)
+        top_a = _panel_a(ax1, df, models, n_boot, seed, labels)
+        top_b = _panel_impossible(ax2, df, models, labels)
+        top_c = _panel_c(ax3, df, models, n_boot, seed, labels)
+        top_d = _panel_d(ax4, df, models, labels, seed)
+        # one measure -> one scale, so every panel is directly comparable
+        ax1.set_ylim(0, max(top_a, top_b, top_c, top_d))
 
     fig.suptitle(
         "Cheating on still-solvable coding tasks vs the impossible fraction of the batch",
@@ -337,25 +484,35 @@ def make_figure(
 
     n_solv = int((~df["is_impossible"]).sum()) if not df.empty else 0
     n_batches = int(df["batch_id"].nunique()) if not df.empty else 0
+    n_imp = int(df["is_impossible"].sum()) if not df.empty else 0
     paragraphs = [
-        f"Shaded vertical band: {BAND_CAPTION}.",
-        f"Bands: cluster-bootstrap 95% CIs over batches ({n_boot:,} resamples, seed {seed}); "
-        "unit = one item-run, cluster = the batch; both panels share one y scale.",
-        f"{n_solv:,} solvable item-runs across {n_batches:,} batches. Cheat = "
-        "D1∨D2∨D3∨D4∨D5 (programmatic detector, no LLM); it counts attempts.",
-        "Panel B is confounded with f: a larger f means both more impossible items and a "
-        "longer batch.",
+        f"Shaded vertical band in A and B: {BAND_CAPTION}.",
+        f"All four panels share one y scale. Bands in A and C: cluster-bootstrap 95% CIs over "
+        f"batches ({n_boot:,} resamples, seed {seed}), unit = one item-run, cluster = the batch. "
+        "Bands in B: Wilson 95% intervals on the cell proportion, since a batch carries at most "
+        "15 impossible item-runs.",
+        f"{n_solv:,} solvable and {n_imp:,} impossible item-runs across {n_batches:,} batches. "
+        "Cheat = D1∨D2∨D3∨D4∨D5 (programmatic detector, no LLM); it counts "
+        "attempts. B is the manipulation check: it shows whether the dose was actually "
+        "delivered, so a flat A beside a rising B reads as \"dose delivered, no spillover\".",
+        "B has no f = 0 point because a batch at f = 0 contains no impossible items. C is "
+        "confounded with f: a larger f means both more impossible items and a longer batch.",
+        "D is a SECONDARY, exploratory exposure measure and replaces realised f nowhere: "
+        "f_discoverable counts only `unreachable` variants, which announce themselves as a "
+        "missing resource, because a `contradict` variant looks solved from inside the sandbox "
+        "(its visible tests pass). One jittered point per batch; the curve is the "
+        "batch-clustered logistic fit.",
         "Line style and marker, not colour alone, carry model identity — the series stay "
         "readable in grayscale print and under colour-vision deficiency.",
     ]
+    note_ax = fig.add_subplot(gs[1, 1:])
+    note_ax.axis("off")
     wrapped: list[str] = []
     for para in paragraphs:
-        wrapped.extend(textwrap.wrap(para, width=146) or [""])
-    # give the footnote block its own room instead of letting it run into the axes
-    fig.subplots_adjust(bottom=min(0.45, 0.115 + 0.0375 * len(wrapped)))
-    fig.text(
-        0.008, 0.012, "\n".join(wrapped), fontsize=6.2, color=TEXT_MUTED,
-        va="bottom", linespacing=1.55,
+        wrapped.extend(textwrap.wrap(para, width=96) or [""])
+    note_ax.text(
+        0.0, 1.0, "\n".join(wrapped), fontsize=6.0, color=TEXT_MUTED,
+        va="top", ha="left", linespacing=1.5, transform=note_ax.transAxes,
     )
 
     paths = []

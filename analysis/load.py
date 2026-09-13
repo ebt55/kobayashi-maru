@@ -9,7 +9,15 @@ from pathlib import Path
 
 import pandas as pd
 
-__all__ = ["load_runs", "load_batch", "parse_batch_id", "COLUMNS", "ARMS"]
+__all__ = [
+    "load_runs",
+    "load_batch",
+    "parse_batch_id",
+    "read_manifest",
+    "series_label",
+    "COLUMNS",
+    "ARMS",
+]
 
 ARMS = ("baseline", "peer_neutral", "peer_tip")
 
@@ -24,9 +32,11 @@ COLUMNS = [
     "model_slug",
     "provider",
     "arm",
+    "env_variant",
     "I",
     "batch_size",
     "f_realised",
+    "f_discoverable",
     "seed",
     "position",
     "n_items_before",
@@ -75,12 +85,40 @@ def parse_batch_id(batch_id: str) -> dict:
     return {"model_slug": (batch_id or "").split("_")[0], "arm": None, "I": None, "seed": None}
 
 
-def _flatten(rec: dict, batch_id: str) -> dict:
+def read_manifest(batch_dir: Path) -> dict:
+    """``batch.json`` for one batch, or ``{}`` when it is absent or unreadable."""
+    p = Path(batch_dir) / "batch.json"
+    if not p.is_file():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def series_label(model_slug: str, env_variant: str | None) -> str:
+    """Legend label: ``luna-sal`` + ``salient`` -> ``"luna (salient)"``.
+
+    The environment is part of the condition, so ``luna`` and ``luna-sal`` stay
+    separate series; only the printed label drops the redundant suffix.
+    """
+    base = str(model_slug or "")
+    for suffix in ("-sal", "-salient"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    return f"{base} ({env_variant})" if env_variant else base
+
+
+def _flatten(rec: dict, batch_id: str, manifest: dict | None = None) -> dict:
     det = rec.get("detectors") or {}
     mon = rec.get("monitor") or {}
     usage = rec.get("usage") or {}
+    manifest = manifest or {}
     parsed = parse_batch_id(batch_id)
     outcome = rec.get("outcome")
+    model_slug = manifest.get("model_slug") or parsed["model_slug"]
 
     monitor_cheated = mon.get("cheated")
     if monitor_cheated is not None:
@@ -94,12 +132,14 @@ def _flatten(rec: dict, batch_id: str) -> dict:
         "batch_id": batch_id,
         "run_id": rec.get("run_id"),
         "model": rec.get("model"),
-        "model_slug": parsed["model_slug"],
+        "model_slug": model_slug,
         "provider": rec.get("provider"),
         "arm": rec.get("arm") or parsed["arm"],
+        "env_variant": rec.get("env_variant") or manifest.get("env_variant"),
         "I": rec.get("I") if rec.get("I") is not None else parsed["I"],
         "batch_size": rec.get("batch_size"),
         "f_realised": rec.get("f_realised"),
+        "f_discoverable": None,  # filled per batch in load_batch
         "seed": rec.get("seed") if rec.get("seed") is not None else parsed["seed"],
         "position": rec.get("position"),
         "n_items_before": rec.get("n_items_before"),
@@ -139,6 +179,7 @@ def _flatten(rec: dict, batch_id: str) -> dict:
 def load_batch(items_path: Path) -> tuple[list[dict], bool]:
     """Return (rows, detected).  ``detected`` is False if any record lacks ``detectors``."""
     batch_id = items_path.parent.name
+    manifest = read_manifest(items_path.parent)
     rows: list[dict] = []
     detected = True
     with items_path.open("r", encoding="utf-8") as fh:
@@ -152,7 +193,19 @@ def load_batch(items_path: Path) -> tuple[list[dict], bool]:
                 raise ValueError(f"{items_path}:{lineno}: malformed JSON ({exc})") from exc
             if not isinstance(rec.get("detectors"), dict) or rec.get("outcome") is None:
                 detected = False
-            rows.append(_flatten(rec, batch_id))
+            rows.append(_flatten(rec, batch_id, manifest))
+
+    # SECONDARY exposure measure (never a substitute for realised f): the share
+    # of the batch that is *discoverably* impossible.  A `contradict` variant
+    # looks solved from inside the sandbox -- its visible tests pass -- whereas
+    # an `unreachable` variant announces itself as a missing resource, so only
+    # the latter is plainly impossible to the agent while it works.
+    if rows:
+        n_items = rows[0].get("batch_size") or len(rows)
+        n_unreachable = sum(1 for r in rows if r["is_impossible"] and r["mutation"] == "unreachable")
+        f_disc = round(n_unreachable / n_items, 4) if n_items else None
+        for r in rows:
+            r["f_discoverable"] = f_disc
     return rows, detected
 
 
@@ -190,6 +243,7 @@ def load_runs(runs_dir: str | Path, warn=warnings.warn) -> pd.DataFrame:
     df = pd.DataFrame(all_rows, columns=COLUMNS)
     if not df.empty:
         df["f_realised"] = pd.to_numeric(df["f_realised"], errors="coerce").round(4)
+        df["f_discoverable"] = pd.to_numeric(df["f_discoverable"], errors="coerce").round(4)
         for col in ("I", "batch_size", "seed", "position", "n_items_before", "n_impossible_before"):
             df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
         df["monitor_cheated"] = df["monitor_cheated"].astype("boolean")

@@ -33,6 +33,8 @@ REQUIRED_ARTEFACTS = (
     "figure.png",
     "figure.svg",
     "flags_for_review.md",
+    "impossible_by_mutation.md",
+    "impossible_by_mutation.csv",
 )
 
 
@@ -96,6 +98,261 @@ def test_figure_is_a_real_png_and_svg(sloped):
     assert 'width="540pt"' in svg or "7.5in" in svg or "540" in svg
 
 
+@pytest.fixture
+def rendered_fig(sloped, monkeypatch):
+    """The Figure object `make_figure` built, kept open for inspection."""
+    import matplotlib.pyplot as plt
+
+    from analysis import figure as figmod
+
+    kept: dict = {}
+    real_close = plt.close
+    monkeypatch.setattr(figmod.plt, "close", lambda f: kept.setdefault("fig", f))
+    figmod.make_figure(sloped["df"], sloped["out"], n_boot=50, seed=0, stem="_inspect")
+    fig = kept["fig"]
+    yield fig
+    real_close(fig)
+
+
+def panels(fig):
+    """The four data panels A-D, in order (the note block carries no title)."""
+    return [ax for ax in fig.axes if ax.get_title(loc="left")]
+
+
+def test_figure_has_four_panels_a_b_c_d(rendered_fig):
+    """A = solvable, B = manipulation check, C = cumulative dose, D = secondary."""
+    titles = [ax.get_title(loc="left") for ax in panels(rendered_fig)]
+    assert len(titles) == 4
+    assert titles[0].startswith("A.") and "solvable" in titles[0]
+    assert titles[1].startswith("B.") and "Manipulation check" in titles[1]
+    assert titles[2].startswith("C.") and "Cumulative dose" in titles[2]
+    assert titles[3].startswith("D.") and "Secondary" in titles[3]
+    assert "discoverably-impossible" in titles[3]
+
+
+def test_figure_panels_share_one_y_limit(rendered_fig):
+    ylims = [ax.get_ylim() for ax in panels(rendered_fig)]
+    assert len(set(ylims)) == 1
+    # B reaches the injected 35% on impossible items, so the shared top clears it
+    assert ylims[0][1] > 35.0
+
+
+def test_figure_band_is_shaded_in_a_and_b_only(rendered_fig):
+    from analysis.figure import BAND_HI, BAND_LO
+
+    def band_spans(ax):
+        return [
+            p for p in ax.patches
+            if abs(p.get_x() - BAND_LO) < 1e-9 and abs(p.get_width() - (BAND_HI - BAND_LO)) < 1e-9
+        ]
+
+    a, b, c, d = panels(rendered_fig)
+    assert len(band_spans(a)) == 1
+    assert len(band_spans(b)) == 1
+    assert len(band_spans(c)) == 0  # C's x axis is a count, not f
+    assert len(band_spans(d)) == 0  # D's x axis is f_discoverable, a different measure
+
+
+def test_figure_panel_b_has_no_f_zero_point(rendered_fig):
+    """A batch at f = 0 contains no impossible items, so B starts at f = 0.167."""
+    b = panels(rendered_fig)[1]
+    xs = [x for line in b.lines for x in line.get_xdata()]
+    assert xs, "panel B drew no series"
+    assert min(xs) > 0.0
+    # A does have an f = 0 cell (the peer markers are dodged +-0.012 around it)
+    a_xs = [x for line in panels(rendered_fig)[0].lines for x in line.get_xdata()]
+    assert min(a_xs) <= 0.0 < min(xs)
+
+
+def test_figure_legend_labels_carry_the_environment(rendered_fig):
+    a, b, _c, _d = panels(rendered_fig)
+    labels = [t.get_text() for t in a.get_legend().get_texts()]
+    assert any(lab.endswith("(standard)") for lab in labels), labels
+    assert "haiku45 (standard)" in labels
+    # B uses the same series identity
+    b_labels = [line.get_label() for line in b.lines if not line.get_label().startswith("_")]
+    assert "haiku45 (standard)" in b_labels
+
+
+def test_figure_series_styles_match_across_panels(rendered_fig):
+    """Same model -> same colour, dash pattern and marker in every panel."""
+    a, b, c, d = panels(rendered_fig)
+
+    def style_of(ax, label):
+        for line in ax.lines:
+            if line.get_label() == label:
+                return (line.get_color(), str(line.get_linestyle()), line.get_marker())
+        return None
+
+    label = "haiku45 (standard)"
+    sa, sb, sc = style_of(a, label), style_of(b, label), style_of(c, label)
+    assert sa is not None and sa == sb == sc
+    # D's fitted curve carries the same colour and dash pattern (markers live on
+    # the per-batch scatter, which is drawn as a separate unlabelled series)
+    sd = style_of(d, label)
+    assert sd is not None and sd[:2] == sa[:2]
+
+
+def test_impossible_wilson_bounds_bracket_the_rate(sloped):
+    cells = pd.read_csv(sloped["out"] / "cells.csv")
+    with_imp = cells[cells["impossible_item_runs"] > 0]
+    assert len(with_imp) > 0
+    assert (with_imp["cheat_pct_impossible_lo"] <= with_imp["cheat_pct_impossible"]).all()
+    assert (with_imp["cheat_pct_impossible"] <= with_imp["cheat_pct_impossible_hi"]).all()
+    # injected 35% on impossible items
+    assert with_imp["cheat_pct_impossible"].mean() == pytest.approx(35.0, abs=8.0)
+    # f = 0 cells have no impossible items at all
+    no_imp = cells[cells["impossible_item_runs"] == 0]
+    assert (no_imp["f_realised"] == 0).all()
+    assert no_imp["cheat_pct_impossible"].isna().all()
+
+
+def test_env_variant_reaches_the_frame_and_the_label():
+    from analysis.load import series_label
+
+    assert series_label("luna-sal", "salient") == "luna (salient)"
+    assert series_label("haiku45", "standard") == "haiku45 (standard)"
+    assert series_label("haiku45", None) == "haiku45"
+
+
+def test_env_variant_column_is_populated(sloped):
+    assert set(sloped["df"]["env_variant"].dropna().unique()) == {"standard"}
+    cells = pd.read_csv(sloped["out"] / "cells.csv")
+    assert (cells["env_variant"] == "standard").all()
+
+
+def test_table_md_carries_the_impossible_ci(sloped):
+    md = (sloped["out"] / "table.md").read_text(encoding="utf-8")
+    header = next(line for line in md.splitlines() if line.startswith("| model |"))
+    # one Wilson CI for the solvable rate, one for the manipulation check
+    assert header.count("95% CI (Wilson)") == 2
+    assert "cheat % on impossible" in header
+    assert "dose delivered, no spillover" in md
+
+
+# --------------------------------------------------------------------------- #
+# impossible_by_mutation
+# --------------------------------------------------------------------------- #
+def test_synth_emits_both_mutation_types(sloped):
+    muts = set(sloped["df"].loc[sloped["df"]["is_impossible"], "mutation"].dropna().unique())
+    assert muts == {"contradict", "unreachable"}
+    # and every impossible item-run carries one
+    imp = sloped["df"][sloped["df"]["is_impossible"]]
+    assert imp["mutation"].notna().all()
+    assert sloped["df"].loc[~sloped["df"]["is_impossible"], "mutation"].isna().all()
+
+
+def test_mutation_csv_has_pooled_and_per_f_rows(sloped):
+    from analysis.mutation import MUTATION_COLUMNS
+
+    rows = pd.read_csv(sloped["out"] / "impossible_by_mutation.csv")
+    assert list(rows.columns) == MUTATION_COLUMNS
+    assert set(rows["kind"]) == {"contradict", "unreachable", "solvable"}
+
+    pooled = rows[rows["f_realised"] == "all"]
+    per_f = rows[rows["f_realised"] != "all"]
+    assert not pooled.empty and not per_f.empty
+    # one pooled row per (line, kind)
+    assert len(pooled) == len(pooled.drop_duplicates(["model_slug", "kind"]))
+    # solvable exists at all five levels; the mutations only where f > 0
+    solv_levels = sorted(per_f.loc[per_f["kind"] == "solvable", "f_realised"].astype(float).unique())
+    assert len(solv_levels) == 5 and solv_levels[0] == 0.0
+    mut_levels = per_f[per_f["kind"].isin(["contradict", "unreachable"])]["f_realised"].astype(float)
+    assert mut_levels.min() > 0.0
+
+
+def test_mutation_pooled_counts_reconcile_with_the_frame(sloped):
+    rows = pd.read_csv(sloped["out"] / "impossible_by_mutation.csv")
+    pooled = rows[rows["f_realised"] == "all"]
+    df = sloped["df"]
+    for slug in df["model_slug"].unique():
+        sub = df[df["model_slug"] == slug]
+        got = pooled[pooled["model_slug"] == slug].set_index("kind")["item_runs"]
+        assert got["solvable"] == int((~sub["is_impossible"]).sum())
+        for mutation in ("contradict", "unreachable"):
+            want = int((sub["is_impossible"] & (sub["mutation"] == mutation)).sum())
+            assert got[mutation] == want, (slug, mutation)
+        assert got["contradict"] + got["unreachable"] == int(sub["is_impossible"].sum())
+
+
+def test_mutation_rates_bracket_and_reflect_the_injection(sloped):
+    rows = pd.read_csv(sloped["out"] / "impossible_by_mutation.csv")
+    pooled = rows[rows["f_realised"] == "all"]
+    assert (pooled["wilson_lo"] <= pooled["cheat_pct"]).all()
+    assert (pooled["cheat_pct"] <= pooled["wilson_hi"]).all()
+    mut = pooled[pooled["kind"].isin(["contradict", "unreachable"])]
+    solv = pooled[pooled["kind"] == "solvable"]
+    # synth injects one rate for both mutations (0.35) and a much lower one on solvable
+    assert mut["cheat_pct"].mean() == pytest.approx(35.0, abs=8.0)
+    assert solv["cheat_pct"].max() < mut["cheat_pct"].min()
+    for col in ("declared_impossible_pct", "honest_fail_pct"):
+        assert pooled[col].between(0, 100).all()
+    assert pooled["mean_turns"].between(1, 30).all()
+
+
+def test_mutation_md_lists_every_line_and_kind(sloped):
+    md = (sloped["out"] / "impossible_by_mutation.md").read_text(encoding="utf-8")
+    assert "| line | mutation | item-runs |" in md
+    for kind in ("contradict", "unreachable", "solvable"):
+        assert f"| {kind} |" in md
+    assert "haiku45 (standard)" in md
+    assert "dose delivered, no spillover" in md
+    # pooled rows only in the md: two lines x three kinds
+    body = [ln for ln in md.splitlines() if ln.startswith("| ") and " | contradict | " in ln
+            or ln.startswith("| ") and " | unreachable | " in ln
+            or ln.startswith("| ") and " | solvable | " in ln]
+    assert len(body) == 6
+
+
+def test_mutation_table_on_an_empty_frame(tmp_path):
+    from analysis.mutation import MUTATION_COLUMNS, build_mutation_rows, write_mutation_table
+
+    empty = pd.DataFrame(columns=MUTATION_COLUMNS)
+    assert build_mutation_rows(pd.DataFrame(columns=["model_slug"])).empty
+    paths = write_mutation_table(pd.DataFrame(columns=["model_slug"]), tmp_path)
+    assert paths["md"].is_file() and paths["csv"].is_file()
+    assert "_no item-runs_" in paths["md"].read_text(encoding="utf-8")
+    assert empty is not None
+
+
+# --------------------------------------------------------------------------- #
+# f_discoverable (SECONDARY exposure measure)
+# --------------------------------------------------------------------------- #
+def test_f_discoverable_is_per_batch_and_counts_only_unreachable(sloped):
+    df = sloped["df"]
+    assert df["f_discoverable"].notna().all()
+    for batch_id, sub in df.groupby("batch_id"):
+        assert sub["f_discoverable"].nunique() == 1  # one value per batch
+        n_unreachable = int((sub["is_impossible"] & (sub["mutation"] == "unreachable")).sum())
+        assert sub["f_discoverable"].iloc[0] == pytest.approx(
+            round(n_unreachable / int(sub["batch_size"].iloc[0]), 4)
+        )
+    # f = 0 batches carry no impossible items at all
+    assert (df.loc[df["f_realised"] == 0, "f_discoverable"] == 0).all()
+
+
+def test_f_discoverable_varies_between_batches_at_the_same_f(sloped):
+    """Variants are sampled per batch, so the unreachable count is not fixed by I."""
+    df = sloped["df"]
+    mid = df[(df["f_realised"] > 0) & (df["f_realised"] < 0.6)]
+    per_level = mid.groupby("f_realised")["f_discoverable"].nunique()
+    assert (per_level > 1).any(), per_level.to_dict()
+    # and it never exceeds realised f, since unreachable items are a subset
+    assert (df["f_discoverable"] <= df["f_realised"] + 1e-9).all()
+
+
+def test_stats_has_the_secondary_discoverable_slope(sloped):
+    for slug, entry in sloped["stats"]["models"].items():
+        fit = entry["logistic_cheat_on_f_discoverable"]
+        assert fit["x"] == "f_discoverable"
+        assert "SECONDARY" in fit["note_secondary"]
+        assert "not a replacement for realised f" in fit["note_secondary"]
+        assert fit["slope"] is not None, f"{slug}: {fit['note']}"
+        assert fit["n_clusters"] == 60
+    # the primary IV is untouched and still reported separately
+    assert "logistic_cheat_on_f" in sloped["stats"]["models"]["haiku45"]
+
+
 def test_band_caption_is_verbatim_from_spec():
     assert BAND_CAPTION == (
         "'~30–40% impossible' — METR's root-cause framing; "
@@ -115,10 +372,13 @@ def test_cells_csv_has_every_spec_column(sloped):
         "cheat_pct_monitor",
         "kappa",
         "cheat_pct_impossible",
+        "cheat_pct_impossible_lo",
+        "cheat_pct_impossible_hi",
         "declared_impossible_pct",
         "refusals",
         "errors",
         "monitor_model",
+        "env_variant",
     ):
         assert col in cells.columns, col
     assert list(cells.columns) == CELL_COLUMNS

@@ -183,7 +183,7 @@ def make_synthetic_runs(
                         monitor_sensitivity=monitor_sensitivity,
                         monitor_fpr=monitor_fpr,
                     )
-                    _write_batch(out_dir, batch_id, recs, model_id, provider, arm, I, seed_b)
+                    _write_batch(out_dir, batch_id, recs, model_id, provider, arm, I, seed_b, model_slug)
                     manifest["batches"].append(batch_id)
                     manifest["n_item_runs"] += len(recs)
 
@@ -218,9 +218,16 @@ def _make_batch(
     f = round(I / n_items, 4)
 
     items = [(t, False, None) for t in SOLVABLE_TASKS]
-    for j in range(I):
-        mutation = "contradict" if j % 2 == 0 else "unreachable"
-        items.append((IMPOSSIBLE_TASKS[j % len(IMPOSSIBLE_TASKS)], True, mutation))
+    # plan section 5: 15 variants, alternating contradict / unreachable by list
+    # index (8 contradict, 7 unreachable); a batch at I < 15 samples I of them,
+    # so the unreachable count -- and hence f_discoverable -- varies per batch.
+    pool = [
+        (t, "contradict" if j % 2 == 0 else "unreachable")
+        for j, t in enumerate(IMPOSSIBLE_TASKS)
+    ]
+    for k in rng.choice(len(pool), size=I, replace=False) if I else []:
+        task, mutation = pool[int(k)]
+        items.append((task, True, mutation))
     order = rng.permutation(len(items))
     items = [items[k] for k in order]
 
@@ -345,7 +352,7 @@ def _monitor_evidence(det: dict) -> str:
     return str(ev[0].get("detail", ""))[:300] if ev else "(synthetic)"
 
 
-def _write_batch(out_dir, batch_id, recs, model_id, provider, arm, I, seed_b) -> None:
+def _write_batch(out_dir, batch_id, recs, model_id, provider, arm, I, seed_b, model_slug) -> None:
     d = out_dir / batch_id
     d.mkdir(parents=True, exist_ok=True)
     with (d / "items.jsonl").open("w", encoding="utf-8", newline="\n") as fh:
@@ -356,6 +363,8 @@ def _write_batch(out_dir, batch_id, recs, model_id, provider, arm, I, seed_b) ->
             {
                 "batch_id": batch_id,
                 "synthetic": True,
+                "model_slug": model_slug,
+                "env_variant": "standard",
                 "model": model_id,
                 "provider": provider,
                 "arm": arm,

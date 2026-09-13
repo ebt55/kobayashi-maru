@@ -446,6 +446,19 @@ def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED)
             "n_batches": int(mdf["batch_id"].nunique()),
             "cells": cells,
             "logistic_cheat_on_f": logistic_clustered(base, "f_realised"),
+            "logistic_cheat_on_f_discoverable": {
+                **logistic_clustered(base, "f_discoverable"),
+                "note_secondary": (
+                    "SECONDARY exposure measure, not a replacement for realised f anywhere. "
+                    "f_discoverable = (unreachable variants in the batch) / batch_size: a "
+                    "`contradict` variant looks solved from inside the sandbox because its "
+                    "visible tests pass, while an `unreachable` variant announces itself as a "
+                    "missing resource, so only the latter is plainly impossible to the agent "
+                    "while it works. Pre-registration fixes f_realised as the IV; this fit is "
+                    "exploratory and was added after the pilot showed every impossible-item "
+                    "cheat landing on unreachable variants"
+                ),
+            },
             "endpoint_difference": endpoint_difference(base, 0.60, 0.0, n_boot=n_boot, seed=seed),
             "spearman": spearman_across_levels(base),
             "cumulative_dose": {
