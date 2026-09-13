@@ -1,0 +1,20 @@
+[
+ {
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "model_slug": "luna",
+  "arm": "baseline",
+  "I": 0,
+  "seeds": "12-19",
+  "concurrency": 6
+ },
+ {
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "model_slug": "luna",
+  "arm": "baseline",
+  "I": 15,
+  "seeds": "12-19",
+  "concurrency": 6
+ }
+]

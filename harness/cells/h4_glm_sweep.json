@@ -1,0 +1,47 @@
+[
+ {
+  "provider": "openrouter",
+  "model": "z-ai/glm-5.3-flash",
+  "model_slug": "glm53flash",
+  "arm": "baseline",
+  "I": 0,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "z-ai/glm-5.3-flash",
+  "model_slug": "glm53flash",
+  "arm": "baseline",
+  "I": 2,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "z-ai/glm-5.3-flash",
+  "model_slug": "glm53flash",
+  "arm": "baseline",
+  "I": 4,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "z-ai/glm-5.3-flash",
+  "model_slug": "glm53flash",
+  "arm": "baseline",
+  "I": 8,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "z-ai/glm-5.3-flash",
+  "model_slug": "glm53flash",
+  "arm": "baseline",
+  "I": 15,
+  "seeds": "0-11",
+  "concurrency": 6
+ }
+]

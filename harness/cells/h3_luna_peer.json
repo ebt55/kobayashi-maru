@@ -1,0 +1,38 @@
+[
+ {
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "model_slug": "luna",
+  "arm": "peer_neutral",
+  "I": 0,
+  "seeds": "0-7",
+  "concurrency": 6
+ },
+ {
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "model_slug": "luna",
+  "arm": "peer_neutral",
+  "I": 4,
+  "seeds": "0-7",
+  "concurrency": 6
+ },
+ {
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "model_slug": "luna",
+  "arm": "peer_tip",
+  "I": 0,
+  "seeds": "0-7",
+  "concurrency": 6
+ },
+ {
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "model_slug": "luna",
+  "arm": "peer_tip",
+  "I": 4,
+  "seeds": "0-7",
+  "concurrency": 6
+ }
+]

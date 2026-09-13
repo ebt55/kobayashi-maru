@@ -1,0 +1,22 @@
+[
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b",
+  "arm": "baseline",
+  "I": 0,
+  "seeds": "0-3",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b",
+  "arm": "baseline",
+  "I": 15,
+  "seeds": "0-3",
+  "concurrency": 1,
+  "num_ctx": 8192
+ }
+]

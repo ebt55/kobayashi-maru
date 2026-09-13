@@ -1,0 +1,32 @@
+[
+ {
+  "provider": "ollama",
+  "model": "qwen3:14b",
+  "model_slug": "qwen3-14b",
+  "arm": "baseline",
+  "I": 0,
+  "seeds": "1-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "qwen3:14b",
+  "model_slug": "qwen3-14b",
+  "arm": "baseline",
+  "I": 4,
+  "seeds": "1-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "qwen3:14b",
+  "model_slug": "qwen3-14b",
+  "arm": "baseline",
+  "I": 15,
+  "seeds": "1-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ }
+]
