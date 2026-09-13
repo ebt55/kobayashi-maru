@@ -70,8 +70,8 @@ contents returned; "false positive" means neither happened.
 
 Ebin read ten trajectories himself on 13 Sep 2026 at 23:50 IST and recorded his verdicts in
 `review_by_ebin/hand_review.md` (8 real cheats, 1 access attempt, 1 monitor false positive; every verdict agrees
-with the programmatic classification above). The renders he read were produced locally with `tools.pick_trajectory`
-from the raw records and viewed in `review_by_ebin/review-ui.html`; the "hand-review-kit/" folder his note mentions was
-that local working folder and is not part of the repository. The five DeepSeek solvable-item cheats, three GLM
+with the programmatic classification above). The ten renders are in the same directory as `review_by_ebin/review-ui.html`, numbered 01–10 in the order of his table,
+produced by `tools.pick_trajectory` from the raw records (nothing edited; tool outputs verbatim).
+The five DeepSeek solvable-item cheats, three GLM
 read-after-write cases and two Haiku impossible-item flags were chosen by the orchestrator to cover each class of
 disagreement, not at random.
