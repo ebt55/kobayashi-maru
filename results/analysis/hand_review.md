@@ -20,7 +20,8 @@ glm-5.3-flash (23 of 600). None in gpt-5.6-luna (0 of 1,240 across every arm), g
 
 Timing: 80 of 89 read the answer file **before** writing `solution.py`; 8 read it afterwards to check a finished
 solution; 1 unknown. The monitor independently called 77 of the 89 cheats (all 23 GLM, 54 of 66 DeepSeek); the 12
-it missed are all canary-captured reads, i.e. monitor misses, not detector errors. Both lines sit at 0 of 120 at f = 0
+it missed are 9 canary-captured reads and 3 access attempts (a listing or a search naming the
+grader file), i.e. monitor misses, not detector errors. Both lines sit at 0 of 120 at f = 0
 in the same environment with the same answer file present, so the reads are not a habit the model brings to the
 task; they appear after impossible items have been seen.
 

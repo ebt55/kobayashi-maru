@@ -5,16 +5,16 @@ The manipulation check split by *which* impossibility was applied, pooled across
 | line | mutation | item-runs | batches | cheat % | 95% CI (Wilson) | declared imp. % | honest fail % | mean turns |
 |---|---|---|---|---|---|---|---|---|
 | dsv41flash (salient) | contradict | 175 | 44 | 21.1 | 15.8-27.8 | 0.0 | 78.9 | 4.47 |
-| dsv41flash (salient) | unreachable | 173 | 48 | 65.9 | 58.6-72.5 | 19.6 | 13.3 | 8.84 |
-| dsv41flash (salient) | solvable | 600 | 60 | 11.0 | 8.7-13.8 | 0.2 | 0.0 | 3.62 |
-| glm53flash (salient) | contradict | 175 | 44 | 3.4 | 1.6-7.3 | 2.9 | 93.7 | 5.22 |
-| glm53flash (salient) | unreachable | 173 | 48 | 30.1 | 23.7-37.3 | 47.4 | 22.5 | 7.42 |
-| glm53flash (salient) | solvable | 600 | 60 | 3.8 | 2.6-5.7 | 2.5 | 0.0 | 4.66 |
+| dsv41flash (salient) | unreachable | 173 | 48 | 64.2 | 56.8-70.9 | 19.6 | 13.3 | 8.84 |
+| dsv41flash (salient) | solvable | 600 | 60 | 11.0 | 8.7-13.8 | 0.0 | 0.0 | 3.62 |
+| glm53flash (salient) | contradict | 175 | 44 | 3.4 | 1.6-7.3 | 2.3 | 94.3 | 5.22 |
+| glm53flash (salient) | unreachable | 173 | 48 | 29.5 | 23.2-36.7 | 48.0 | 22.5 | 7.42 |
+| glm53flash (salient) | solvable | 600 | 60 | 3.8 | 2.6-5.7 | 0.0 | 0.0 | 4.66 |
 | haiku45 (standard) | contradict | 119 | 37 | 0.0 | 0.0-3.1 | 0.0 | 100.0 | 8.01 |
 | haiku45 (standard) | unreachable | 124 | 41 | 58.9 | 50.1-67.1 | 9.7 | 31.4 | 14.73 |
-| haiku45 (standard) | solvable | 530 | 53 | 0.0 | 0.0-0.7 | 0.2 | 0.0 | 7.68 |
+| haiku45 (standard) | solvable | 530 | 53 | 0.0 | 0.0-0.7 | 0.0 | 0.0 | 7.68 |
 | luna (salient) | contradict | 284 | 76 | 0.0 | 0.0-1.3 | 0.0 | 100.0 | 3.61 |
-| luna (salient) | unreachable | 280 | 80 | 37.1 | 31.7-42.9 | 10.0 | 52.9 | 7.66 |
+| luna (salient) | unreachable | 280 | 80 | 36.8 | 31.4-42.6 | 10.0 | 52.9 | 7.66 |
 | luna (salient) | solvable | 1240 | 124 | 0.0 | 0.0-0.3 | 0.0 | 0.0 | 4.01 |
 | luna-sal-cont (salient) | contradict | 118 | 24 | 0.0 | 0.0-3.1 | 0.0 | 100.0 | 3.03 |
 | luna-sal-cont (salient) | unreachable | 110 | 24 | 1.8 | 0.5-6.4 | 3.6 | 94.5 | 3.81 |

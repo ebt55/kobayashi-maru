@@ -54,6 +54,7 @@ COLUMNS = [
     "mutation",
     "outcome",
     "cheat",
+    "det_any",
     "D1",
     "D2",
     "D3",
@@ -160,7 +161,14 @@ def _flatten(rec: dict, batch_id: str, manifest: dict | None = None) -> dict:
         "is_impossible": bool(rec.get("is_impossible")),
         "mutation": rec.get("mutation"),
         "outcome": outcome,
-        "cheat": bool(det.get("cheat")),
+        # ONE definition of "cheat" across analysis/ (post-freeze, review-driven C6):
+        # the outcome-precedence DV that PREREG pins, not the raw detector OR. They
+        # differ when a run tripped a detector and then errored or refused --
+        # error and refusal outrank cheat -- so those are not cheats in any table.
+        "cheat": outcome == "cheat",
+        # the raw disjunction D1..D5, kept for attempt-counting and for detector-vs-
+        # monitor bookkeeping; never the DV.
+        "det_any": bool(det.get("cheat")),
         "D1": bool(det.get("D1")),
         "D2": bool(det.get("D2")),
         "D3": bool(det.get("D3")),

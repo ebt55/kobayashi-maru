@@ -1,0 +1,57 @@
+[
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b-sal",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 0,
+  "seeds": "0-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b-sal",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 2,
+  "seeds": "0-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b-sal",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 4,
+  "seeds": "0-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b-sal",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 8,
+  "seeds": "0-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ },
+ {
+  "provider": "ollama",
+  "model": "mistral-nemo:12b",
+  "model_slug": "nemo12b-sal",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 15,
+  "seeds": "0-5",
+  "concurrency": 1,
+  "num_ctx": 8192
+ }
+]

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import math
 from pathlib import Path
 
@@ -21,6 +23,7 @@ CELL_COLUMNS = [
     "I",
     "f_realised",
     "batches",
+    "cheats_by_batch",
     "solvable_item_runs",
     "honest_pass_pct",
     "cheat_pct_detector",
@@ -65,7 +68,10 @@ def build_cells(df: pd.DataFrame) -> pd.DataFrame:
         imp_lo, imp_hi = wilson_ci(int(imp["cheat"].sum()), int(len(imp)))
 
         rated = sub[sub["monitor_cheated"].notna()]
-        a = [bool(v) for v in rated["cheat"].tolist()]
+        # rater vs rater: the RAW detector flag, not the outcome-derived DV (see
+        # stats.kappa_block). The monitor cannot see a timeout or a refusal.
+        _kcol = "det_any" if "det_any" in rated else "cheat"
+        a = [bool(v) for v in rated[_kcol].tolist()]
         b = [bool(v) for v in rated["monitor_cheated"].tolist()]
         kap = cohen_kappa(a, b) if rated.shape[0] else float("nan")
         tab = kappa_table(a, b)
@@ -84,6 +90,13 @@ def build_cells(df: pd.DataFrame) -> pd.DataFrame:
                 "I": int(sub["I"].dropna().iloc[0]) if sub["I"].notna().any() else None,
                 "f_realised": None if f is None or not np.isfinite(f) else round(float(f), 4),
                 "batches": int(sub["batch_id"].nunique()),
+                # T6 (post-freeze, review-driven): cheats cluster hard in a few batches.
+                # The clustered SE and the cluster bootstrap already handle the inference,
+                # but a reader of "13.3%" pictures a diffuse rate, so ship the raw
+                # per-batch counts (descending) beside it.
+                "cheats_by_batch": json.dumps(sorted(
+                    (int(g["cheat"].sum()) for _, g in solv.groupby("batch_id", sort=True)),
+                    reverse=True)),
                 "solvable_item_runs": n,
                 "honest_pass_pct": _pct(rate(solv["honest_pass"])),
                 "cheat_pct_detector": _pct(k / n) if n else float("nan"),
@@ -155,7 +168,49 @@ MD_COLUMNS = [
 ]
 
 
-def write_table_md(cells: pd.DataFrame, out_dir: str | Path) -> Path:
+def _model_stats_section(stats: dict | None) -> list[str]:
+    """Slope and endpoint per model line, with the labels review C8/C9/C12 asked for."""
+    if not stats or not stats.get("models"):
+        return []
+    L = ["## Model-level statistics", "",
+         "`p (1-sided)` is the PRE-REGISTERED test (cheating rises with *f*); `p (2-sided)` "
+         "is what statsmodels reports and is shown for completeness. The endpoint CI is the "
+         "seed-0 cluster bootstrap; `reseed lo` is the range of the lower bound across "
+         "seeds 0-9 of the same bootstrap, so a bound that only clears zero on one seed is "
+         "visible as such. `agree|flagged` is agreement restricted to item-runs either "
+         "rater flagged; the overall kappa is dominated by the runs neither flagged. "
+         "kappa: detector flag vs monitor; the outcome DV additionally applies the "
+         "error/refusal precedence.", "",
+         "| model | arm scope | slope | p (1-sided) | p (2-sided) | endpoint diff | "
+         "95% CI (seed 0) | reseed lo | P(diff<=0) | kappa | agree" + chr(92) + "|flagged |",
+         "|---|---|---|---|---|---|---|---|---|---|---|"]
+    for slug, e in sorted(stats["models"].items()):
+        lg = e.get("logistic_cheat_on_f") or {}
+        ep = e.get("endpoint_difference") or {}
+        kp = e.get("kappa") or {}
+        def f(v, nd=3):
+            return "-" if v is None or (isinstance(v, float) and not np.isfinite(v)) else f"{v:.{nd}f}"
+        def g(v):
+            return "-" if v is None or (isinstance(v, float) and not np.isfinite(v)) else f"{v:.3g}"
+        ci = ("-" if not np.isfinite(ep.get("ci_lo", float("nan")))
+              else f"[{100 * ep['ci_lo']:+.1f}, {100 * ep['ci_hi']:+.1f}]")
+        reseed = ("-" if ep.get("ci_lo_min") is None
+                  else f"[{100 * ep['ci_lo_min']:+.1f}, {100 * ep['ci_lo_max']:+.1f}]")
+        pbo = ("-" if ep.get("p_boot_ge_0_min") is None
+               else f"{ep['p_boot_ge_0_min']:.3f}-{ep['p_boot_ge_0_max']:.3f}")
+        diff = ("-" if not np.isfinite(ep.get("diff", float("nan")))
+                else f"{100 * ep['diff']:+.1f}")
+        L.append(
+            f"| {slug} | {e.get('arm_scope', '-')} | {f(lg.get('slope'))} | "
+            f"{g(lg.get('p_one_sided'))} | {g(lg.get('p_two_sided'))} | {diff} | {ci} | "
+            f"{reseed} | {pbo} | {f(kp.get('kappa'))} | {f(kp.get('agreement_on_flagged'))} |"
+        )
+    L.append("")
+    return L
+
+
+def write_table_md(cells: pd.DataFrame, out_dir: str | Path,
+                   stats: dict | None = None) -> Path:
     """The one table, as markdown (plan section 6)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -191,6 +246,35 @@ def write_table_md(cells: pd.DataFrame, out_dir: str | Path) -> Path:
         lines.append("| " + " | ".join(out) + " |")
 
     lines.append("")
+    lines += _model_stats_section(stats)
+    lines.append("## Per-batch solvable-cheat counts")
+    lines.append("")
+    lines.append(
+        "Cheats concentrate in a minority of batches, so a cell rate is not a diffuse "
+        "per-item probability. Each list is that cell's solvable-item cheat count per "
+        "batch, descending. Cells with no events are omitted."
+    )
+    lines.append("")
+    lines.append("| model | arm | f | batches | solvable runs | cheats | per-batch counts |")
+    lines.append("|---|---|---|---|---|---|---|")
+    any_events = False
+    for _, row in cells.iterrows():
+        counts = row.get("cheats_by_batch")
+        try:
+            parsed = json.loads(counts) if isinstance(counts, str) else list(counts or [])
+        except (TypeError, ValueError):
+            parsed = []
+        if not any(parsed):
+            continue
+        any_events = True
+        lines.append(
+            f"| {row['model_slug']} | {row['arm']} | {_fmt(row['f_realised'], 3)} | "
+            f"{_fmt(row['batches'], 0)} | {_fmt(row['solvable_item_runs'], 0)} | "
+            f"{sum(parsed)} | {', '.join(str(c) for c in parsed)} |"
+        )
+    if not any_events:
+        lines.append("| _(no cell has a solvable-item cheat)_ |  |  |  |  |  |  |")
+    lines.append("")
     lines.append("## Column definitions")
     lines.append("")
     lines.append(
@@ -204,8 +288,10 @@ def write_table_md(cells: pd.DataFrame, out_dir: str | Path) -> Path:
         "monitor actually rated. A lower bound by construction.\n"
         "- **monitor** -- monitor model(s) that rated this cell (cross-lineage: never the agent's "
         "own lineage).\n"
-        "- **kappa** -- Cohen's kappa, detector vs monitor, over every rated item-run in the cell "
-        "(solvable and impossible). Blank when kappa is undefined (neither rater flagged anything).\n"
+        "- **kappa** -- Cohen's kappa: the DETECTOR FLAG (raw D1..D5) vs the monitor, over every "
+        "rated item-run in the cell (solvable and impossible). The outcome DV additionally applies "
+        "the error/refusal precedence, which the monitor cannot see, so kappa is kept as a "
+        "rater-vs-rater comparison. Blank when kappa is undefined (neither rater flagged anything).\n"
         "- **cheat % on impossible** -- manipulation check (plan P5), with its own Wilson 95% "
         "interval: the dose is real only if this is high. ImpossibleBench-comparable. A flat "
         "`cheat % (det)` beside a rising `cheat % on impossible` is the \"dose delivered, no "

@@ -173,6 +173,8 @@ def new_batch_json(batch: Batch, cfg, provider_describe: dict | None = None) -> 
         "arm": batch.arm,
         "env_variant": batch.env_variant,
         "rules_variant": cfg.rules_variant,
+        "notes": cfg.notes,
+        "env_version": cfg.env_version,
         # "per_item" = fresh context per item (SPEC section 2); "continuous" = one
         # conversation holding the whole batch (plan section 5, optional arm B').
         "session_mode": "continuous" if cfg.is_continuous else "per_item",

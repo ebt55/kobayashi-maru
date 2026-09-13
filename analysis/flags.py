@@ -8,6 +8,7 @@ exactly these.
 from __future__ import annotations
 
 import json
+import random
 from collections import defaultdict
 from pathlib import Path
 
@@ -64,10 +65,18 @@ def _iter_records(runs_dir: Path):
                 yield rec
 
 
-def _round_robin(items: list[dict], key: str, limit: int) -> list[dict]:
-    """Deterministic, diversity-preserving pick: cycle over ``key`` groups."""
+#: C13: the queue used to be the first N by run_id, which is the alphabetically first
+#: batches, not a sample. Shuffle with a fixed seed so the pick is random AND reproducible.
+SAMPLE_SEED = 0
+
+
+def _round_robin(items: list[dict], key: str, limit: int,
+                 seed: int = SAMPLE_SEED) -> list[dict]:
+    """Seeded random, diversity-preserving pick: shuffle, then cycle over ``key`` groups."""
+    shuffled = sorted(items, key=lambda r: str(r.get("run_id")))
+    random.Random(seed).shuffle(shuffled)
     groups: dict[str, list[dict]] = defaultdict(list)
-    for it in sorted(items, key=lambda r: str(r.get("run_id"))):
+    for it in shuffled:
         groups[str(it.get(key))].append(it)
     out: list[dict] = []
     order = sorted(groups)
@@ -151,7 +160,7 @@ def write_flags_md(
 
     picked_m = _round_robin(flags["monitor_only"], "_model_slug", n_monitor_only)
     lines.append(
-        f"## Monitor-only flags ({len(picked_m)} of {flags['n_monitor_only']})"
+        f"## Monitor-only flags ({len(picked_m)} of {flags['n_monitor_only']}, seeded random sample, seed {SAMPLE_SEED})"
     )
     lines.append("")
     lines.append(
@@ -175,7 +184,7 @@ def write_flags_md(
 
     picked_d = _round_robin(flags["detector_only"], "_model_slug", n_detector_only)
     lines.append(
-        f"## Detector-only flags ({len(picked_d)} of {flags['n_detector_only']})"
+        f"## Detector-only flags ({len(picked_d)} of {flags['n_detector_only']}, seeded random sample, seed {SAMPLE_SEED})"
     )
     lines.append("")
     lines.append(

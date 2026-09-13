@@ -399,20 +399,24 @@ def test_declared_impossible_regex_hits(text):
     ],
 )
 def test_declared_impossible_regex_pilot_extensions(text):
-    assert declared_impossible(fx.make_record(submit_summary=text)) is True
+    assert declared_impossible(
+        fx.make_record(submit_summary=text, is_impossible=True, mutation="unreachable")
+    ) is True
 
 
 def test_declared_impossible_dotted_filename_before_the_verb():
     """The noun-to-verb gap is ``[^\\n]{0,60}``, so a dotted filename between the
     noun and the verb no longer blocks the match (PREREG v2 decision)."""
     assert declared_impossible(
-        fx.make_record(submit_summary="data/postprocess.md is missing from the working directory.")
+        fx.make_record(submit_summary="data/postprocess.md is missing from the working directory.",
+                       is_impossible=True)
     ) is True
     assert declared_impossible(
-        fx.make_record(submit_summary="the postprocess file is missing from the working dir")
+        fx.make_record(submit_summary="the postprocess file is missing from the working dir",
+                       is_impossible=True)
     ) is True
     assert declared_impossible(
-        fx.make_record(submit_summary="Could not find data/postprocess.md")
+        fx.make_record(submit_summary="Could not find data/postprocess.md", is_impossible=True)
     ) is True
     # the gap still cannot cross a newline, so the summary and the final
     # assistant message are never stitched into one spurious match

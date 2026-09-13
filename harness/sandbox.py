@@ -40,6 +40,16 @@ SANDBOX_UID = 10001
 SANDBOX_GID = 10001
 WORK_ROOT = "/work"
 
+#: Sandbox environment version.
+#:   1 = the frozen sweeps: the work dir was ``/work/<item_key>``, so the directory name
+#:       carried the mutation label (``t14_luhn_check_digit__unreachable``) and leaked it
+#:       through `pwd`, `ls ..`, `ls /work` and Python tracebacks; earlier items' work
+#:       dirs also stayed readable for the life of the batch container.
+#:   2 = the work dir is ``/work/item_<position>``: opaque, deterministic, no label, and
+#:       every earlier item directory is removed before the next item is prepared.
+#: Records written before the field existed are implicitly version 1.
+ENV_VERSION = 2
+
 # Files copied into the work dir from the task dir, beyond tests/ and .grader/.
 TASK_FILES = ("spec.md", "solution.py")
 #: NEVER copied into a sandbox.
@@ -217,8 +227,11 @@ class DockerSandbox:
         name_prefix: str = "dc_",
         template_dir: Path | None = None,
         keep: bool = False,
+        env_version: int = ENV_VERSION,
     ) -> None:
         self.batch_id = batch_id
+        self.env_version = int(env_version)
+        self._container_dirs: dict[str, str] = {}
         self.tasks_dir = Path(tasks_dir) if tasks_dir else None
         self.image = image
         self.name = f"{name_prefix}{_safe_name(batch_id)}"[:120]
@@ -257,8 +270,35 @@ class DockerSandbox:
         self.close()
 
     # -- plumbing --------------------------------------------------------
+    def _dirname(self, item_key: str) -> str:
+        """Container directory name for an item.
+
+        env v2 maps the item to an opaque ``item_<position>``; the item_key never
+        reaches the container. v1 (the frozen sweeps) used the item_key itself.
+        """
+        return self._container_dirs.get(item_key, item_key)
+
     def _workdir(self, item_key: str) -> str:
-        return f"{WORK_ROOT}/{item_key}"
+        return f"{WORK_ROOT}/{self._dirname(item_key)}"
+
+    def _exec_root(self, argv: list[str], timeout: float = 60) -> ExecResult:
+        """Run an argv with /work as the cwd (used for cross-item housekeeping)."""
+        try:
+            proc = self._run(["docker", "exec", "-w", WORK_ROOT, self.name, *argv],
+                             timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            return ExecResult((exc.output or b"").decode("utf-8", "replace"), -1, True)
+        return ExecResult(proc.stdout.decode("utf-8", "replace"), proc.returncode, False)
+
+    def clear_work_root(self) -> None:
+        """Remove every item directory in the batch container.
+
+        Called before each item is prepared (env v2). The previous item's snapshot,
+        in-sandbox grade and final files have all been collected by then, so nothing is
+        lost -- and the agent can no longer read a sibling item's grader files, nor see
+        from `ls /work` how many items came before it.
+        """
+        self._exec_root(["sh", "-c", "rm -rf /work/* /work/.[!.]* 2>/dev/null; exit 0"])
 
     def _run(self, args: list[str], timeout: float, stdin: bytes | None = None) -> subprocess.CompletedProcess:
         return subprocess.run(
@@ -284,8 +324,8 @@ class DockerSandbox:
         return ExecResult(proc.stdout.decode("utf-8", "replace"), proc.returncode, False)
 
     def put_dir(self, item_key: str, host_dir: Path) -> None:
-        """Copy a host directory to ``/work/<item_key>`` inside the container."""
-        payload = _tar_bytes(Path(host_dir), item_key)
+        """Copy a host directory to this item's work dir inside the container."""
+        payload = _tar_bytes(Path(host_dir), self._dirname(item_key))
         proc = self._run(["docker", "cp", "-", f"{self.name}:{WORK_ROOT}"],
                          timeout=300, stdin=payload)
         if proc.returncode != 0:
@@ -296,12 +336,19 @@ class DockerSandbox:
 
     # -- public API ------------------------------------------------------
     def prepare_item(self, item_key: str, task_dir: Path, arm: str = "baseline",
-                     env_variant: str = "standard", template_dir: Path | None = None) -> Path:
+                     env_variant: str = "standard", template_dir: Path | None = None,
+                     position: int | None = None) -> Path:
         if not self._started:
             self.start()
         tdir = Path(template_dir or self.template_dir
                     or resolve_template_dir(task_dir, self.tasks_dir))
-        host_dir = self._staging / item_key
+        if self.env_version >= 2:
+            # opaque directory name: nothing about the task or its mutation
+            self._container_dirs[item_key] = (
+                f"item_{int(position):02d}" if position is not None else "item")
+            # and no sibling item survives into this item's container
+            self.clear_work_root()
+        host_dir = self._staging / self._dirname(item_key)
         shutil.rmtree(host_dir, ignore_errors=True)
         assemble_agent_workdir(host_dir, task_dir, tdir, arm, env_variant)
         self.put_dir(item_key, host_dir)
@@ -389,8 +436,10 @@ class LocalSandbox:
 
     def __init__(self, batch_id: str, tasks_dir: Path | None = None,
                  template_dir: Path | None = None, root: Path | None = None,
-                 keep: bool = False, **_ignored) -> None:
+                 keep: bool = False, env_version: int = ENV_VERSION, **_ignored) -> None:
         self.batch_id = batch_id
+        self.env_version = int(env_version)
+        self._container_dirs: dict[str, str] = {}
         self.tasks_dir = Path(tasks_dir) if tasks_dir else None
         self.template_dir = Path(template_dir) if template_dir else None
         self.keep = keep
@@ -413,8 +462,18 @@ class LocalSandbox:
     def __exit__(self, *exc) -> None:
         self.close()
 
+    def _dirname(self, item_key: str) -> str:
+        return self._container_dirs.get(item_key, item_key)
+
     def _dir(self, item_key: str) -> Path:
-        return self.root / item_key
+        return self.root / self._dirname(item_key)
+
+    def clear_work_root(self) -> None:
+        """Mirror of the Docker cleanup: no sibling item survives into the next one."""
+        if self.root.is_dir():
+            for child in self.root.iterdir():
+                shutil.rmtree(child, ignore_errors=True) if child.is_dir() else child.unlink(
+                    missing_ok=True)
 
     def put_dir(self, item_key: str, host_dir: Path) -> None:
         dest = self._dir(item_key)
@@ -424,9 +483,14 @@ class LocalSandbox:
         self._host_dirs[item_key] = dest
 
     def prepare_item(self, item_key: str, task_dir: Path, arm: str = "baseline",
-                     env_variant: str = "standard", template_dir: Path | None = None) -> Path:
+                     env_variant: str = "standard", template_dir: Path | None = None,
+                     position: int | None = None) -> Path:
         tdir = Path(template_dir or self.template_dir
                     or resolve_template_dir(task_dir, self.tasks_dir))
+        if self.env_version >= 2:
+            self._container_dirs[item_key] = (
+                f"item_{int(position):02d}" if position is not None else "item")
+            self.clear_work_root()
         dest = self._dir(item_key)
         shutil.rmtree(dest, ignore_errors=True)
         assemble_agent_workdir(dest, task_dir, tdir, arm, env_variant)

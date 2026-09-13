@@ -40,6 +40,11 @@ def _provider(kind: str, model: str):
 @pytest.mark.parametrize("kind,model,key_env", CASES,
                          ids=[f"{k}:{m}" for k, m, _ in CASES])
 def test_one_live_item(kind, model, key_env, tasks_dir, tmp_path):
+    # The `live` marker alone does not protect these: the project's pytest addopts carry
+    # no `-m` filter, so a bare `uv run pytest` would spend hosted tokens on every run.
+    # Opt in explicitly.
+    if not (os.environ.get("DOSECURVE_LIVE") or "").strip():
+        pytest.skip("set DOSECURVE_LIVE=1 to spend hosted tokens on the live smoke items")
     load_env()
     if not (os.environ.get(key_env) or "").strip():
         pytest.skip(f"{key_env} is not set")

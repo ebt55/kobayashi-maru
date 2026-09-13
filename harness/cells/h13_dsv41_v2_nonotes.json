@@ -1,0 +1,13 @@
+[
+ {
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "model_slug": "dsv41flash-sal-v2-nonotes",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 15,
+  "seeds": "0-11",
+  "concurrency": 3,
+  "notes": false
+ }
+]

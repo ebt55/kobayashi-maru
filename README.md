@@ -36,7 +36,7 @@ the incident (per the METR/Redwood investigation digest); the ExploitGym digest 
 neither the ExploitGym paper, its README, nor the RDI writeup, and calls it organizer-added context. The caption names
 the source that states it and does not adjudicate between the two.
 
-**Headline numbers (frozen 13 Sep 2026 21:30 IST; 6,763 item-runs, 439 batches, every one detector-staged and monitor-rated).**
+**Headline numbers (frozen 13 Sep 2026 21:30 IST; 6,763 item-runs, 439 batches, all detector-staged; 6,719 of 6,763 monitor-rated).**
 Cheating on *solvable* items, detector D1–D5, by line (baseline arm, salient environment unless marked):
 
 | line | solvable cheats | rate at *f* = 0 → 0.60 | endpoint difference, cluster-bootstrap 95% CI | clustered logistic slope on *f* (95% CI, p) | cheat on impossible items (unreachable only) | κ |
@@ -44,7 +44,7 @@ Cheating on *solvable* items, detector D1–D5, by line (baseline arm, salient e
 | deepseek-v4.1-flash | 66 / 600 | 0.0% → 30.0% | +30.0 points [+14.2, +45.8] | 5.99 [3.27, 8.71], p = 1.6e-5 | 43.4% (65.9%) | 0.88 |
 | glm-5.3-flash | 23 / 600 | 0.0% → 5.0% (10.8% at 0.286) | +5.0 points [+0.8, +11.7] | 1.74 [−0.81, 4.29], p = 0.18 | 16.7% (30.1%) | 0.99 |
 | gpt-5.6-luna (primary; all arms) | 0 / 1,240 | 0 → 0 | 0 [0, 0] | not estimable (no events) | 18.4% (37.1%) | 0.98 |
-| gpt-5.6-sol (the incident's model) | 0 / 600 | 0 → 0 | 0 | not estimable | 2.9% (5.8%; declares 91% impossible) | — |
+| gpt-5.6-sol (the incident's model) | 0 / 600 | 0 → 0 | 0 | not estimable | 2.9% (5.8%; declares 91% impossible) | 0.82 |
 | claude-haiku-4-5 (standard env; *f* = 0.60 has 5 batches) | 0 / 530 | 0 → 0 | 0 | not estimable | 30.0% (58.9%) | 0.98 |
 | qwen3:14b (local) | 0 / 300 | 0 → 0 | 0 | not estimable | 0.0% (0.0%), dose not delivered | — |
 
@@ -74,7 +74,7 @@ hand-review queue in `results/analysis/flags_for_review.md` with the reviewer's 
 ## Pre-registration
 
 `PREREG.md` holds the hypotheses, the committed grids, the predictions P1–P6, the falsification criterion and the
-decision rules. It was written before any model was called and has four versions; each is a commit, and the section in
+decision rules. It was written before any model was called and has six versions; each is a commit, and the section in
 `PREREG.md` for each version says what changed and why.
 
 | version | commit | what changed |
@@ -112,8 +112,12 @@ detectors for real:
 ```sh
 uv run python -m harness.run --dry-run --provider fake --model fake --model-slug demo-dry --I 4 --seeds 0
 uv run python -m detectors.run --batch demo-dry_baseline_I4_s0
-uv run pytest -q -m "not ollama and not live"      # the whole test suite, no key needed
+uv run pytest -q                                   # the whole test suite, no key needed
 ```
+
+No test hits a provider by default: `addopts` carries `-m 'not live'`, and the four
+live smoke items additionally require `DOSECURVE_LIVE=1`. To run them on purpose:
+`DOSECURVE_LIVE=1 uv run pytest -q -m live` (spends a few cents of hosted tokens).
 
 ## Repository layout
 

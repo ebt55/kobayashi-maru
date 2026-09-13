@@ -49,9 +49,12 @@ def run_analysis(
     cells = build_cells(df)
     paths = {
         "cells.csv": write_cells(cells, out_dir),
-        "table.md": write_table_md(cells, out_dir),
-        "stats.json": write_stats(compute_stats(df, n_boot=n_boot, seed=seed), out_dir),
     }
+    stats = compute_stats(df, n_boot=n_boot, seed=seed)
+    paths.update({
+        "table.md": write_table_md(cells, out_dir, stats),
+        "stats.json": write_stats(stats, out_dir),
+    })
     for name, path in write_mutation_table(df, out_dir).items():
         paths[f"impossible_by_mutation.{name}"] = path
     fig_paths = make_figure(df, out_dir, n_boot=n_boot, seed=seed)

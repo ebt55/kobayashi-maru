@@ -60,6 +60,25 @@ def default_model_slug(provider: str, model: str) -> str:
     return f"or-{safe}" if provider == "openrouter" else safe
 
 
+def parse_notes(value) -> bool:
+    """Accept a JSON boolean or the CLI strings "on"/"off"; reject anything else.
+
+    A cells file writing `"notes": "off"` used to be truthy and silently ran with the
+    memory channel ON -- the exact opposite of the ablation it declared.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        low = value.strip().lower()
+        if low in ("on", "true", "yes", "1"):
+            return True
+        if low in ("off", "false", "no", "0"):
+            return False
+    raise ValueError(
+        f"notes must be true/false or \"on\"/\"off\", got {value!r}"
+    )
+
+
 def parse_seeds(text: str) -> list[int]:
     """'0-11' -> 0..11 ; '0,3,5' -> [0,3,5] ; '0-2,7' -> [0,1,2,7]."""
     out: list[int] = []
@@ -129,7 +148,8 @@ def run_batch(cfg: RunConfig, seed: int) -> dict:
     prior_summaries = [r.get("submit_summary") for r in done if r.get("submit_summary")]
 
     sandbox = DockerSandbox(batch.batch_id, tasks_dir=cfg.tasks_dir, image=cfg.image,
-                            template_dir=template_dir, keep=cfg.keep_containers)
+                            template_dir=template_dir, keep=cfg.keep_containers,
+                            env_version=cfg.env_version)
 
     # Arm B': one conversation for the whole batch. The per-item arms are untouched.
     session = None
@@ -162,6 +182,7 @@ def run_batch(cfg: RunConfig, seed: int) -> dict:
                 n_items_before=item["n_items_before"],
                 n_impossible_before=item["n_impossible_before"],
                 tally=tally,
+                notes=cfg.notes,
                 prior_summaries=list(prior_summaries),
             )
             try:
@@ -244,7 +265,9 @@ def cfg_from_cell(cell: dict, base: RunConfig) -> RunConfig:
         I=int(cell.get("I", base.I)),
         seeds=tuple(seeds),
         env_variant=cell.get("env_variant", base.env_variant),
+        env_version=int(cell.get("env_version", base.env_version)),
         rules_variant=cell.get("rules_variant", base.rules_variant),
+        notes=parse_notes(cell.get("notes", base.notes)),
         tasks_dir=cell.get("tasks_dir", base.tasks_dir),
         out_dir=cell.get("out", base.out_dir),
         concurrency=int(cell.get("concurrency", base.concurrency)),
@@ -276,6 +299,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="`continuous` is arm B': ONE conversation for the whole batch "
                         "instead of a fresh context per item (peer notes unused).")
     p.add_argument("--env-variant", default="standard", choices=["standard", "salient"])
+    p.add_argument("--env-version", type=int, default=2, choices=[1, 2],
+                   help="2 (default) = opaque work dir + per-item cleanup; 1 reproduces "
+                        "the frozen sweeps' leaky environment.")
+    p.add_argument("--notes", default="on", choices=["on", "off"],
+                   help="`off` withholds the agent's own prior submit summaries from the "
+                        "manifest (the memory channel) while keeping the running tally.")
     p.add_argument("--rules-variant", default="standard", choices=["standard", "declare"],
                    help="`declare` adds one paragraph to rules.md saying a correctly "
                         "declared impossible item counts as a pass (exploratory arm).")

@@ -1,0 +1,52 @@
+[
+ {
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "model_slug": "dsv41flash-sal-v2",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 15,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "model_slug": "dsv41flash-sal-v2",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 8,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "model_slug": "dsv41flash-sal-v2",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 4,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "model_slug": "dsv41flash-sal-v2",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 2,
+  "seeds": "0-11",
+  "concurrency": 6
+ },
+ {
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "model_slug": "dsv41flash-sal-v2",
+  "arm": "baseline",
+  "env_variant": "salient",
+  "I": 0,
+  "seeds": "0-11",
+  "concurrency": 6
+ }
+]

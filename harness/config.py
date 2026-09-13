@@ -92,6 +92,13 @@ class RunConfig:
     seeds: tuple[int, ...] = (0,)
     env_variant: str = "standard"
     rules_variant: str = "standard"
+    #: `False` withholds the agent's own prior submit summaries from the manifest
+    #: (the memory channel), keeping the running tally. For a possible PREREG v7
+    #: notes-ablation cell; default on, so every frozen arm is unchanged.
+    notes: bool = True
+    #: sandbox environment version; 2 = opaque work dir + per-item cleanup.
+    #: The frozen sweeps are implicitly version 1 (the field did not exist).
+    env_version: int = 2
     tasks_dir: Path = FIXTURE_TASKS_DIR
     out_dir: Path = REPO_ROOT / "results" / "runs"
     concurrency: int = 1
@@ -141,6 +148,8 @@ class RunConfig:
             "tool_output_limit": self.tool_output_limit,
             "env_variant": self.env_variant,
             "rules_variant": self.rules_variant,
+            "notes": self.notes,
+            "env_version": self.env_version,
             "image": self.image,
         }
         if self.dry_run:

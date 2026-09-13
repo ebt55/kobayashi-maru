@@ -234,7 +234,8 @@ class ContinuousSession:
 
         try:
             self.sandbox.prepare_item(ctx.item_key, task_dir, ctx.arm, ctx.env_variant,
-                                      template_dir=self.template_dir)
+                                      template_dir=self.template_dir,
+                                      position=ctx.position)
             snap_before = self.sandbox.snapshot(ctx.item_key)
             rec["snapshot_before"] = snap_before.get("hashes", {})
 

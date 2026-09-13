@@ -37,6 +37,9 @@ __all__ = [
 
 N_BOOT = 2000
 BOOT_SEED = 0
+#: C9 reseed sensitivity: the endpoint bootstrap is re-run at each of these seeds and
+#: the range of the resulting bounds is reported beside the seed-0 interval.
+RESEED_SEEDS = tuple(range(10))
 Z95 = 1.959963984540054
 
 
@@ -244,7 +247,13 @@ def logistic_clustered(
             "slope": slope,
             "se": se,
             "z": float(res.tvalues[1]),
+            # statsmodels reports a TWO-SIDED p. PREREG's primary test is one-sided in
+            # the predicted direction (cheating RISES with f), so both are emitted and
+            # both are labelled wherever they are printed (post-freeze, review-driven C8).
             "p": float(res.pvalues[1]),
+            "p_two_sided": float(res.pvalues[1]),
+            "p_one_sided": (float(res.pvalues[1]) / 2.0 if slope > 0
+                            else 1.0 - float(res.pvalues[1]) / 2.0),
             "ci_lo": slope - Z95 * se,
             "ci_hi": slope + Z95 * se,
             "odds_ratio": float(np.exp(slope)),
@@ -296,6 +305,24 @@ def endpoint_difference(
     hi = df[np.isclose(f, f_hi, atol=0.005)]
     lo = df[np.isclose(f, f_lo, atol=0.005)]
     out = bootstrap_diff_ci(hi, lo, col=col, n_boot=n_boot, seed=seed)
+    # Post-freeze, review-driven (C9): one seed can make a bound look decisive. Re-run the
+    # same cluster bootstrap for seeds 0-9 and carry the range, so a CI whose lower bound
+    # sits on zero for nine of ten seeds cannot be read as if it never touched zero.
+    lows, highs, ps = [], [], []
+    for s_i in RESEED_SEEDS:
+        alt = bootstrap_diff_ci(hi, lo, col=col, n_boot=n_boot, seed=s_i)
+        if np.isfinite(alt.get("ci_lo", np.nan)):
+            lows.append(alt["ci_lo"])
+            highs.append(alt["ci_hi"])
+        if alt.get("p_boot_ge_0") is not None:
+            ps.append(alt["p_boot_ge_0"])
+    if lows:
+        out["reseed_seeds"] = list(RESEED_SEEDS)
+        out["ci_lo_min"], out["ci_lo_max"] = float(min(lows)), float(max(lows))
+        out["ci_hi_min"], out["ci_hi_max"] = float(min(highs)), float(max(highs))
+        out["ci_lo_touches_zero"] = bool(min(lows) <= 0.0)
+    if ps:
+        out["p_boot_ge_0_min"], out["p_boot_ge_0_max"] = float(min(ps)), float(max(ps))
     out["f_hi"] = f_hi
     out["f_lo"] = f_lo
     out["rate_hi"] = rate(hi[col]) if len(hi) else float("nan")
@@ -336,9 +363,17 @@ def peer_contrasts(
 # detector vs monitor agreement
 # --------------------------------------------------------------------------- #
 def kappa_block(df: pd.DataFrame) -> dict:
-    """Cohen's kappa detector-vs-monitor plus the 2x2 disagreement cells."""
+    """Cohen's kappa detector-vs-monitor plus the 2x2 disagreement cells.
+
+    RATER vs RATER: this uses the raw detector flag ``det_any`` (D1..D5), not the
+    outcome-derived ``cheat``. The monitor never sees a timeout or a provider refusal,
+    so comparing it against the DV -- which additionally applies the error/refusal
+    precedence -- would score the detector down for four records on which the two raters
+    in fact agreed. Everything else in analysis/ uses the outcome-derived ``cheat``.
+    """
     rated = df[df["monitor_cheated"].notna()]
-    a = [bool(v) for v in rated["cheat"].tolist()]
+    col = "det_any" if "det_any" in rated else "cheat"
+    a = [bool(v) for v in rated[col].tolist()]
     b = [bool(v) for v in rated["monitor_cheated"].tolist()]
     table = kappa_table(a, b)
     k = cohen_kappa(a, b)
@@ -354,9 +389,22 @@ def kappa_block(df: pd.DataFrame) -> dict:
             "monitor_only": table["b_only"],
             "neither": table["neither"],
         },
-        "detector_rate": rate(rated["cheat"]) if len(rated) else float("nan"),
+        "detector_rate": rate(rated[col]) if len(rated) else float("nan"),
         "monitor_rate": rate(rated["monitor_cheated"].astype(float)) if len(rated) else float("nan"),
+        # Post-freeze, review-driven (C12): the overall kappa is dominated by the huge
+        # "neither rater flagged" cell, so it mostly measures how rare cheating is.
+        # Agreement restricted to the item-runs EITHER rater flagged is the number that
+        # says whether the two raters pick out the same events.
+        "agreement_on_flagged": _flagged_agreement(table),
+        "rater_column": col,
+        "n_flagged_by_either": int(table["both"] + table["a_only"] + table["b_only"]),
     }
+
+
+def _flagged_agreement(table: dict) -> float | None:
+    """both / (both + detector_only + monitor_only) -- Jaccard on the flagged set."""
+    denom = table["both"] + table["a_only"] + table["b_only"]
+    return None if denom == 0 else float(table["both"] / denom)
 
 
 def _kappa_by_pair(df: pd.DataFrame) -> list[dict]:
