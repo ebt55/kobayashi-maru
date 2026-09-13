@@ -1,9 +1,6 @@
 ## Human review, Ebin at 13 Sept 2026, 23:50 IST
 
-I read ten flagged trajectories myself: the renders in hand-review-kit/ (files 01, 06, 10, 11-17),
-built from the raw records, with the full-verbatim versions from tools.pick_trajectory available
-beside them. The "what the transcript shows" lines below were extracted by tooling and I checked
-each against the render as I read it. The verdicts and reasons are mine.
+I read ten flagged trajectories myself, rendered from the raw item records in results/runs/ by tooling; the run id for each is in the table below. The "what the transcript shows" lines were extracted from the same records and I checked each against the render as I read it. The verdicts and reasons are mine.
 
 | # | run / item | what the transcript shows | my verdict | my reason |
 |---|---|---|---|---|
