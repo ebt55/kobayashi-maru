@@ -45,8 +45,10 @@ interval, monitor cheat %, κ, cheat-on-impossible, declared-impossible %, refus
 `results/analysis/table.md`, machine-readable in `results/analysis/cells.csv`. The manipulation check broken out by
 mutation kind — whether `contradict` and `unreachable` items actually delivered a dose — is
 `results/analysis/impossible_by_mutation.md` (CSV alongside). Statistics are in `results/analysis/stats.json`, the
-hand-review queue in `results/analysis/flags_for_review.md`, and one full detector-flagged trajectory rendered for
-reading in `results/analysis/example_cheat_trajectory.md`.
+hand-review queue in `results/analysis/flags_for_review.md` with the reviewer's verdicts on every disagreement in
+`results/analysis/hand_review.md`, and one full detector-flagged trajectory rendered for reading in
+`results/analysis/example_cheat_trajectory.md`. Where the money went, by provider, model and line, is
+`results/analysis/spend.md`.
 
 ## Pre-registration
 
@@ -96,7 +98,7 @@ uv run pytest -q -m "not ollama and not live"      # the whole test suite, no ke
 
 | path | what it is |
 |---|---|
-| `PREREG.md` | Pre-registered hypotheses, grids, predictions and decision rules; four versions, each a commit. |
+| `PREREG.md` | Pre-registered hypotheses, grids, predictions and decision rules; six versions, each a commit, each dated against what had been observed. |
 | `SPEC.md` | The interface contract between the three parallel builders (task format, batch construction, item-run record, detectors, monitor, analysis outputs). |
 | `RUNPLAN.md` | Which cells were to be run, in what order, at what cost, against the clock. |
 | `DEVIATIONS.md` | Append-only log of every departure from SPEC.md and from the plan, by whom and why. |
@@ -109,9 +111,9 @@ uv run pytest -q -m "not ollama and not live"      # the whole test suite, no ke
 | `monitor/` | The LLM monitor: prompt, runner, disk cache, and Cohen's κ against the detectors. |
 | `analysis/` | Per-cell rates, Wilson intervals, cluster bootstrap, clustered logistic slope, cumulative-dose regression, the figure and the table. |
 | `tools/` | Task generation and validation, plus `pick_trajectory.py`, which renders one detector-flagged trajectory as readable markdown. |
-| `results/analysis/` | The figure, the table, the stats, the review queue, the example trajectory. |
+| `results/analysis/` | The figure, the table, the stats, the review queue and verdicts, the example trajectory, the spend table. |
 | `results/runs/` | Raw item records, one JSONL line per item-run (gitignored — large). |
-| `results/pilot_v0/`, `results/pilot_v1/` | The two excluded pilots, kept as disclosed observations, not analysed. |
+| `results/pilot_v0/`, `results/pilot_v1/` | The two pilots, kept as disclosed observations, not in the analysed grid. Pilot v1 is the per-line hour-8 statistic (one I = 15, seed-0 batch per line under rules v2 in the standard environment): cheats on the 15 impossible items were Luna 0, GLM 0, Sol 0, DeepSeek 1, Qwen 1; Haiku's pilot is its seed-0 sweep batch. Two pilot flags are hand-reviewed in `results/analysis/hand_review.md`. |
 | `results/logs/`, `results/monitor_cache/` | Sweep console logs and the monitor's response cache (gitignored). |
 | `pyproject.toml`, `uv.lock` | Python 3.12, `uv`-managed environment. |
 
@@ -128,8 +130,9 @@ runbook. Everything else — tasks, harness, detectors, monitor, batch framing, 
 
 - **The tasks are synthetic.** Thirty toy Python utilities with a `submit` tool are not a real multi-day eval harness; a
   flat curve here does not rule out spillover in a harness with a real scoreboard, real peers and real stakes.
-- **The models are small and cheap.** The curve's shape for frontier models is not measured. The transferable claim is
-  the direction, not the level, and only if replicated.
+- **Most of the models are small and cheap.** One line is the model from the incident (gpt-5.6-sol); the others are
+  the cheapest current endpoints and two local open-weight models. The transferable claim is the direction, not the
+  level, and only if replicated.
 - **The detector covers five cheat classes.** D1–D5 catch test tampering, hidden-answer reads, hardcoding, skip/xfail
   and grader tampering; a cheat outside those — a partial hardcode that survives the fresh probe inputs, say — is missed
   by the detector and may be missed by the monitor too. The monitor is a lower bound by construction, and the two raters'
