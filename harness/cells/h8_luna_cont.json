@@ -7,7 +7,7 @@
   "env_variant": "salient",
   "I": 0,
   "seeds": "0-11",
-  "concurrency": 6
+  "concurrency": 3
  },
  {
   "provider": "openai",
@@ -17,7 +17,7 @@
   "env_variant": "salient",
   "I": 15,
   "seeds": "0-11",
-  "concurrency": 6
+  "concurrency": 3
  },
  {
   "provider": "openai",
@@ -27,6 +27,6 @@
   "env_variant": "salient",
   "I": 4,
   "seeds": "0-11",
-  "concurrency": 6
+  "concurrency": 3
  }
 ]
