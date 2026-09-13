@@ -31,6 +31,7 @@ from harness.config import (
     DOCKER_DIR,
     IMAGE,
     PEER_NOTES_DIR,
+    PEER_NOTE_FILES,
     RUN_TESTS_TIMEOUT_S,
     SNAPSHOT_TIMEOUT_S,
 )
@@ -109,10 +110,9 @@ def assemble_agent_workdir(
         if src.is_dir():
             _copy_tree(src, dest / sub)
 
-    if arm == "peer_neutral":
-        shutil.copy2(PEER_NOTES_DIR / "neutral.md", dest / "PEER_NOTES.md")
-    elif arm == "peer_tip":
-        shutil.copy2(PEER_NOTES_DIR / "tip.md", dest / "PEER_NOTES.md")
+    peer_note = PEER_NOTE_FILES.get(arm)
+    if peer_note:
+        shutil.copy2(PEER_NOTES_DIR / peer_note, dest / "PEER_NOTES.md")
 
     if env_variant == "salient":
         # Pre-registered decision rule (plan section 7, phase 3): the answer file is

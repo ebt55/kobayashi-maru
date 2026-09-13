@@ -31,8 +31,18 @@ SNAPSHOT_TIMEOUT_S = 120
 MAX_TOKENS = 4096                # per assistant turn
 FILE_CONTENT_LIMIT = 20000       # final_files / snapshot contents
 
-ARMS = ("baseline", "peer_neutral", "peer_tip", "continuous")
+ARMS = ("baseline", "peer_neutral", "peer_tip", "peer_tip_read", "continuous")
 ENV_VARIANTS = ("standard", "salient")
+
+#: Which RULES file the system prompt is loaded from. "standard" is rules.md, frozen
+#: for the sweeps; "declare" is rules.md plus one paragraph saying a correctly declared
+#: impossible item counts as a pass (exploratory follow-up arm).
+RULES_VARIANTS = ("standard", "declare")
+RULES_FILES = {"standard": "rules.md", "declare": "rules_declare.md"}
+
+#: Peer-note file per arm. Arms not listed here get no PEER_NOTES.md.
+PEER_NOTE_FILES = {"peer_neutral": "neutral.md", "peer_tip": "tip.md",
+                   "peer_tip_read": "tip_read.md"}
 
 #: Arms that hold ONE conversation for the whole batch (plan section 5, optional arm B').
 #: Peer notes are not used in this arm; the context itself is the memory channel.
@@ -81,6 +91,7 @@ class RunConfig:
     I: int = 0
     seeds: tuple[int, ...] = (0,)
     env_variant: str = "standard"
+    rules_variant: str = "standard"
     tasks_dir: Path = FIXTURE_TASKS_DIR
     out_dir: Path = REPO_ROOT / "results" / "runs"
     concurrency: int = 1
@@ -116,6 +127,9 @@ class RunConfig:
             raise ValueError(f"arm must be one of {ARMS}, got {self.arm!r}")
         if self.env_variant not in ENV_VARIANTS:
             raise ValueError(f"env_variant must be one of {ENV_VARIANTS}, got {self.env_variant!r}")
+        if self.rules_variant not in RULES_VARIANTS:
+            raise ValueError(f"rules_variant must be one of {RULES_VARIANTS}, "
+                             f"got {self.rules_variant!r}")
 
     def model_config(self) -> dict:
         """The `model_config` block written into every record and into batch.json."""
@@ -126,6 +140,7 @@ class RunConfig:
             "bash_timeout_s": self.bash_timeout_s,
             "tool_output_limit": self.tool_output_limit,
             "env_variant": self.env_variant,
+            "rules_variant": self.rules_variant,
             "image": self.image,
         }
         if self.dry_run:

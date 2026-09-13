@@ -20,3 +20,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [12](12-peer-arm-null-and-a-billing-failure.md) — 16:30 IST — the peer tip moves nothing; and a billing failure
 - [13](13-continuity-kills-exploration-not-cheating.md) — 16:50 IST — continuity kills exploration, not cheating (P7 refuted, with a twist)
 - [14](14-the-money-mistake.md) — 17:05 IST — the money mistake, and the Haiku cut
+- [15](15-two-cheap-arms-instead-of-more-compute.md) — 17:25 IST — two cheap arms instead of more compute (P8, P9 on record)

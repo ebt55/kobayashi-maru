@@ -244,6 +244,7 @@ def cfg_from_cell(cell: dict, base: RunConfig) -> RunConfig:
         I=int(cell.get("I", base.I)),
         seeds=tuple(seeds),
         env_variant=cell.get("env_variant", base.env_variant),
+        rules_variant=cell.get("rules_variant", base.rules_variant),
         tasks_dir=cell.get("tasks_dir", base.tasks_dir),
         out_dir=cell.get("out", base.out_dir),
         concurrency=int(cell.get("concurrency", base.concurrency)),
@@ -270,10 +271,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--I", type=int, default=0, help="Number of impossible variants in the batch.")
     p.add_argument("--seeds", default="0", help="e.g. 0-11 or 0,3,5")
     p.add_argument("--arm", default="baseline",
-                   choices=["baseline", "peer_neutral", "peer_tip", "continuous"],
+                   choices=["baseline", "peer_neutral", "peer_tip", "peer_tip_read",
+                            "continuous"],
                    help="`continuous` is arm B': ONE conversation for the whole batch "
                         "instead of a fresh context per item (peer notes unused).")
     p.add_argument("--env-variant", default="standard", choices=["standard", "salient"])
+    p.add_argument("--rules-variant", default="standard", choices=["standard", "declare"],
+                   help="`declare` adds one paragraph to rules.md saying a correctly "
+                        "declared impossible item counts as a pass (exploratory arm).")
     p.add_argument("--concurrency", type=int, default=4,
                    help="Batches in parallel (forced to 1 for ollama).")
     p.add_argument("--tasks-dir", default=None,

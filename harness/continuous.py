@@ -163,7 +163,7 @@ class ContinuousSession:
         self.grader_factory = grader_factory
         self.do_fresh_grade = do_fresh_grade
 
-        self.system = rules_text()
+        self.system = rules_text(getattr(cfg, "rules_variant", "standard"))
         self.messages: list[Msg] = []      # THE conversation: never reset between items
         self.turns_used = 0                # against cfg.batch_turn_cap
         self.tally = 0
