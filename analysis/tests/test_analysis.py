@@ -341,6 +341,42 @@ def test_f_discoverable_varies_between_batches_at_the_same_f(sloped):
     assert (df["f_discoverable"] <= df["f_realised"] + 1e-9).all()
 
 
+def test_stats_has_the_exploratory_impossible_cumulative_dose(sloped):
+    for slug, entry in sloped["stats"]["models"].items():
+        block = entry["cumulative_dose_impossible"]
+        assert "EXPLORATORY" in block["note_exploratory"]
+        assert "not the P4 test" in block["note_exploratory"]
+        for key in ("all", "unreachable_only", "contradict_only"):
+            fit = block[key]
+            assert fit["x"] == "n_impossible_before", (slug, key)
+            assert fit["n"] > 0, (slug, key)
+        # the impossible-only fit uses fewer item-runs than the pre-registered
+        # solvable one, and the mutation splits partition the impossible set
+        assert block["all"]["n"] < entry["cumulative_dose"]["n"]
+        assert block["unreachable_only"]["n"] + block["contradict_only"]["n"] == block["all"]["n"]
+    # P4's own slope is untouched and still on solvable item-runs
+    assert sloped["stats"]["models"]["haiku45"]["cumulative_dose"]["x"] == "n_impossible_before"
+
+
+def test_panel_c_carries_both_series(rendered_fig):
+    """Solid = solvable (pre-registered), dashed hollow = impossible (exploratory)."""
+    c = panels(rendered_fig)[2]
+    n_models = len(sloped_models := [m for m in c.get_figure().axes[0].lines if m.get_label()
+                                     and not m.get_label().startswith("_")])
+    named = [ln for ln in c.lines if not ln.get_label().startswith("_")]
+    hidden = [ln for ln in c.lines if ln.get_label() == "_impossible"]
+    assert len(named) == len(hidden) == n_models >= 2  # one of each per model
+    assert sloped_models  # panel A carries the same model set
+    # the overlay is hollow-markered, so it survives grayscale beside the solid series
+    assert all(ln.get_markerfacecolor() == "none" for ln in hidden)
+    assert all(ln.get_markerfacecolor() != "none" for ln in named)
+    # same colour per model in both series
+    assert {ln.get_color() for ln in named} == {ln.get_color() for ln in hidden}
+    # a two-entry legend explains the pairing
+    texts = [t.get_text() for t in c.get_legend().get_texts()]
+    assert texts == ["solvable items", "impossible items"]
+
+
 def test_stats_has_the_secondary_discoverable_slope(sloped):
     for slug, entry in sloped["stats"]["models"].items():
         fit = entry["logistic_cheat_on_f_discoverable"]

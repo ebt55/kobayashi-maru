@@ -469,6 +469,27 @@ def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED)
                     "slope separates order from dose only partially (plan section 11)"
                 ),
             },
+            "cumulative_dose_impossible": {
+                "all": logistic_clustered(imp, "n_impossible_before"),
+                "unreachable_only": logistic_clustered(
+                    imp[imp["mutation"] == "unreachable"], "n_impossible_before"
+                ),
+                "contradict_only": logistic_clustered(
+                    imp[imp["mutation"] == "contradict"], "n_impossible_before"
+                ),
+                "note_exploratory": (
+                    "EXPLORATORY, not pre-registered, and not the P4 test: P4 is the "
+                    "cumulative-dose slope on SOLVABLE item-runs (`cumulative_dose` above). "
+                    "This is the same slope fitted over IMPOSSIBLE item-runs only, added after "
+                    "the pilot showed the impossible-item cheat rate falling with exposure "
+                    "rather than rising. The `unreachable_only` fit is the one to read: a "
+                    "`contradict` variant looks solved from inside the sandbox because its "
+                    "visible tests pass, so it rarely provokes a cheat at all and contributes "
+                    "little but noise. Confounded with f in the same way as `cumulative_dose`, "
+                    "and additionally with position: an item late in a batch has more impossible "
+                    "items behind it only because the batch is long"
+                ),
+            },
             "cheat_pct_impossible": {
                 "rate": rate(imp["cheat"]) if len(imp) else float("nan"),
                 "n": int(len(imp)),

@@ -349,6 +349,41 @@ def _panel_c(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
             label=labels.get(slug, slug), clip_on=False,
         )
 
+    # EXPLORATORY overlay: the same curve over the IMPOSSIBLE item-runs.  One
+    # shared thin dash with hollow markers, so it never impersonates a model's
+    # own line style; the pre-registered series is the solvable one above.
+    imp = df[df["is_impossible"]].copy()
+    imp = imp[imp["n_impossible_before"].notna()]
+    if not imp.empty:
+        imp["_bin"] = pd.cut(
+            imp["n_impossible_before"].astype(int),
+            bins=list(DOSE_BIN_EDGES),
+            right=False,
+            labels=list(DOSE_BIN_LABELS),
+            include_lowest=True,
+        )
+        for i, slug in enumerate(models):
+            colour = SERIES[i % len(SERIES)]
+            mk = MARKERS[i % len(MARKERS)]
+            sub = imp[imp["model_slug"] == slug]
+            if sub.empty:
+                continue
+            xs, ys = [], []
+            for _label, cell in sub.groupby("_bin", observed=True, sort=True):
+                if len(cell) < 10:
+                    continue
+                xs.append(float(cell["n_impossible_before"].astype(float).mean()))
+                ys.append(100.0 * int(cell["cheat"].sum()) / int(len(cell)))
+            if not xs:
+                continue
+            ymax = max(ymax, max(ys))
+            ax.plot(
+                xs, ys, color=colour, linestyle=(0, (2.0, 1.8)), linewidth=1.4,
+                zorder=3, marker=mk, markersize=5.0, markerfacecolor="none",
+                markeredgecolor=colour, markeredgewidth=1.2, alpha=0.85,
+                label="_impossible", clip_on=False,
+            )
+
     top = max(4.0, ymax * 1.16)
     ax.set_ylim(0, top)
     ax.xaxis.set_major_locator(mticker.MultipleLocator(4))
@@ -356,9 +391,27 @@ def _panel_c(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
         "impossible items already seen", fontsize=8, color=TEXT_SECONDARY
     )
     ax.set_title(
-        "C.  Cumulative dose (solvable)",
+        "C.  Cumulative dose",
         fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
     )
+    if not imp.empty:
+        proxies = [
+            plt.Line2D([], [], color=TEXT_SECONDARY, linestyle="solid", linewidth=2.0,
+                       marker="o", markersize=5.0, markeredgecolor=SURFACE,
+                       markeredgewidth=1.2, label="solvable items"),
+            plt.Line2D([], [], color=TEXT_SECONDARY, linestyle=(0, (2.0, 1.8)), linewidth=1.4,
+                       marker="o", markersize=5.0, markerfacecolor="none",
+                       markeredgecolor=TEXT_SECONDARY, markeredgewidth=1.2,
+                       label="impossible items"),
+        ]
+        leg = ax.legend(
+            handles=proxies, loc="upper left", fontsize=6.0, frameon=True,
+            framealpha=1.0, edgecolor=GRID, facecolor=SURFACE, borderpad=0.35,
+            handlelength=2.2, labelspacing=0.3, handletextpad=0.5,
+        )
+        leg.get_frame().set_linewidth(0.8)
+        for t in leg.get_texts():
+            t.set_color(TEXT_SECONDARY)
     return top
 
 
@@ -496,7 +549,9 @@ def make_figure(
         "attempts. B is the manipulation check: it shows whether the dose was actually "
         "delivered, so a flat A beside a rising B reads as \"dose delivered, no spillover\".",
         "B has no f = 0 point because a batch at f = 0 contains no impossible items. C is "
-        "confounded with f: a larger f means both more impossible items and a longer batch.",
+        "confounded with f: a larger f means both more impossible items and a longer batch. "
+        "C's solid series (solvable items) is the pre-registered one; its dashed, hollow-marker "
+        "series over the impossible items is EXPLORATORY and was added after the pilot.",
         "D is a SECONDARY, exploratory exposure measure and replaces realised f nowhere: "
         "f_discoverable counts only `unreachable` variants, which announce themselves as a "
         "missing resource, because a `contradict` variant looks solved from inside the sandbox "
