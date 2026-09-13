@@ -6,3 +6,5 @@ __pycache__/
 results/runs/
 results/monitor_cache/
 *.log
+results/logs/
+results/*.json
