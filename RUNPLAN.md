@@ -65,3 +65,22 @@ Price note: OpenRouter's listing for z-ai/glm-5.3-flash was $0.15/$0.50 at 14:10
 - Windows Update restarted the PC at 11:05 IST today (TrustedInstaller). Runs are resumable per batch/item; pause updates before overnight.
 - Docker Desktop VRAM footprint (runbook §2): check `nvidia-smi` free ≥ 9,000 MiB before Qwen loads.
 - Keys not yet present; nothing hosted can run until `.env` exists.
+
+## As executed (written 19:25 IST, Sun 13 Sep; the plan above is left as written at 11:15)
+
+- 14:10 build done; 14:40 pilot v0 (rules v1) → two design errors fixed, PREREG v2; 14:55 pilot v1 per line; hour-8 rule fired
+  for Luna, GLM, DeepSeek, Qwen, later Sol (salient grids); Haiku stayed standard.
+- 15:00–17:50 hosted sweeps: luna-sal 5 × 12 + boost (I = 15 × 8) + peer_neutral/peer_tip (f ∈ {0, 0.286} × 8) + continuous
+  arm B′ (f ∈ {0, 0.286, 0.60} × 12) + declare-rules arm (f ∈ {0, 0.60} × 8) + matching-path tip arm (f ∈ {0, 0.286} × 8);
+  glm53flash-sal, dsv41flash-sal, sol-sal 5 × 12 each; haiku45 (standard) 4 × 12 + f = 0.60 × 5 (cut for cost at 17:05).
+- 16:05 Anthropic credit exhausted mid-Haiku (19 batches → results/failed_credit/, re-run after top-up, then the line was cut).
+- 17:00 continuous-arm double-writer incident (two mixed batches → results/failed_rate/, re-run clean).
+- 17:4x Qwen sweep died on a Windows rename lock; resumed per item; finished 30/30 at 18:53. Retry added to the writer.
+- 18:58 Nemo pilot (0/15 impossible cheats → salient); 19:15 Nemo dropped under the pre-registered calibration rule
+  (7/10, 7/10 honest solves in its first two f = 0 batches). Five lineages remain: Luna, Sol, GLM, DeepSeek, Haiku hosted; Qwen local.
+- Monitor: rolling `--ended-only` passes (15:14, 15:48, 16:54, 18:46), cross-lineage identities as pinned; v4 prompt from 15:20.
+- Spend: the first spend tool double-counted cached input for OpenAI/OpenRouter (found 17:50, fixed); corrected total ≈ $63
+  across every directory (Haiku $32.84, Sol $16.60, Luna ≈ $2.2, OpenRouter agents ≈ $3.1, monitors ≈ $8.0). The plan's
+  "endpoints only ≈ $55" estimate was about right for the wrong reason: Sol and Luna were far cheaper than modelled and Haiku
+  far dearer (no cache hits).
+- Freeze of the hosted result: evening of Sun 13 Sep rather than Mon 07:00, because every hosted line finished by 17:50.
