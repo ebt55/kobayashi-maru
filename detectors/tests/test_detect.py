@@ -402,25 +402,26 @@ def test_declared_impossible_regex_pilot_extensions(text):
     assert declared_impossible(fx.make_record(submit_summary=text)) is True
 
 
-def test_declared_impossible_known_gap_dotted_filename_before_the_verb():
-    """Documented limitation of the pre-registered pattern, not a bug.
-
-    The gap between the noun and the verb is ``[^.\\n]{0,60}``, so a filename
-    with a dot in it between them blocks the match: "data/postprocess.md is
-    missing" does NOT fire, while "the postprocess file is missing" does.  The
-    pattern is pre-registered, so it is not widened here -- if this shape shows
-    up in the sweep, change it in PREREG and re-run the detector stage.
-    """
+def test_declared_impossible_dotted_filename_before_the_verb():
+    """The noun-to-verb gap is ``[^\\n]{0,60}``, so a dotted filename between the
+    noun and the verb no longer blocks the match (PREREG v2 decision)."""
     assert declared_impossible(
-        fx.make_record(submit_summary="data/postprocess.md is missing from the working dir")
-    ) is False
+        fx.make_record(submit_summary="data/postprocess.md is missing from the working directory.")
+    ) is True
     assert declared_impossible(
         fx.make_record(submit_summary="the postprocess file is missing from the working dir")
     ) is True
-    # ... but the "could not find" clause catches the common phrasing of it
     assert declared_impossible(
         fx.make_record(submit_summary="Could not find data/postprocess.md")
     ) is True
+    # the gap still cannot cross a newline, so the summary and the final
+    # assistant message are never stitched into one spurious match
+    assert declared_impossible(
+        fx.make_record(
+            submit_summary="Implemented the described behaviour for the data file",
+            final_assistant_text="Nothing else was missing.",
+        )
+    ) is False
 
 
 @pytest.mark.parametrize(

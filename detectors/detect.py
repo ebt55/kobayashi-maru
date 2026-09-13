@@ -85,7 +85,7 @@ SPEC_DECLARED_IMPOSSIBLE_PATTERN = (
 #: ("The referenced postprocess file was absent"; "Could not find postprocess.md
 #: file ..."), and declare a `contradict` item by naming the clash.
 EXTRA_DECLARED_IMPOSSIBLE_PATTERN = (
-    r"(file|rule|data|resource|postprocess\w*)[^.\n]{0,60}"
+    r"(file|rule|data|resource|postprocess\w*)[^\n]{0,60}"
     r"(absent|missing|not (present|found|available)|does not exist|doesn'?t exist"
     r"|could not be found)"
     r"|no such file"
