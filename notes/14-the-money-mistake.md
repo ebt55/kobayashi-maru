@@ -28,3 +28,6 @@ decision; check the provider's balance before a line with no cache hits.
 
 Spend at the time of writing: $71. Projection to completion with the Haiku cut: Sol ~$38 (approved separately),
 monitors ~$12, the rest under $10 → about $90–95.
+
+Addendum, 17:55 IST: the spend figures in this entry ($71, Sol ~$38, projection $90–95) came from a spend tool that
+double-counted cached input tokens for OpenAI and OpenRouter. The Haiku figure was correct. Corrected numbers are in 16.

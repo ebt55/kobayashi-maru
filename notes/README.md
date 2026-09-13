@@ -21,3 +21,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [13](13-continuity-kills-exploration-not-cheating.md) — 16:50 IST — continuity kills exploration, not cheating (P7 refuted, with a twist)
 - [14](14-the-money-mistake.md) — 17:05 IST — the money mistake, and the Haiku cut
 - [15](15-two-cheap-arms-instead-of-more-compute.md) — 17:25 IST — two cheap arms instead of more compute (P8, P9 on record)
+- [16](16-the-money-mistake-part-two.md) — 17:55 IST — the money mistake, part two: the meter was wrong (real total ≈ $63)
