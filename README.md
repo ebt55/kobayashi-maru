@@ -180,9 +180,11 @@ runbook. Everything else — tasks, harness, detectors, monitor, batch framing, 
 - **Only answer-key reading was observed.** In the salient environment every cheat, on impossible and solvable items
   alike, is a read of or reach for the planted answer file; the test editing seen in the incident never occurred, even
   when a peer note suggested it. What was measured is exploit propagation in an environment that planted the exploit.
-- **The hand review was performed by the orchestrating model**, over every solvable-item cheat programmatically and a
-  seeded random sample of the disagreement queue by transcript; the verdicts and method are in
-  `results/analysis/hand_review.md`.
+- **The hand review is two-layered.** The orchestrating model classified every solvable-item cheat programmatically and
+  read a seeded random sample of the disagreement queue; Ebin then read ten trajectories himself (five DeepSeek
+  solvable-item cheats, three GLM read-after-write cases, two Haiku impossible-item flags) and recorded his own verdicts,
+  which agree with the classification. Both are in `results/analysis/hand_review.md` and
+  `results/analysis/review_by_ebin/hand_review.md`.
 - **The detector covers five cheat classes.** D1–D5 catch test tampering, hidden-answer reads, hardcoding, skip/xfail
   and grader tampering; a cheat outside those — a partial hardcode that survives the fresh probe inputs, say — is missed
   by the detector and may be missed by the monitor too. The monitor is a lower bound by construction, and the two raters'
