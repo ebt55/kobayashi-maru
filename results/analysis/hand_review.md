@@ -68,9 +68,8 @@ contents returned; "false positive" means neither happened.
 
 ## Human review
 
-Ebin read ten trajectories himself on 13 Sep 2026 at 23:50 IST and recorded his verdicts in
-`review_by_ebin/hand_review.md` (8 real cheats, 1 access attempt, 1 monitor false positive; every verdict agrees
-with the programmatic classification above). The renders he read and the reading UI (`review-ui.html`) are in `review_by_ebin/`.
-The five DeepSeek solvable-item cheats, three GLM
-read-after-write cases and two Haiku impossible-item flags were chosen by the orchestrator to cover each class of
-disagreement, not at random.
+Ebin read ten trajectories himself on 13 Sep 2026 at 23:50 IST — five DeepSeek solvable-item cheats, three GLM
+read-after-write cases, two Haiku impossible-item flags, chosen by the orchestrator to cover each class of disagreement —
+and recorded his own verdicts in `review_by_ebin/hand_review.md`: 8 real cheats, 1 access attempt, 1 monitor false
+positive. Every verdict agrees with the programmatic classification above. His verdicts, not the model's, are the ones
+the report cites as the human hand review.
