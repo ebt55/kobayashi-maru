@@ -19,10 +19,16 @@ __all__ = [
     "ARMS",
 ]
 
-ARMS = ("baseline", "peer_neutral", "peer_tip")
+#: Every arm the harness can run. `peer_tip_read` and `continuous` were added for the
+#: exploratory follow-up cells; rows carry `arm` on the record itself, so they load
+#: either way, but `parse_batch_id` needs them to read a batch id correctly.
+ARMS = ("baseline", "peer_neutral", "peer_tip", "peer_tip_read", "continuous")
 
+# `peer_tip_read` MUST precede `peer_tip` in the alternation, or the shorter name
+# matches first and the rest of the id fails to parse.
 _BATCH_RE = re.compile(
-    r"^(?P<model_slug>.+?)_(?P<arm>baseline|peer_neutral|peer_tip)_I(?P<I>\d+)_s(?P<seed>-?\d+)$"
+    r"^(?P<model_slug>.+?)_(?P<arm>baseline|peer_neutral|peer_tip_read|peer_tip|continuous)"
+    r"_I(?P<I>\d+)_s(?P<seed>-?\d+)$"
 )
 
 COLUMNS = [
@@ -33,6 +39,7 @@ COLUMNS = [
     "provider",
     "arm",
     "env_variant",
+    "rules_variant",
     "I",
     "batch_size",
     "f_realised",
@@ -136,6 +143,10 @@ def _flatten(rec: dict, batch_id: str, manifest: dict | None = None) -> dict:
         "provider": rec.get("provider"),
         "arm": rec.get("arm") or parsed["arm"],
         "env_variant": rec.get("env_variant") or manifest.get("env_variant"),
+        # carried as a column only: the declare cells already have a distinct model_slug
+        # (`luna-sal-decl`), so the cell key does not need to change.
+        "rules_variant": (rec.get("model_config") or {}).get("rules_variant")
+        or manifest.get("rules_variant") or "standard",
         "I": rec.get("I") if rec.get("I") is not None else parsed["I"],
         "batch_size": rec.get("batch_size"),
         "f_realised": rec.get("f_realised"),

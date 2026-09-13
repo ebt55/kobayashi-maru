@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -176,6 +177,48 @@ def read_jsonl(path: Path) -> list[dict]:
     return out
 
 
+#: Windows refuses `os.replace` onto a file another process currently holds open for
+#: reading (WinError 5). Several readers poll every `batch.json` while a sweep is
+#: running -- the rolling detector/monitor stage, the completion monitor, the local-model
+#: queue script -- and the harness rewrites `batch.json` after every item, so on a fast
+#: local model the race eventually lands. Retry the rename instead of giving up; the
+#: window is milliseconds. POSIX renames over an open file happily, so this is off there.
+RETRY_REPLACE = os.name == "nt"
+REPLACE_ATTEMPTS = 10
+REPLACE_BACKOFF_S = 0.05
+REPLACE_BACKOFF_MAX_S = 1.0
+
+
+def atomic_replace(tmp: str | Path, path: Path) -> None:
+    """``os.replace`` with a bounded retry on Windows sharing violations.
+
+    Still strictly atomic: on every attempt it is the same tmp-then-replace, never a
+    partial or non-atomic write. After the last attempt the original error is re-raised.
+    """
+    delay = REPLACE_BACKOFF_S
+    attempts = REPLACE_ATTEMPTS if RETRY_REPLACE else 1
+    for attempt in range(attempts):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, REPLACE_BACKOFF_MAX_S)
+
+
+def _cleanup(tmp: str | Path) -> None:
+    """Best-effort removal of a temp file; a reader may briefly hold it too."""
+    for attempt in range(REPLACE_ATTEMPTS if RETRY_REPLACE else 1):
+        try:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
+            return
+        except PermissionError:
+            time.sleep(min(REPLACE_BACKOFF_S * (2 ** attempt), REPLACE_BACKOFF_MAX_S))
+
+
 def rewrite_jsonl(path: Path, records: list[dict]) -> None:
     """Atomic whole-file rewrite (how later stages update records in place)."""
     path = Path(path)
@@ -187,10 +230,9 @@ def rewrite_jsonl(path: Path, records: list[dict]) -> None:
                 fh.write(json.dumps(ordered(rec), ensure_ascii=False) + "\n")
             fh.flush()
             os.fsync(fh.fileno())
-        os.replace(tmp, path)
+        atomic_replace(tmp, path)
     except BaseException:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
+        _cleanup(tmp)
         raise
 
 
@@ -204,10 +246,9 @@ def write_json(path: Path, payload: dict) -> None:
             fh.write("\n")
             fh.flush()
             os.fsync(fh.fileno())
-        os.replace(tmp, path)
+        atomic_replace(tmp, path)
     except BaseException:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
+        _cleanup(tmp)
         raise
 
 

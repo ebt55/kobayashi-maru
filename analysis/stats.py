@@ -415,7 +415,13 @@ def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED)
     for model_slug, mdf in df.groupby("model_slug", sort=True):
         solv = mdf[~mdf["is_impossible"]]
         imp = mdf[mdf["is_impossible"]]
-        base = solv[solv["arm"] == "baseline"] if (solv["arm"] == "baseline").any() else solv
+        # The pre-registered slope is defined on the BASELINE arm of each model_slug.
+        # A follow-up slug that ran no baseline at all (arm B' under `*-cont`) still
+        # gets its own curve, but it must be labelled so a reader never mistakes it
+        # for the primary statistic.
+        has_baseline = bool((solv["arm"] == "baseline").any())
+        base = solv[solv["arm"] == "baseline"] if has_baseline else solv
+        arms_used = sorted(str(a) for a in base["arm"].dropna().unique())
 
         cells = []
         for f, sub in base.groupby("f_realised", sort=True):
@@ -444,6 +450,14 @@ def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED)
             "n_solvable_item_runs": int(len(solv)),
             "n_impossible_item_runs": int(len(imp)),
             "n_batches": int(mdf["batch_id"].nunique()),
+            "arm_scope": "baseline" if has_baseline else "+".join(arms_used),
+            "arm_scope_note": (
+                "pre-registered primary scope: the baseline arm of this model_slug"
+                if has_baseline else
+                "NOT the pre-registered primary statistic: this model_slug ran no baseline "
+                "arm, so every fit below is computed on arm(s) " + "+".join(arms_used)
+                + " and is exploratory"
+            ),
             "cells": cells,
             "logistic_cheat_on_f": logistic_clustered(base, "f_realised"),
             "logistic_cheat_on_f_discoverable": {

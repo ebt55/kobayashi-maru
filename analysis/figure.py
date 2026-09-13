@@ -86,6 +86,22 @@ DOSE_BIN_EDGES = (0, 1, 2, 3, 5, 8, 16)
 DOSE_BIN_LABELS = ("0", "1", "2", "3–4", "5–7", "8+")
 
 
+CONTINUOUS_SUFFIXES = ("-cont", "-continuous")
+
+
+def continuous_base(slug: str) -> str | None:
+    """`luna-sal-cont` -> `luna-sal`; None when the slug is not a continuous follow-up.
+
+    Arm B' runs under its own model_slug, so without this it would take a colour slot and
+    a legend entry of its own while being invisible in panels A and B (both of which
+    filter to `arm == "baseline"`).
+    """
+    for suffix in CONTINUOUS_SUFFIXES:
+        if slug.endswith(suffix):
+            return slug[: -len(suffix)]
+    return None
+
+
 def _order_models(slugs) -> list[str]:
     known = [s for s in PREFERRED_MODEL_ORDER if s in slugs]
     rest = sorted(s for s in slugs if s not in PREFERRED_MODEL_ORDER)
@@ -238,14 +254,44 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
         )
         end_labels.append((ys[-1], xs[-1], slug))
 
+    # arm B' (one continuous session for the whole batch): same colour as its base
+    # model, dashed, because it is the same model under a different memory channel.
+    cont_handles = []
+    cont = solv[solv["arm"] == "continuous"]
+    for slug in sorted(cont["model_slug"].dropna().unique()):
+        base_slug = continuous_base(str(slug))
+        colour = (SERIES[models.index(base_slug) % len(SERIES)]
+                  if base_slug in models else TEXT_SECONDARY)
+        sub = cont[cont["model_slug"] == slug]
+        xs, ys = [], []
+        for f, cell in sub.groupby("f_realised", sort=True):
+            if not np.isfinite(f) or len(cell) == 0:
+                continue
+            xs.append(float(f))
+            ys.append(100.0 * float(cell["cheat"].mean()))
+        if not xs:
+            continue
+        ymax = max(ymax, max(ys))
+        ax.plot(
+            xs, ys, color=colour, linestyle=(0, (4.0, 2.0)), linewidth=1.6,
+            marker="P", markersize=5.5, markeredgecolor=SURFACE, markeredgewidth=1.0,
+            zorder=4, clip_on=False,
+        )
+        cont_handles.append(
+            plt.Line2D([], [], color=colour, linestyle=(0, (4.0, 2.0)), linewidth=1.6,
+                       marker="P", markersize=5.5,
+                       label=f"{base_slug or slug} · continuous (arm B′)")
+        )
+
     # peer arms, if they ran: markers only, never a line (a different arm is not
     # a continuation of the baseline dose curve).
-    peer = solv[solv["arm"].isin(["peer_neutral", "peer_tip"])]
-    peer_handles = []
+    peer = solv[solv["arm"].isin(["peer_neutral", "peer_tip", "peer_tip_read"])]
+    peer_handles = list(cont_handles)
     if not peer.empty:
         for arm, marker, dx, face in (
             ("peer_neutral", "v", -0.012, "none"),
             ("peer_tip", "^", 0.012, None),
+            ("peer_tip_read", "D", 0.030, None),
         ):
             sub = peer[peer["arm"] == arm]
             if sub.empty:
@@ -271,7 +317,9 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
                     [], [], marker=marker, linestyle="none", markersize=6.5,
                     markerfacecolor=TEXT_SECONDARY if face is None else "none",
                     markeredgecolor=TEXT_SECONDARY, markeredgewidth=1.4,
-                    label="peer: tip" if arm == "peer_tip" else "peer: neutral",
+                    label={"peer_tip": "peer: tip",
+                           "peer_tip_read": "peer: tip (matching path)",
+                           "peer_neutral": "peer: neutral"}[arm],
                 )
             )
 
@@ -516,7 +564,9 @@ def make_figure(
     for ax in (ax2, ax3, ax4):
         ax.tick_params(labelleft=True)
 
-    models = _order_models(sorted(df["model_slug"].dropna().unique())) if not df.empty else []
+    all_slugs = sorted(df["model_slug"].dropna().unique()) if not df.empty else []
+    # arm B' is drawn on panel A against its base model's colour, not as its own series
+    models = _order_models([s for s in all_slugs if continuous_base(s) not in all_slugs])
     if df.empty or not models:
         for ax in axes:
             ax.text(0.5, 0.5, "no item-runs", ha="center", va="center",
