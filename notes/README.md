@@ -16,3 +16,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [08](08-the-monitor-argued-with-itself-about-listings.md) — 15:20 IST — the monitor argued with itself about directory listings
 - [09](09-only-visible-impossibility-delivers-a-dose.md) — 15:30 IST — only visible impossibility delivers a dose
 - [10](10-primary-line-complete.md) — 15:45 IST — the primary line is complete: dose delivered, spillover zero
+- [11](11-what-is-the-move-after-a-null.md) — 16:00 IST — what is the move after a null? (and the incident model joins)
