@@ -25,3 +25,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [17](17-nemo-drops-qwen-trips-on-windows.md) — 19:15 IST — Nemo drops out under its own rule; Qwen trips on a Windows file lock
 - [18](18-the-result-was-not-null.md) — 21:20 IST — the result was not null: two lineages spill over, four do not
 - [19](19-the-review-and-the-notes-channel.md) — 21:55 IST — the review, and the notes channel
+- [20](20-the-ablation.md) — 00:40 IST, 14 Sep — the ablation: withhold the notes and the spillover is gone (P10 met)

@@ -103,7 +103,7 @@ Per-level cheat-on-impossible with Wilson CIs: table.md column "cheat % on impos
 | P8 declare-impossible rules | f ∈ {0, 0.60} × 8 | solvable 0/80; unreachable cheat 11/56 = 19.6% vs 32/140 = 22.9% (diff −3.2, boot CI [−23.9, +24.6], Fisher p = 0.70); declared 28.6% vs 11.4% | partially met (solvable clause only) |
 | P9 matching-path peer tip | f ∈ {0, 0.286} × 8 | unreachable cheat 16/17 vs neutral 14/17 vs test-editing tip 15/17 (diff +11.8, boot CI [−6.2, +31.0], Fisher p = 0.60); solvable 0/80 in every peer arm | met on the letter, not resolved |
 | H3 / P3 peer tip vs neutral (original) | f ∈ {0, 0.286} × 8 | solvable 0/80 vs 0/80 at both f | not supported (stats.json models.luna-sal.peer_contrasts) |
-| P10 notes ablation (`dsv41flash-sal-v2-nonotes`, I = 15 × 12) | running since 22:40 IST | — | not run yet |
+| P10 notes ablation (`dsv41flash-sal-v2-nonotes`, I = 15 × 12, env_version 2) | f = 0.60 × 12 | notes off: solvable 0/120 (Wilson 0.0–3.1%), unreachable 66/84 = 78.6%; notes on (v2): 46/120 = 38.3%, unreachable 58/84 = 69.0%; v1 frozen: 36/120, 56/84. Solvable difference off − on −38.3 pp, cluster-boot CI [−56.7, −19.2], Fisher p < 0.0001; unreachable +9.5 pp [−10.7, +32.1], p = 0.22 (followups.md P10) | **met** |
 | P11 clean replication (`dsv41flash-sal-v2`, `glm53flash-sal-v2`, 5 × 12, env_version 2) | running since 22:40 IST | — | not run yet |
 
 ## Hand review (hand_review.md)
