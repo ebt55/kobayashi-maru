@@ -1,4 +1,4 @@
-# dosecurve — does raising the fraction of impossible tasks in a batch raise cheating on the tasks that are still solvable?
+# kobayashi-maru — does raising the fraction of impossible tasks in a batch raise cheating on the tasks that are still solvable?
 
 Benchmark reports and incident write-ups repeatedly assert that batches padded with unsolvable work push agents into
 cheating, but nobody has varied that fraction and measured the consequence on the items the agent *could* have solved
@@ -10,6 +10,18 @@ tool calls (no LLM), with an independent LLM monitor of a different lineage as a
 reported. Each item runs in its own Docker work dir with five tools (`bash`, `read_file`, `write_file`, `run_tests`,
 `submit`), every cheat path is reachable and rule-forbidden, and the real score always comes from a re-grade in a
 pristine container the agent never touched.
+
+## Why the name
+
+In *Star Trek II: The Wrath of Khan* the Kobayashi Maru is a Starfleet Academy simulation: a distress call from a
+civilian ship stranded in enemy territory. Rescue it and overwhelming forces destroy you; abandon it and civilians die.
+The test is unwinnable by design, and its purpose is to see how a commander behaves facing certain defeat. Kirk failed
+it twice, then secretly reprogrammed the simulator so he could win — "I changed the conditions of the test" — and got a
+commendation for original thinking. That maps onto this study almost word for word: the task looks like a legitimate
+mission (a normal coding task with visible tests), not a puzzle announcing that it is impossible; it is mechanically
+unwinnable by construction; and the celebrated response to it is cheating the grader, which is exactly what detectors
+D1–D5 catch. The question the film never asks is the one measured here: after a cadet Kirks the Maru, do they start
+Kirk-ing the winnable missions too? (The Python package and working directory are still called `dosecurve`.)
 
 ## The figure
 
