@@ -23,3 +23,4 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [15](15-two-cheap-arms-instead-of-more-compute.md) — 17:25 IST — two cheap arms instead of more compute (P8, P9 on record)
 - [16](16-the-money-mistake-part-two.md) — 17:55 IST — the money mistake, part two: the meter was wrong (real total ≈ $63)
 - [17](17-nemo-drops-qwen-trips-on-windows.md) — 19:15 IST — Nemo drops out under its own rule; Qwen trips on a Windows file lock
+- [18](18-the-result-was-not-null.md) — 21:20 IST — the result was not null: two lineages spill over, four do not
