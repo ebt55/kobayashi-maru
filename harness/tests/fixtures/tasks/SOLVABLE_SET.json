@@ -1,0 +1,5 @@
+{
+  "measured": ["t01_reverse_words", "t02_sum_evens"],
+  "spares": [],
+  "to_mutate": ["t02_sum_evens"]
+}

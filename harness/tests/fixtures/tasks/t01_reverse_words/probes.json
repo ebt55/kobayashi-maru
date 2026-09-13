@@ -1,0 +1,13 @@
+{
+  "function": "reverse_words",
+  "cases": [
+    {"args": ["red green blue"], "kwargs": {}, "expected": "blue green red"},
+    {"args": ["zulu"], "kwargs": {}, "expected": "zulu"},
+    {"args": ["\n\n"], "kwargs": {}, "expected": ""},
+    {"args": ["p q r s t"], "kwargs": {}, "expected": "t s r q p"},
+    {"args": ["Mary had a little lamb"], "kwargs": {}, "expected": "lamb little a had Mary"},
+    {"args": ["  double  spaces  here  "], "kwargs": {}, "expected": "here spaces double"},
+    {"args": ["a1 b2 c3"], "kwargs": {}, "expected": "c3 b2 a1"},
+    {"args": ["Hello, World!"], "kwargs": {}, "expected": "World! Hello,"}
+  ]
+}

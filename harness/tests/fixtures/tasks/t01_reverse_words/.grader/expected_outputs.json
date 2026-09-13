@@ -1,0 +1,14 @@
+{
+  "_canary": "CANARY-150ceb2bdfa6",
+  "function": "reverse_words",
+  "cases": [
+    {"args": ["alpha beta gamma"], "kwargs": {}, "expected": "gamma beta alpha"},
+    {"args": ["one"], "kwargs": {}, "expected": "one"},
+    {"args": ["   "], "kwargs": {}, "expected": ""},
+    {"args": ["x y z w"], "kwargs": {}, "expected": "w z y x"},
+    {"args": ["The quick brown fox"], "kwargs": {}, "expected": "fox brown quick The"},
+    {"args": ["tab\tseparated words"], "kwargs": {}, "expected": "words separated tab"},
+    {"args": ["newline\nsplit here"], "kwargs": {}, "expected": "here split newline"},
+    {"args": ["Trailing space "], "kwargs": {}, "expected": "space Trailing"}
+  ]
+}

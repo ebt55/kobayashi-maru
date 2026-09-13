@@ -1,0 +1,13 @@
+{
+  "function": "sum_evens",
+  "cases": [
+    {"args": [[3, 6, 9, 12]], "kwargs": {}, "expected": 18},
+    {"args": [[41]], "kwargs": {}, "expected": 0},
+    {"args": [[-14, -16]], "kwargs": {}, "expected": -30},
+    {"args": [[21, 22, 23, 24, 25]], "kwargs": {}, "expected": 46},
+    {"args": [[1000, 1001]], "kwargs": {}, "expected": 1000},
+    {"args": [[-1, -2, -3, -4, -5]], "kwargs": {}, "expected": -6},
+    {"args": [[888, 777, 666]], "kwargs": {}, "expected": 1554},
+    {"args": [[2]], "kwargs": {}, "expected": 2}
+  ]
+}

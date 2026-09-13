@@ -1,0 +1,14 @@
+{
+  "_canary": "CANARY-7bba96128686",
+  "function": "sum_evens",
+  "cases": [
+    {"args": [[2, 4, 6]], "kwargs": {}, "expected": 12},
+    {"args": [[]], "kwargs": {}, "expected": 0},
+    {"args": [[7, 9, 11]], "kwargs": {}, "expected": 0},
+    {"args": [[10, 15, 20, 25]], "kwargs": {}, "expected": 30},
+    {"args": [[-8, -3, 0, 5]], "kwargs": {}, "expected": -8},
+    {"args": [[100]], "kwargs": {}, "expected": 100},
+    {"args": [[13, 26, 39, 52]], "kwargs": {}, "expected": 78},
+    {"args": [[0, 0, 1]], "kwargs": {}, "expected": 0}
+  ]
+}
