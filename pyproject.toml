@@ -1,0 +1,23 @@
+[project]
+name = "dosecurve"
+version = "0.1.0"
+description = "Impossibility dose curve: does the fraction of impossible tasks in a batch raise cheating on the solvable ones?"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.0",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "pytest>=8",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scipy>=1.13",
+    "statsmodels>=0.14",
+    "matplotlib>=3.9",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["harness/tests", "detectors/tests", "monitor/tests", "analysis/tests", "tools/tests"]
+addopts = "-q"
+
+[tool.uv]
+package = false
