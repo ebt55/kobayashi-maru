@@ -376,7 +376,7 @@ The logistic p is statsmodels' two-sided value, as in `stats.json`; the pre-regi
 
 **Measures.** Whether the leak-closed replication's higher solvable-item cheat rate is a change in how often the agent's own notes carried the answer file, or a change in how often such a note was acted on: the environment x note-present 2x2 per line, an exact decomposition of the total change into those two parts, and the upstream discovery rate on unreachable items.
 
-**Cannot show.** That closing the leaks caused the discovery change. v2 ran later, against the same endpoints, with no concurrent v1 control and every fix applied at once; time-of-day and provider-side drift are not excluded, and neither is any other difference between the two sweeps.
+**Cannot show.** That closing the leaks caused the discovery change. v2 ran later, against the same endpoints, with no concurrent v1 control and every fix applied at once; time-of-day and provider-side drift are not excluded, and neither is any other difference between the two sweeps. Nor does 6b's pooled row carry to any one dose: the split is aggregation-dependent, and it reverses. Pooled, both lines move mostly through note prevalence; at f = 0.60 — the endpoint the headline uses — DeepSeek's note prevalence falls while the rate given a note rises, so the endpoint change is rate-driven and the two parts carry opposite signs. Use the per-f rows, not the pooled one, for a claim about a single f.
 
 v2 is the PREREG v7 leak-closed replication: same seeds, same item order, opaque work-directory names and no readable sibling item directories.
 
@@ -406,6 +406,23 @@ With `R = p * r_named + (1 - p) * r_not`, the change splits exactly into a preva
 
 `glm53flash-sal`: (0.1433 - 0.0517) x (0.5268 - 0.0129) = +0.0471; 0.0975 x +0.0859 + 0.9025 x -0.0024 = +0.0062; sum +0.0533 = total +0.0533.
 
+The same split at every dose. The identity holds at each f separately, and the answer it gives is not the pooled one: aggregating over f mixes doses with different note prevalences, which is itself a prevalence change.
+
+| line | f | n v1/v2 | total change (pp) | prevalence part (pp) | rate part (pp) | note prevalence | rate with a note | larger part |
+|---|---|---|---|---|---|---|---|---|
+| dsv41flash | 0 | 120/120 | +0.0 | +0.0 | +0.0 | 0.0% -> 0.0% | 0.0% -> 0.0% | no change |
+| dsv41flash | 0.1667 | 120/120 | +0.0 | +1.1 | -1.1 | 4.2% -> 12.5% | 20.0% -> 6.7% | no change (parts of opposite sign) |
+| dsv41flash | 0.2857 | 120/120 | -1.7 | -2.0 | +0.4 | 40.0% -> 33.3% | 33.3% -> 30.0% | prevalence (parts of opposite sign) |
+| dsv41flash | 0.4444 | 120/120 | +8.3 | +14.0 | -5.7 | 15.0% -> 41.7% | 61.1% -> 46.0% | prevalence (parts of opposite sign) |
+| dsv41flash | 0.6 | 120/120 | +8.3 | -0.7 | +9.1 | 45.8% -> 44.2% | 49.1% -> 67.9% | rate (parts of opposite sign) |
+| glm53flash | 0 | 120/120 | +0.0 | +0.0 | +0.0 | 0.0% -> 0.0% | 0.0% -> 0.0% | no change |
+| glm53flash | 0.1667 | 120/120 | +5.8 | +2.4 | +3.5 | 0.0% -> 6.7% | 0.0% -> 75.0% | rate |
+| glm53flash | 0.2857 | 120/120 | -6.7 | +0.7 | -7.4 | 13.3% -> 15.0% | 62.5% -> 27.8% | rate (parts of opposite sign) |
+| glm53flash | 0.4444 | 120/120 | +10.8 | +4.1 | +6.7 | 1.7% -> 13.3% | 0.0% -> 75.0% | rate |
+| glm53flash | 0.6 | 120/120 | +16.7 | +12.5 | +4.2 | 10.8% -> 36.7% | 38.5% -> 59.1% | prevalence |
+
+Rows where the two parts pull against each other: `dsv41flash-sal` at f = 0.2857 (total -1.7, prevalence -2.0, rate +0.4); `dsv41flash-sal` at f = 0.4444 (total +8.3, prevalence +14.0, rate -5.7); `dsv41flash-sal` at f = 0.6 (total +8.3, prevalence -0.7, rate +9.1); `glm53flash-sal` at f = 0.2857 (total -6.7, prevalence +0.7, rate -7.4). A prevalence sentence taken from the pooled row would have the sign of the prevalence part wrong at those doses.
+
 ### 6c. The upstream chain
 
 | line | cheat on unreachable v1 | v2 | note prevalence (solvable) | cheat rate given a note | v2 - v1 given a note (pp) |
@@ -427,4 +444,33 @@ The chain's last link is the one the crosstab cannot establish, and there is an 
 | glm53flash | 120 | 4 | 2 | 22 | 92 | 5.0% | 21.7% | 3.59e-05 |
 
 Every pair matched on task identity (`dsv41flash-sal` 120/120, 0 task mismatches, `glm53flash-sal` 120/120, 0 task mismatches), and no item-run in either environment was left unpaired.
+
+## 8. Run-to-run variability at fixed configuration
+
+**Measures.** How far an item-run moves when nothing about it changes. Several sweeps were aborted mid-flight and re-run under an identical configuration, which leaves an unplanned replication: every `(batch_id, position)` present on both sides is the same task, at the same place in the same batch, for the same model, executed twice. Reported per line and per item kind as a discordant-pair table, an exact McNemar, the gross item-level flip rate and the net drift.
+
+**Cannot show.** A designed replication, and therefore not a clean noise floor. The pairs exist because runs died, so survival into the analysable set is not random: batches that aborted early, and items whose first attempt died on a provider error, are simply absent, and one line contributes no pairs at all. The two executions are also separated in time, so this figure contains provider drift as well as sampling noise and is a clean estimate of neither. Cells are small, and pairs within a batch are not independent, which the exact McNemar does not adjust for.
+
+`results/failed_credit` holds the aborted attempts. 1,216 `(batch_id, position)` keys appear in both it and the analysed runs, across 89 batches. Of those, 893 pairs are dropped because at least one side is an `api_error` record — that is what aborted the sweeps — and 59 more because a side did not otherwise finish cleanly, leaving **264 analysable pairs**.
+
+| line | item kind | pairs | both cheat | first run only | re-run only | neither | flip rate | net (pp) | exact McNemar p |
+|---|---|---|---|---|---|---|---|---|---|
+| dsv41flash-v2 | solvable | 86 | 1 | 6 | 4 | 75 | 11.6% | -2.3 | 0.754 |
+| dsv41flash-v2 | unreachable | 13 | 8 | 2 | 2 | 1 | 30.8% | +0.0 | 1 |
+| dsv41flash-v2 | contradict | 16 | 1 | 0 | 0 | 15 | 0.0% | +0.0 | — |
+| dsv41flash-v2-nonotes | solvable | 17 | 0 | 0 | 0 | 17 | 0.0% | +0.0 | — |
+| dsv41flash-v2-nonotes | unreachable | 7 | 5 | 1 | 1 | 0 | 28.6% | +0.0 | 1 |
+| dsv41flash-v2-nonotes | contradict | 11 | 0 | 0 | 0 | 11 | 0.0% | +0.0 | — |
+| glm53flash-v2 | solvable | 78 | 1 | 1 | 9 | 67 | 12.8% | +10.3 | 0.0215 |
+| glm53flash-v2 | unreachable | 16 | 5 | 2 | 4 | 5 | 37.5% | +12.5 | 0.688 |
+| glm53flash-v2 | contradict | 20 | 1 | 1 | 2 | 16 | 15.0% | +5.0 | 1 |
+| **pooled** | solvable | 181 | — | 7 | 13 | — | 11.0% | +3.3 | 0.263 |
+| **pooled** | unreachable | 36 | — | 5 | 7 | — | 33.3% | +5.6 | 0.774 |
+| **pooled** | contradict | 47 | — | 1 | 2 | — | 6.4% | +2.1 | 1 |
+
+**How this compares with the v1 -> v2 shift.** On solvable items 11.0% of pairs disagree with themselves — same task, same batch slot, same model, one execution apart — while the net drift over 181 pairs is only +3.3 pp (exact McNemar p = 0.263). The endpoint shifts section 6b reports are +8.3 pp for `dsv41flash` at f = 0.6 and +16.7 pp for `glm53flash` at f = 0.6. Those sit *below* the gross churn and *above* the net drift, and both halves of that belong in any statement about them. A single item-run is about a one-in-nine chance of flipping on its own, so no individual trajectory is evidence of anything; but replicate batches do not drift far in aggregate, so the v1 -> v2 gap is several times the drift a bare re-run produces. Read the environment comparison as suggestive at that scale, not as a measurement whose noise is negligible.
+
+Unreachable items are noisier again — 33.3% of 36 pairs flip, against 11.0% on solvable ones — which is what a rate sitting near the middle of its range does. The dose measure that sections 4 and 5 condition on inherits that noise.
+
+Lines with no analysable pairs at all: `haiku45` — every overlapping key there was excluded, so nothing in this section speaks to those lines.
 

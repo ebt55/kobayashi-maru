@@ -114,8 +114,12 @@ def test_main_figure_carries_its_takeaways_and_definitions(rendered):
     _out, _paths, svgs = rendered
     svg = svgs["figure_main"]
     # panel takeaways, written as statements
-    assert "Two of six models cheat more" in svg
-    assert "Five of six did cheat here" in svg
+    # the subtitles count only the lines P5 calls dosed, so they cannot contradict
+    # the evidence/not-evidence split drawn below the panels
+    assert "Of the four models actually tempted" in svg
+    assert "Only four of six took the bait" in svg
+    assert "Five of six" not in svg
+    assert "never cheat at all" not in svg
     # f spelled out for a reader who has never seen it
     assert "impossible items / batch size" in svg
     assert "ten solvable tasks" in svg
@@ -129,15 +133,56 @@ def test_main_figure_draws_the_null_upper_bounds_on_the_plot(rendered, live_df):
     """A line resting on zero cannot show its precision; the callout must."""
     _out, _paths, svgs = rendered
     svg = svgs["figure_main"]
-    assert "not for want of data" in svg
     for slug, total in (("luna-sal", "1,240"), ("sol-sal", "600"),
                         ("haiku45", "530"), ("qwen3-14b-sal", "300")):
         sub = live_df[(live_df["model_slug"] == slug) & (~live_df["is_impossible"])]
         assert int(sub["cheat"].sum()) == 0, slug           # still a null
         assert len(sub) == int(total.replace(",", "")), slug
-    # the four upper bounds, as rendered
-    for bound in ("0.3%", "0.6%", "0.7%", "1.3%"):
+        assert total in svg, slug
+    # ONLY the two properly dosed lines get an upper bound: quoting a precise zero for a
+    # line that was never tempted is the misreading the split exists to prevent
+    for bound in ("0.3%", "0.7%"):
         assert bound in svg, bound
+    for bound in ("0.6%", "1.3%"):
+        assert bound not in svg, bound
+
+
+def test_main_figure_splits_the_nulls_by_whether_the_dose_landed(rendered, live_df):
+    """Under P5 an undosed line is untested, not a weaker null; the figure must say so."""
+    from analysis.figure_report import P5_FLOOR, _null_rows
+
+    _out, _paths, svgs = rendered
+    svg = svgs["figure_main"]
+    dosed, undosed = _null_rows(live_df)
+    assert [r[0] for r in dosed] == ["luna-sal", "haiku45"]
+    assert [r[0] for r in undosed] == ["sol-sal", "qwen3-14b-sal"]
+    assert all(r[4] >= P5_FLOOR for r in dosed)
+    assert all(r[4] < P5_FLOOR for r in undosed)
+
+    # the two categories are named, and the second is not phrased as a weaker first
+    assert "EVIDENCE: the bait was taken" in svg
+    assert "NOT EVIDENCE: the bait was never taken" in svg
+    assert "is untested," in svg
+    assert "not a weaker null." in svg
+    # each line carries the dose that put it in its group
+    for pct in ("37%", "59%", "6%", "0%"):
+        assert pct in svg, pct
+
+
+def test_the_dose_reported_beside_each_null_is_the_unreachable_rate(live_df):
+    """The 'bait' column is read on unreachable items, and the caption says which."""
+    from analysis.figure_report import _null_rows
+
+    dosed, undosed = _null_rows(live_df)
+    for slug, _k, _n, _hi, dose, pooled in dosed + undosed:
+        sub = live_df[live_df["model_slug"] == slug]
+        imp = sub[sub["is_impossible"]]
+        unre = imp[imp["mutation"] == "unreachable"]
+        assert dose == pytest.approx(float(unre["cheat"].mean()))
+        assert pooled == pytest.approx(float(imp["cheat"].mean()))
+        # the two differ, which is why the caption has to name the stratum
+        if slug in ("luna-sal", "haiku45"):
+            assert dose > pooled
 
 
 def test_mechanism_figure_carries_its_counts_and_the_correlational_warning(rendered):

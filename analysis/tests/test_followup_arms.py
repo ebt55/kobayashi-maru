@@ -314,6 +314,64 @@ def test_v7_figure_is_written_with_both_panels(tmp_path):
     assert "v1 remains the frozen primary result" in V7_CAPTION
 
 
+def test_v7_panel_b_shows_both_kinds_of_impossible_item(tmp_path):
+    """Only `unreachable` is the favourable half: withholding the notes raises it
+    while `contradict` goes to zero, so the panel must carry both and the
+    all-impossible total, or the caption tells a flattering half-truth."""
+    from analysis.figure_v7 import IMPOSSIBLE_KINDS, make_v7_figure
+
+    runs = tmp_path / "runs"
+    for seed in range(2):
+        for I, f in ((0, 0.0), (15, 0.6)):
+            _batch(runs, "dsv41flash-sal", "baseline", I, seed, f,
+                   n_cheat=(3 if f else 0))
+            _batch(runs, "dsv41flash-sal-v2", "baseline", I, seed, f,
+                   n_cheat=(4 if f else 0))
+        _batch(runs, "dsv41flash-sal-v2-nonotes", "baseline", 15, seed, 0.6,
+               n_cheat=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df = load_runs(runs)
+
+    svg = make_v7_figure(df, tmp_path, n_boot=20, seed=0)[1].read_text(
+        encoding="utf-8")
+    assert [k for k, _m, _dx, _l in IMPOSSIBLE_KINDS] == ["unreachable",
+                                                         "contradict"]
+    # distinct marker shapes, so the two series separate in grayscale too
+    assert len({m for _k, m, _dx, _l in IMPOSSIBLE_KINDS}) == 2
+    for _k, _m, _dx, label in IMPOSSIBLE_KINDS:
+        assert label in svg, label
+    # the corrective total is drawn on the panel, not left to the caption
+    assert "all impossible items" in svg
+    # the caption states the direction of BOTH moves and the net
+    # phrases that straddle a wrapped line break are invisible in the SVG, so these
+    # are all short enough to survive the wrap
+    for token in ("RAISES", "impossibility", "FALLS", "wrote"):
+        assert token in svg, token
+
+
+def test_v7_panel_b_totals_are_the_sum_of_the_two_strata():
+    """The annotated all-impossible total must equal unreachable + contradict."""
+    import pandas as pd
+
+    from analysis.figure_v7 import _cell, _kind
+
+    df = pd.DataFrame({
+        "model_slug": ["s"] * 6, "arm": ["baseline"] * 6,
+        "f_realised": [0.6] * 6,
+        "is_impossible": [False, False, True, True, True, True],
+        "mutation": [None, None, "unreachable", "unreachable",
+                     "contradict", "contradict"],
+        "cheat": [False, True, True, False, True, True],
+    })
+    solv, imp = _cell(df, "s", 0.6)
+    assert len(solv) == 2 and len(imp) == 4
+    ku, nu = _kind(imp, "unreachable")
+    kc, nc = _kind(imp, "contradict")
+    assert (ku, nu, kc, nc) == (1, 2, 2, 2)
+    assert int(imp["cheat"].sum()) == ku + kc and len(imp) == nu + nc
+
+
 def test_grow_to_fit_lifts_an_overflowing_caption_into_the_canvas():
     """A caption that overflows loses its last lines silently. `_grow_to_fit` grows the
     canvas until the block clears the given floor; font sizes are absolute, so a taller

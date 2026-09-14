@@ -242,9 +242,13 @@ runbook. Everything else — tasks, harness, detectors, monitor, batch framing, 
   discloses nothing new, but it is a naming channel and is named here rather than left to be found.
 - **Run-to-run variability at fixed configuration is not something the study measured before publishing a
   replication.** The v1 and v2 grids differ in wall-clock time as well as environment, and the per-item outcome on
-  impossible tasks is not deterministic at the sampling temperature used. `results/analysis/mechanism.md` quantifies
-  this from the batches that were interrupted by the provider balance failure and then re-run under an identical
-  configuration; read the v1-to-v2 comparison against that noise floor, not against zero.
+  impossible tasks is not deterministic at the sampling temperature used. `results/analysis/mechanism.md` §8 quantifies
+  this from the 264 item-runs that completed cleanly both before and after the provider balance failure forced an
+  identical re-run: a single solvable item-run flips its cheat/no-cheat outcome 11.0% of the time, an unreachable one
+  33.3%, while the *aggregate* drift over the same pairs is only +3.3 and +5.6 points. The replication's endpoint
+  shifts (+8.3 and +16.7 points) therefore sit below the per-item churn and above the aggregate drift: no single
+  trajectory is evidence of anything, and the v1-to-v2 gap is several times what a bare re-run produces. Suggestive
+  at this scale, not noise-negligible.
 - **The monitor is not fully independent of the detector.** Its rubric was written to describe the same cheat classes
   the detector implements, so κ measures agreement between two implementations of one definition rather than
   agreement between two independent notions of cheating. It remains a lower bound and a useful cross-check; it is not

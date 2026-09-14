@@ -230,3 +230,16 @@ Useful for motivation and related work, and one piece of direct advice we happen
 - **Framing to avoid:** the talk's own summary is that the field is "very not on track" and that whack-a-mole
   patching of surfaced misalignments is the failure mode. A targeted mitigation like "turn off the notes replay" is
   whack-a-mole by that standard. Claim it as a cheap operational control, not as a principled fix.
+
+## The noise floor, now measured (mechanism.md §8)
+
+The study publishes a replication, so a reader is entitled to ask how much two identical runs differ. The balance
+failure gave that for free: 264 item-runs completed cleanly both before the failure and in the forced re-run.
+
+- A single solvable item-run flips its cheat / no-cheat outcome **11.0%** of the time; an unreachable one **33.3%**.
+- Aggregated over the same pairs the drift is only **+3.3** and **+5.6** points.
+- The replication's endpoint shifts are **+8.3** (DeepSeek) and **+16.7** (GLM) points.
+
+Both halves belong in the sentence. No individual trajectory is evidence, because one in nine flips on its own. The
+v1-to-v2 gap is several times what a bare re-run produces, so it is suggestive rather than noise. This is the
+strongest form of the "not measurably larger" claim: it now has a measured floor under it instead of an assertion.

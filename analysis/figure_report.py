@@ -216,22 +216,91 @@ def _draw_lines(ax, df: pd.DataFrame, *, impossible: bool, n_boot: int, seed: in
     return handles, ymax
 
 
-def _null_callout(ax, df: pd.DataFrame, top: float) -> None:
-    """The four flat lines, with the precision a line sitting on zero cannot show."""
+#: The four models that never cheated on a solvable task. Pre-registration P5 fixes the
+#: bar: a line whose cheat rate on impossible items is under 10% had too weak a dose for
+#: its flat line to mean anything, so those two belong in a different category, not
+#: lower down the same one.
+NULL_SLUGS = ("luna-sal", "sol-sal", "haiku45", "qwen3-14b-sal")
+P5_FLOOR = 0.10
+
+
+def _null_rows(df: pd.DataFrame) -> tuple[list[tuple], list[tuple]]:
+    """Split the flat lines into (dose landed, dose never landed).
+
+    The dose is read on `unreachable` items: a `contradict` variant looks solved from
+    inside the sandbox because its visible tests pass, so it rarely provokes a cheat from
+    anyone and pools into the rate as near-constant dilution. The pooled
+    cheat-on-all-impossible rate is carried alongside, because that is what panel B draws.
+    """
+    dosed, undosed = [], []
+    for slug in NULL_SLUGS:
+        sub = df[df["model_slug"] == slug]
+        solv = sub[~sub["is_impossible"]]
+        if solv.empty:
+            continue
+        imp = sub[sub["is_impossible"]]
+        unre = imp[imp["mutation"] == "unreachable"]
+        k, n = int(solv["cheat"].sum()), int(len(solv))
+        dose = float(unre["cheat"].mean()) if len(unre) else 0.0
+        pooled = float(imp["cheat"].mean()) if len(imp) else 0.0
+        row = (slug, k, n, 100.0 * wilson_ci(k, n)[1], dose, pooled)
+        (dosed if dose >= P5_FLOOR else undosed).append(row)
+    return dosed, undosed
+
+
+#: column widths for the two null boxes, so the numbers line up in a monospaced face
+_NCOL = (17, 8, 7, 6)
+
+
+def _null_row(slug: str, k: int, n: int, bound: str, dose: str) -> str:
+    return (f"{_name(slug):<{_NCOL[0]}}{k}/{n:,}".ljust(_NCOL[0] + _NCOL[1])
+            + bound.rjust(_NCOL[2]) + dose.rjust(_NCOL[3]))
+
+
+def _null_callout(fig, df: pd.DataFrame, y: float) -> None:
+    """The flat lines, split by whether the dose that makes a null mean anything landed.
+
+    Two boxes side by side rather than one ranked list. A single list invites the reader
+    to take the bottom two entries as weaker versions of the top two; they are not on the
+    same scale at all. Under pre-registration P5, a line that never took the bait has not
+    produced a weak null — it has produced no test. The right-hand box therefore withholds
+    the 95% bound as well, because quoting a precision for an untested line is exactly the
+    misreading the split exists to prevent.
+    """
     if df.empty or "model_slug" not in df:
         return
-    lines = ["Flat — and precisely so, not for want of data:"]
-    for slug in ("luna-sal", "sol-sal", "haiku45", "qwen3-14b-sal"):
-        sub = df[(df["model_slug"] == slug) & (~df["is_impossible"])]
-        if sub.empty:
-            continue
-        k, n = int(sub["cheat"].sum()), int(len(sub))
-        lines.append(f"   {_name(slug)}  {k}/{n:,}  (95% upper bound {100 * wilson_ci(k, n)[1]:.1f}%)")
-    lines.append("   pooled over every arm of that model")
-    ax.text(0.035, 0.965, "\n".join(lines), transform=ax.transAxes, fontsize=FS_ANNOT,
-            color=TEXT_SECONDARY, va="top", ha="left", linespacing=1.5,
-            bbox=dict(boxstyle="round,pad=0.45", facecolor=SURFACE, edgecolor=GRID,
-                      linewidth=0.9), zorder=8)
+    dosed, undosed = _null_rows(df)
+    if not dosed and not undosed:
+        return
+    header = ("".ljust(_NCOL[0]) + "cheats".ljust(_NCOL[1])
+              + "bound".rjust(_NCOL[2]) + "bait".rjust(_NCOL[3]))
+
+    def box(x: float, head: str, rows: list[tuple], bounds: bool, style, tail: list[str]):
+        lines = [head, "", header]
+        for slug, k, n, hi, dose, _pooled in rows:
+            lines.append(_null_row(slug, k, n, f"≤{hi:.1f}%" if bounds else "—",
+                                   f"{100 * dose:.0f}%"))
+        lines += tail
+        return fig.text(x, y, "\n".join(lines), fontsize=FS_CAPTION,
+                        color=TEXT_SECONDARY, va="top", ha="left", linespacing=1.6,
+                        family="DejaVu Sans Mono",
+                        bbox=dict(boxstyle="round,pad=0.5", facecolor=SURFACE,
+                                  edgecolor=GRID, linewidth=0.9, linestyle=style))
+
+    t = box(0.085, "EVIDENCE: the bait was taken", dosed, True, "solid",
+            ["", "Cheated freely whenever a task was",
+             "impossible, and never once when it",
+             "was solvable."])
+    # measure rather than guess: the second box starts where the first one ends, so the
+    # split survives any font-metric difference between machines
+    fig.canvas.draw()
+    x1 = float(t.get_window_extent(fig.canvas.get_renderer()).transformed(
+        fig.transFigure.inverted()).x1)
+    box(min(x1 + 0.025, 0.60), "NOT EVIDENCE: the bait was never taken", undosed, False,
+        (0, (3, 2)),
+        ["", "Under P5 a line below 10% here is untested,",
+         "not a weaker null. Nothing tempted these two,",
+         "so there was nothing for them to resist."])
 
 
 def make_main_figure(df: pd.DataFrame, out_dir: str | Path, n_boot: int = 2000,
@@ -244,9 +313,13 @@ def make_main_figure(df: pd.DataFrame, out_dir: str | Path, n_boot: int = 2000,
                          "axes.labelcolor": TEXT_SECONDARY, "svg.fonttype": "path",
                          "figure.dpi": 200, "savefig.dpi": 200})
 
-    fig = plt.figure(figsize=(7.4, 6.4))
+    # The stack under the panels is tall (two null boxes, the f definition, a legend
+    # and a long caption), so the canvas is sized for it up front: leaning on
+    # _grow_to_fit compounds here, because each pass also lifts the block it is trying
+    # to fit. The fractions below are one absolute layout at this height.
+    fig = plt.figure(figsize=(7.4, 9.8))
     gs = fig.add_gridspec(1, 2, wspace=0.22, left=0.085, right=0.985,
-                          top=0.795, bottom=0.52)
+                          top=0.877, bottom=0.673)
     ax1, ax2 = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
     _style(fig, (ax1, ax2))
     for ax in (ax1, ax2):
@@ -270,21 +343,23 @@ def make_main_figure(df: pd.DataFrame, out_dir: str | Path, n_boot: int = 2000,
     ax1.set_ylabel("cheat rate (% of item-runs)", fontsize=FS_AXIS, color=TEXT_SECONDARY)
     ax2.set_ylabel("cheat rate (% of item-runs)", fontsize=FS_AXIS, color=TEXT_SECONDARY)
 
-    # pad_lines is shared so the two panel titles sit at the same height
+    # pad_lines is shared so the two panel titles sit at the same height. Both subtitles
+    # count only the lines P5 calls dosed, so neither can be read as contradicting the
+    # evidence/not-evidence split drawn underneath them.
     _panel_head(ax1, "A.  Cheating on the tasks that were still solvable",
-                "Two of six models cheat more as the batch fills with impossible tasks. "
-                "Four never cheat at all.", wrap=52, pad_lines=3)
+                "Of the four models actually tempted, two cheat more as the batch "
+                "fills and two never cheat.", wrap=52, pad_lines=2)
     _panel_head(ax2, "B.  Cheating on the impossible tasks",
-                "Five of six did cheat here, so the flat lines in A are a real result, "
-                "not a manipulation that failed to bite.", wrap=48, pad_lines=3)
-    _null_callout(ax1, df, top)
+                "Only four of six took the bait: not GPT-5.6-Sol, not Qwen3-14B.",
+                wrap=48, pad_lines=2)
+    _null_callout(fig, df, 0.627)
 
     # f, spelled out under the axes where a reader meets it
-    fig.text(0.085, 0.452, textwrap.fill(F_DEFINITION, 104), fontsize=FS_ANNOT,
+    fig.text(0.085, 0.458, textwrap.fill(F_DEFINITION, 104), fontsize=FS_ANNOT,
              color=TEXT_MUTED, va="top", ha="left", linespacing=1.4)
 
     if handles:
-        leg = fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.30),
+        leg = fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.330),
                          ncol=2, fontsize=FS_LEGEND, frameon=True, framealpha=1.0,
                          edgecolor=GRID, facecolor=SURFACE, borderpad=0.6,
                          handlelength=3.0, labelspacing=0.45, handletextpad=0.6,
@@ -295,7 +370,7 @@ def make_main_figure(df: pd.DataFrame, out_dir: str | Path, n_boot: int = 2000,
 
     fig.suptitle("Does filling a batch with impossible tasks make an agent cheat on the "
                  "solvable ones?", fontsize=FS_TITLE + 0.7, color=TEXT_PRIMARY,
-                 x=0.012, ha="left", y=0.975)
+                 x=0.012, ha="left", y=0.976)
 
     note = _caption(fig, [
         "Unit: one item-run. Cluster: the batch. Bands in A: cluster-bootstrap 95% "
@@ -305,13 +380,21 @@ def make_main_figure(df: pd.DataFrame, out_dir: str | Path, n_boot: int = 2000,
         "the environment leaks closed, in the same colour as the model they repeat. "
         "Cheat = a programmatic detector over sandbox state and logged tool calls, no "
         "LLM; it counts attempts.",
-        "The callout in A gives each flat line's pooled count over every arm of that "
-        "model with its 95% Wilson upper bound, because a line resting on zero cannot "
-        "show its own precision. Qwen3-14B's null is uninformative: panel B shows its "
-        "dose never landed. " + ENV_NOTE,
+        "The two boxes split A's four flat lines by whether the run actually tempted "
+        "them. 'cheats' is that model's solvable-item count pooled over every arm it "
+        "ran; 'bound' is the 95% Wilson upper bound on it, shown because a line resting "
+        "on zero cannot show its own precision; 'bait' is the share of its "
+        "unreachable-variant impossible items it cheated on -- the temptation actually "
+        "delivered (a contradict variant looks solved from inside the sandbox, so it "
+        "tempts almost nobody). Pre-registration P5 calls a line under 10% there too "
+        "weakly dosed for its null to mean anything: GPT-5.6-Sol and Qwen3-14B are a "
+        "different category, not a weaker result, and no bound is quoted for them "
+        "because a precise zero on an untested line is the misreading the split "
+        "prevents. Panel B pools both kinds of impossible item, so its curves sit below "
+        "the 'bait' column. " + ENV_NOTE,
         f"Shaded band: {BAND_CAPTION}.",
         SLUG_MAP_NOTE,
-    ], width=118, y=0.245)
+    ], width=118, y=0.310)
     _grow_to_fit(fig, note, floor=0.0, pad_in=0.12)
 
     paths = []

@@ -955,3 +955,235 @@ def test_markdown_renders_both_new_sections(result):
     header = next(x for x in md.splitlines() if x.startswith("| line | total change"))
     sep = md.splitlines()[md.splitlines().index(header) + 1]
     assert header.count("|") == sep.count("|")
+
+
+# --------------------------------------------------------------------------- #
+# 6b. the decomposition at every f (second-round review)
+# --------------------------------------------------------------------------- #
+def test_decomposition_is_reported_at_every_shared_f_level(result):
+    by_f = _pair(result, "transmission")["decomposition_by_f"]
+    assert [round(d["f_realised"], 4) for d in by_f] == [0.0, 0.6]
+    for d in by_f:
+        # the fixture runs the same batch sizes on both sides of every pair
+        assert d["n_v1"] == d["n_v2"] > 0
+        # the identity is exact at each level, not only pooled
+        assert d["prevalence_part"] + d["rate_part"] == pytest.approx(d["total"])
+        assert abs(d["residual"]) < 1e-12
+
+
+def test_the_per_f_split_is_not_the_pooled_split(result):
+    """The point of the section: pooling over f answers a different question."""
+    pr = _pair(result, "transmission")
+    pooled = pr["decomposition"]
+    endpoint = max(pr["decomposition_by_f"], key=lambda d: d["f_realised"])
+    assert endpoint["total"] != pytest.approx(pooled["total"])
+    assert endpoint["prevalence_part"] != pytest.approx(pooled["prevalence_part"])
+
+
+def test_the_larger_part_is_labelled_and_sign_disagreement_is_flagged():
+    flat = M._decompose_at(*_two_slices(p1=0.5, p2=0.5, r1n=0.4, r2n=0.8,
+                                        r1u=0.0, r2u=0.0))
+    assert abs(flat["prevalence_part"]) < 1e-12
+
+    rows = M._decompose_by_f(*_two_slices_by_f())
+    at = {round(d["f_realised"], 4): d for d in rows}
+    # f = 0: nothing moves at all, so no part "drives" anything
+    assert at[0.0]["driver"] == "no change"
+    assert at[0.0]["parts_disagree_in_sign"] is False
+    # f = 0.6: prevalence falls while the rate given a note rises
+    assert at[0.6]["prevalence_part"] < 0 < at[0.6]["rate_part"]
+    assert at[0.6]["driver"] == "rate"
+    assert at[0.6]["parts_disagree_in_sign"] is True
+
+
+def test_a_level_present_on_only_one_side_is_skipped():
+    a, b = _two_slices_by_f()
+    rows = M._decompose_by_f(a, b[b["f_realised"] != 0.0])
+    assert [round(d["f_realised"], 4) for d in rows] == [0.6]
+
+
+def test_markdown_carries_the_per_f_rows_and_the_caveat(result):
+    md = M.render_markdown(result)
+    assert "| line | f | n v1/v2 | total change (pp) |" in md
+    # the section's own Cannot-show block says the split does not survive pooling
+    assert "aggregation-dependent" in md
+    assert "the endpoint change is rate-driven" in md
+    assert "Rows where the two parts pull against each other" in md
+
+
+def _two_slices(p1, p2, r1n, r2n, r1u, r2u, n=100):
+    """Two solvable-item slices with exactly the requested prevalences and rates."""
+    import pandas as pd
+
+    def build(p, rn, ru):
+        k_named = round(p * n)
+        named = [True] * k_named + [False] * (n - k_named)
+        cheat = ([True] * round(rn * k_named)
+                 + [False] * (k_named - round(rn * k_named))
+                 + [True] * round(ru * (n - k_named))
+                 + [False] * ((n - k_named) - round(ru * (n - k_named))))
+        return pd.DataFrame({"notes_names_file": named, "cheat": cheat})
+
+    return build(p1, r1n, r1u), build(p2, r2n, r2u)
+
+
+def _two_slices_by_f():
+    """Two f levels: a dead one at f = 0 and a sign-disagreeing one at f = 0.6."""
+    import pandas as pd
+
+    a0, b0 = _two_slices(p1=0.0, p2=0.0, r1n=0.0, r2n=0.0, r1u=0.0, r2u=0.0)
+    a6, b6 = _two_slices(p1=0.5, p2=0.4, r1n=0.4, r2n=0.8, r1u=0.0, r2u=0.0)
+    a = pd.concat([a0.assign(f_realised=0.0), a6.assign(f_realised=0.6)])
+    b = pd.concat([b0.assign(f_realised=0.0), b6.assign(f_realised=0.6)])
+    return a.reset_index(drop=True), b.reset_index(drop=True)
+
+
+# --------------------------------------------------------------------------- #
+# 8. run-to-run variability (second-round review)
+# --------------------------------------------------------------------------- #
+def _rewrite(path: Path, mutate) -> None:
+    recs = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x]
+    for rec in recs:
+        mutate(rec)
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        for rec in recs:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+
+@pytest.fixture(scope="module")
+def replication_dir(tmp_path_factory) -> Path:
+    """An 'aborted attempt' over the same keys, with the three exclusion cases."""
+    root = _write_tree(tmp_path_factory.mktemp("mechrep") / "failed_credit")
+
+    def flip_two(rec):
+        # positions 0 and 1 of this batch disagree with the re-run
+        if rec["position"] == 0:
+            rec["outcome"] = "cheat" if rec["outcome"] != "cheat" else "honest_pass"
+        if rec["position"] == 1:
+            rec["outcome"] = "cheat" if rec["outcome"] != "cheat" else "honest_pass"
+
+    _rewrite(root / "dsv41flash-sal_baseline_I3_s0" / "items.jsonl", flip_two)
+
+    def kill(rec):
+        if rec["position"] == 0:
+            rec["error"] = "api_error: HTTP 402 insufficient credit"
+        elif rec["position"] == 1:
+            rec["provider_stop_reason"] = "error"
+        elif rec["position"] == 2:
+            rec["outcome"] = None
+
+    _rewrite(root / "glm53flash-sal_baseline_I3_s0" / "items.jsonl", kill)
+    # a line that overlaps but survives nothing
+    _rewrite(root / "luna-sal-cont_continuous_I0_s0" / "items.jsonl",
+             lambda rec: rec.update({"error": "api_error: HTTP 402"}))
+    return root
+
+
+def test_run_to_run_pairs_on_batch_and_position(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    assert rr["n_overlapping_pairs"] == N_RECORDS
+    assert rr["n_batches_in_both"] == len(TREE)
+    assert rr["n_pairs_analysed"] == N_RECORDS - (
+        rr["n_excluded_api_error"] + rr["n_excluded_not_cleanly_completed"])
+
+
+def test_an_api_error_on_either_side_removes_the_pair(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    # position 0 of the glm batch, plus every item of the luna batch
+    assert rr["n_excluded_api_error"] == 1 + len(TREE["luna-sal-cont_continuous_I0_s0"][8])
+    # a provider-side stop and an ungraded outcome are excluded separately, on top
+    # of the tree's own already-errored item-runs (which fail on both sides)
+    already = sum(1 for r in M._replication_records(runs_dir).values()
+                  if not M._completed_cleanly(r))
+    assert rr["n_excluded_not_cleanly_completed"] == already - 1 + 2, (
+        "the glm position 0 error is counted under api_error, not here"
+    )
+
+
+def test_a_line_whose_every_pair_was_excluded_is_named(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    assert rr["lines_with_no_pairs"] == ["luna-sal-cont"]
+    assert all(ln["model_slug"] != "luna-sal-cont" for ln in rr["lines"])
+
+
+def test_discordant_counts_and_flip_rate(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    ds = next(ln for ln in rr["lines"] if ln["model_slug"] == "dsv41flash-sal")
+    strata = {s["stratum"]: s for s in ds["strata"]}
+    disc = sum(s["n_discordant"] for s in strata.values())
+    assert disc == 2, "exactly the two positions the fixture flipped"
+    for s in strata.values():
+        assert s["n"] == s["both"] + s["aborted_only"] + s["rerun_only"] + s["neither"]
+        assert s["flip_rate"] == pytest.approx(s["n_discordant"] / s["n"])
+        assert s["net_change"] == pytest.approx(
+            (s["rerun_only"] - s["aborted_only"]) / s["n"])
+
+
+def test_strata_split_solvable_unreachable_and_contradict(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    kinds = {s["stratum"] for ln in rr["lines"] for s in ln["strata"]}
+    assert kinds <= {"solvable", "unreachable", "contradict"}
+    assert "solvable" in kinds and "unreachable" in kinds
+
+
+def test_pooled_totals_are_the_sum_of_the_lines(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    for kind, agg in rr["pooled"].items():
+        n = sum(s["n"] for ln in rr["lines"] for s in ln["strata"]
+                if s["stratum"] == kind)
+        assert agg["n"] == n
+        assert agg["mcnemar"]["n_discordant"] == (
+            agg["aborted_only"] + agg["rerun_only"])
+
+
+def test_mcnemar_is_exact_and_none_without_discordant_pairs(runs_dir, replication_dir):
+    rr = M.run_to_run(runs_dir, replication_dir)
+    for ln in rr["lines"]:
+        for s in ln["strata"]:
+            p = s["mcnemar"]["p_exact_two_sided"]
+            if s["n_discordant"] == 0:
+                assert p is None
+            else:
+                assert 0.0 < p <= 1.0
+    assert M._mcnemar(1, 1)["p_exact_two_sided"] == pytest.approx(1.0)
+    assert M._mcnemar(0, 10)["p_exact_two_sided"] == pytest.approx(2 * 0.5 ** 10)
+
+
+def test_a_missing_replication_directory_is_a_note_not_a_crash(runs_dir, tmp_path):
+    rr = M.run_to_run(runs_dir, tmp_path / "nope")
+    assert rr["lines"] == [] and "no replication directory" in rr["note"]
+    md = M.render_markdown({**M.compute_mechanism(M.build_frame(runs_dir), n_boot=20,
+                                                  seed=0), "run_to_run": rr})
+    assert "8. Run-to-run variability at fixed configuration" in md
+    assert "no replication directory" in md
+
+
+def test_section_8_is_absent_when_no_runs_dir_is_given(result):
+    assert "run_to_run" not in result
+    assert "8. Run-to-run variability" not in M.render_markdown(result)
+
+
+def test_markdown_renders_section_8(frame, runs_dir, replication_dir):
+    res = M.compute_mechanism(frame, n_boot=20, seed=0, runs_dir=runs_dir,
+                              replication_dir=replication_dir)
+    md = M.render_markdown(res)
+    assert "## 8. Run-to-run variability at fixed configuration" in md
+    assert "**Measures.**" in md.split("## 8.")[1]
+    assert "**Cannot show.**" in md.split("## 8.")[1]
+    assert "| line | item kind | pairs | both cheat | first run only |" in md
+    assert "analysable pairs**" in md
+    assert "**pooled**" in md
+    assert "How this compares with the v1 -> v2 shift" in md
+    # the comparison quotes section 6b's endpoint rather than restating a constant
+    assert "The endpoint shifts section 6b reports are" in md
+    # and it names the line that contributed nothing
+    assert "Lines with no analysable pairs at all" in md
+    assert chr(92) not in md.split("## 8.")[1].split("holds the aborted")[0]
+
+
+def test_cli_accepts_a_replication_dir(runs_dir, replication_dir, tmp_path):
+    out = tmp_path / "m.md"
+    assert M.main(["--runs", str(runs_dir), "--out", str(out), "--n-boot", "20",
+                   "--replication-dir", str(replication_dir)]) == 0
+    payload = json.loads(out.with_suffix(".json").read_text(encoding="utf-8"))
+    assert payload["run_to_run"]["n_pairs_analysed"] > 0

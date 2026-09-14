@@ -858,6 +858,53 @@ def _decompose(p1: float, p2: float, r1n: float, r2n: float, r1u: float, r2u: fl
     }
 
 
+def _decompose_at(sa: pd.DataFrame, sb: pd.DataFrame) -> dict:
+    """The §6b split for one pair of solvable-item slices."""
+    return _decompose(
+        p1=float(sa["notes_names_file"].mean()),
+        p2=float(sb["notes_names_file"].mean()),
+        r1n=(sa[sa["notes_names_file"]]["cheat"].mean()
+             if sa["notes_names_file"].any() else 0.0),
+        r2n=(sb[sb["notes_names_file"]]["cheat"].mean()
+             if sb["notes_names_file"].any() else 0.0),
+        r1u=(sa[~sa["notes_names_file"]]["cheat"].mean()
+             if (~sa["notes_names_file"]).any() else 0.0),
+        r2u=(sb[~sb["notes_names_file"]]["cheat"].mean()
+             if (~sb["notes_names_file"]).any() else 0.0),
+    )
+
+
+def _decompose_by_f(sa: pd.DataFrame, sb: pd.DataFrame) -> list[dict]:
+    """The same split at every f level, because it is aggregation-dependent.
+
+    Pooled over f the change is mostly prevalence for both lines, but that does not
+    carry to the endpoint: at f = 0.60 DeepSeek's note prevalence FALLS while the rate
+    given a note rises, so the endpoint change there is rate-driven. A reader who takes
+    the pooled sentence to the endpoint would have it backwards.
+    """
+    out: list[dict] = []
+    levels = sorted(set(sa["f_realised"].round(4)) | set(sb["f_realised"].round(4)))
+    for f in levels:
+        a = sa[sa["f_realised"].round(4) == f]
+        b = sb[sb["f_realised"].round(4) == f]
+        if a.empty or b.empty:
+            continue
+        d = _decompose_at(a, b)
+        d["f_realised"] = float(f)
+        d["n_v1"], d["n_v2"] = int(len(a)), int(len(b))
+        # "driven by" is only meaningful when something actually moved
+        if abs(d["total"]) < 1e-12:
+            d["driver"] = "no change"
+        elif abs(d["prevalence_part"]) >= abs(d["rate_part"]):
+            d["driver"] = "prevalence"
+        else:
+            d["driver"] = "rate"
+        d["parts_disagree_in_sign"] = bool(
+            d["prevalence_part"] * d["rate_part"] < 0)
+        out.append(d)
+    return out
+
+
 def _ablation_block(df: pd.DataFrame, slug: str, arm: str) -> dict | None:
     """The notes-withheld line of the same environment, when one was run."""
     sub = df[(df["model_slug"] == slug) & (df["arm"] == arm)]
@@ -939,6 +986,9 @@ def transmission(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED) 
                     r1u=(not_a["cheat"].mean() if len(not_a) else 0.0),
                     r2u=(not_b["cheat"].mean() if len(not_b) else 0.0),
                 ),
+                # the same split per f level: the pooled answer does not carry to the
+                # endpoint, and the endpoint is where the headline lives
+                "decomposition_by_f": _decompose_by_f(sa, sb),
             }
         )
     return {
@@ -1033,6 +1083,158 @@ def item_paired(df: pd.DataFrame, f: float = PAIRED_F, n_boot: int = N_BOOT,
 # --------------------------------------------------------------------------- #
 # assembly
 # --------------------------------------------------------------------------- #
+#: Where the aborted attempts live. `results/failed_credit/` holds batches that ran
+#: partway before the OpenRouter 402 and were then re-run from scratch under an
+#: identical configuration -- an unplanned same-config replication.
+REPLICATION_DIR = "results/failed_credit"
+
+
+def _replication_records(path: Path) -> dict[tuple[str, int], dict]:
+    """``(batch_id, position) -> record`` for one runs tree."""
+    out: dict[tuple[str, int], dict] = {}
+    for items in sorted(Path(path).glob("*/items.jsonl")):
+        batch = items.parent.name
+        with items.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                pos = rec.get("position")
+                if pos is not None:
+                    out[(batch, int(pos))] = rec
+    return out
+
+
+def _is_api_error(rec: dict) -> bool:
+    return "api_error" in str(rec.get("error") or "")
+
+
+def _completed_cleanly(rec: dict) -> bool:
+    """A side usable for pairing: a real trajectory with a graded outcome.
+
+    A record that died on the 402 has no trajectory to compare, and one that was never
+    detector-staged has `outcome = None`, which must not be read as "did not cheat".
+    """
+    if _is_api_error(rec) or rec.get("provider_stop_reason") == "error":
+        return False
+    return rec.get("outcome") not in (None, "error")
+
+
+def run_to_run(runs_dir: str | Path, replication_dir: str | Path = REPLICATION_DIR) -> dict:
+    """Same configuration, run twice: how much does an item-run move on its own?
+
+    We publish a v1-vs-v2 comparison, so the honest context for it is our own
+    run-to-run noise. The aborted attempts give it for free: same batch id, same
+    position, same task, same model, same configuration, two independent executions.
+    """
+    rep_path, run_path = Path(replication_dir), Path(runs_dir)
+    out: dict = {
+        "replication_dir": str(rep_path),
+        "definition": (
+            "for every (batch_id, position) present in both the aborted attempt and the "
+            "re-run, both sides having completed cleanly: an unplanned same-configuration "
+            "replication"
+        ),
+        "lines": [],
+    }
+    if not rep_path.is_dir():
+        out["note"] = f"no replication directory at {rep_path}"
+        return out
+
+    aborted, rerun = _replication_records(rep_path), _replication_records(run_path)
+    keys = sorted(set(aborted) & set(rerun))
+    out["n_overlapping_pairs"] = len(keys)
+    out["n_batches_in_both"] = len({k[0] for k in keys})
+
+    def _slug_of(a: dict, b: dict, key: tuple) -> str:
+        return str(b.get("model_slug") or a.get("model_slug")
+                   or key[0].split("_")[0])
+
+    per: dict[str, dict] = {}
+    overlapping_slugs: set[str] = set()
+    excluded_api = excluded_incomplete = 0
+    for key in keys:
+        a, b = aborted[key], rerun[key]
+        overlapping_slugs.add(_slug_of(a, b, key))
+        if _is_api_error(a) or _is_api_error(b):
+            excluded_api += 1
+            continue
+        if not _completed_cleanly(a) or not _completed_cleanly(b):
+            excluded_incomplete += 1
+            continue
+        slug = _slug_of(a, b, key)
+        kind = ("solvable" if not a.get("is_impossible")
+                else "unreachable" if a.get("mutation") == "unreachable" else "contradict")
+        cell = per.setdefault(slug, {})
+        st = cell.setdefault(kind, {"n": 0, "both": 0, "aborted_only": 0,
+                                    "rerun_only": 0, "neither": 0})
+        ca, cb = a.get("outcome") == "cheat", b.get("outcome") == "cheat"
+        st["n"] += 1
+        st["both" if (ca and cb) else "aborted_only" if ca
+           else "rerun_only" if cb else "neither"] += 1
+
+    out["n_excluded_api_error"] = excluded_api
+    out["n_excluded_not_cleanly_completed"] = excluded_incomplete
+    out["n_pairs_analysed"] = sum(
+        st["n"] for cell in per.values() for st in cell.values())
+    # a line can overlap and still contribute nothing, if every one of its pairs
+    # was excluded; that is a fact about the section's coverage, so it is reported
+    out["lines_with_no_pairs"] = sorted(overlapping_slugs - set(per))
+
+    pooled: dict[str, dict] = {}
+    for slug in sorted(per):
+        strata = []
+        for kind in ("solvable", "unreachable", "contradict"):
+            st = per[slug].get(kind)
+            if not st:
+                continue
+            disc = st["aborted_only"] + st["rerun_only"]
+            strata.append({
+                "stratum": kind,
+                **st,
+                "n_discordant": disc,
+                "flip_rate": (disc / st["n"]) if st["n"] else None,
+                "net_change": ((st["rerun_only"] - st["aborted_only"]) / st["n"])
+                if st["n"] else None,
+                "mcnemar": _mcnemar(st["aborted_only"], st["rerun_only"]),
+            })
+            agg = pooled.setdefault(kind, {"n": 0, "n_discordant": 0,
+                                           "aborted_only": 0, "rerun_only": 0})
+            agg["n"] += st["n"]
+            agg["n_discordant"] += disc
+            agg["aborted_only"] += st["aborted_only"]
+            agg["rerun_only"] += st["rerun_only"]
+        if strata:
+            out["lines"].append({"model_slug": slug, "strata": strata})
+
+    for kind, agg in pooled.items():
+        agg["flip_rate"] = (agg["n_discordant"] / agg["n"]) if agg["n"] else None
+        agg["net_change"] = ((agg["rerun_only"] - agg["aborted_only"]) / agg["n"]
+                             if agg["n"] else None)
+        agg["mcnemar"] = _mcnemar(agg["aborted_only"], agg["rerun_only"])
+    out["pooled"] = pooled
+    return out
+
+
+def _mcnemar(b: int, c: int) -> dict:
+    """Exact (binomial) McNemar on the discordant pairs."""
+    disc = b + c
+    p = None
+    if disc:
+        try:
+            from scipy.stats import binomtest
+
+            p = float(binomtest(b, disc, 0.5).pvalue)
+        except Exception:  # pragma: no cover - scipy is a declared dependency
+            p = None
+    return {"b_aborted_only": b, "c_rerun_only": c, "n_discordant": disc,
+            "p_exact_two_sided": p}
+
+
 def _jsonable(obj):
     if isinstance(obj, dict):
         return {k: _jsonable(v) for k, v in obj.items()}
@@ -1052,7 +1254,9 @@ def _jsonable(obj):
     return str(obj)
 
 
-def compute_mechanism(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED) -> dict:
+def compute_mechanism(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED,
+                      runs_dir: str | Path | None = None,
+                      replication_dir: str | Path | None = None) -> dict:
     res = {
         "n_item_runs": int(len(df)),
         "n_batches": int(df["batch_id"].nunique()) if len(df) else 0,
@@ -1068,6 +1272,9 @@ def compute_mechanism(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_S
         "transmission": transmission(df, n_boot=n_boot, seed=seed),
         "item_paired": item_paired(df, n_boot=n_boot, seed=seed),
     }
+    if runs_dir is not None:
+        res["run_to_run"] = run_to_run(
+            runs_dir, replication_dir or REPLICATION_DIR)
     return _jsonable(res)
 
 
@@ -1496,7 +1703,12 @@ def render_markdown(res: dict) -> str:
         "That closing the leaks caused the discovery change. v2 ran later, against the "
         "same endpoints, with no concurrent v1 control and every fix applied at once; "
         "time-of-day and provider-side drift are not excluded, and neither is any other "
-        "difference between the two sweeps.",
+        "difference between the two sweeps. Nor does 6b's pooled row carry to any one "
+        "dose: the split is aggregation-dependent, and it reverses. Pooled, both lines "
+        "move mostly through note prevalence; at f = 0.60 — the endpoint the headline "
+        "uses — DeepSeek's note prevalence falls while the rate given a note rises, so "
+        "the endpoint change is rate-driven and the two parts carry opposite signs. Use "
+        "the per-f rows, not the pooled one, for a claim about a single f.",
     )
     L += [f"{tr['note']}.", "",
           "### 6a. Environment x note-present", ""]
@@ -1574,6 +1786,50 @@ def render_markdown(res: dict) -> str:
             f"{1 - d['p_bar']:.4f} x {d['d_not_named']:+.4f} = {d['rate_part']:+.4f}; "
             f"sum {d['prevalence_part'] + d['rate_part']:+.4f} = "
             f"total {d['total']:+.4f}.",
+            "",
+        ]
+    L += [
+        "The same split at every dose. The identity holds at each f separately, and "
+        "the answer it gives is not the pooled one: aggregating over f mixes doses "
+        "with different note prevalences, which is itself a prevalence change.",
+        "",
+    ]
+    rows = []
+    for pr in tr["pairs"]:
+        for d in pr.get("decomposition_by_f", []):
+            rows.append(
+                [
+                    pr["model_slug_v1"].replace("-sal", ""),
+                    _f(d["f_realised"]),
+                    f"{d['n_v1']}/{d['n_v2']}",
+                    _pp(d["total"]),
+                    _pp(d["prevalence_part"]),
+                    _pp(d["rate_part"]),
+                    f"{_pct(d['p1'])} -> {_pct(d['p2'])}",
+                    f"{_pct(d['r1_named'])} -> {_pct(d['r2_named'])}",
+                    d["driver"] + (" (parts of opposite sign)"
+                                   if d["parts_disagree_in_sign"] else ""),
+                ]
+            )
+    L += _table(
+        ["line", "f", "n v1/v2", "total change (pp)", "prevalence part (pp)",
+         "rate part (pp)", "note prevalence", "rate with a note", "larger part"],
+        rows,
+    )
+    flips = [(pr, d) for pr in tr["pairs"]
+             for d in pr.get("decomposition_by_f", [])
+             if d["parts_disagree_in_sign"] and abs(d["total"]) > 1e-9]
+    if flips:
+        L += [
+            "Rows where the two parts pull against each other: "
+            + "; ".join(
+                f"`{pr['model_slug_v1']}` at f = {_f(d['f_realised'])} "
+                f"(total {_pp(d['total'])}, prevalence {_pp(d['prevalence_part'])}, "
+                f"rate {_pp(d['rate_part'])})"
+                for pr, d in flips
+            )
+            + ". A prevalence sentence taken from the pooled row would have the sign "
+              "of the prevalence part wrong at those doses.",
             "",
         ]
     L += ["### 6c. The upstream chain", ""]
@@ -1667,6 +1923,131 @@ def render_markdown(res: dict) -> str:
             + "), and no item-run in either environment was left unpaired.",
             "",
         ]
+
+    # ---------------------------------------------------------------- 8
+    rr = res.get("run_to_run")
+    if rr:
+        L += _header(
+            "8. Run-to-run variability at fixed configuration",
+            "How far an item-run moves when nothing about it changes. Several sweeps "
+            "were aborted mid-flight and re-run under an identical configuration, which "
+            "leaves an unplanned replication: every `(batch_id, position)` present on "
+            "both sides is the same task, at the same place in the same batch, for the "
+            "same model, executed twice. Reported per line and per item kind as a "
+            "discordant-pair table, an exact McNemar, the gross item-level flip rate "
+            "and the net drift.",
+            "A designed replication, and therefore not a clean noise floor. The pairs "
+            "exist because runs died, so survival into the analysable set is not "
+            "random: batches that aborted early, and items whose first attempt died on "
+            "a provider error, are simply absent, and one line contributes no pairs at "
+            "all. The two executions are also separated in time, so this figure "
+            "contains provider drift as well as sampling noise and is a clean estimate "
+            "of neither. Cells are small, and pairs within a batch are not independent, "
+            "which the exact McNemar does not adjust for.",
+        )
+        if not rr.get("lines"):
+            L += [rr.get("note", "No analysable replication pairs."), ""]
+        else:
+            L += [
+                f"`{rr['replication_dir'].replace(chr(92), '/')}` holds the aborted "
+                "attempts. "
+                f"{rr['n_overlapping_pairs']:,} `(batch_id, position)` keys appear in "
+                f"both it and the analysed runs, across {rr['n_batches_in_both']:,} "
+                f"batches. Of those, {rr['n_excluded_api_error']:,} pairs are dropped "
+                "because at least one side is an `api_error` record — that is what "
+                f"aborted the sweeps — and {rr['n_excluded_not_cleanly_completed']:,} "
+                "more because a side did not otherwise finish cleanly, leaving "
+                f"**{rr['n_pairs_analysed']:,} analysable pairs**.",
+                "",
+            ]
+            rows = []
+            for ln in rr["lines"]:
+                for st in ln["strata"]:
+                    pv = st["mcnemar"]["p_exact_two_sided"]
+                    rows.append(
+                        [
+                            ln["model_slug"].replace("-sal", ""),
+                            st["stratum"],
+                            str(st["n"]),
+                            str(st["both"]), str(st["aborted_only"]),
+                            str(st["rerun_only"]), str(st["neither"]),
+                            _pct(st["flip_rate"]),
+                            _pp(st["net_change"]),
+                            "—" if pv is None else f"{pv:.3g}",
+                        ]
+                    )
+            for kind in ("solvable", "unreachable", "contradict"):
+                agg = rr.get("pooled", {}).get(kind)
+                if not agg:
+                    continue
+                pv = agg["mcnemar"]["p_exact_two_sided"]
+                rows.append(
+                    [
+                        "**pooled**", kind, str(agg["n"]), "—",
+                        str(agg["aborted_only"]), str(agg["rerun_only"]), "—",
+                        _pct(agg["flip_rate"]), _pp(agg["net_change"]),
+                        "—" if pv is None else f"{pv:.3g}",
+                    ]
+                )
+            L += _table(
+                ["line", "item kind", "pairs", "both cheat", "first run only",
+                 "re-run only", "neither", "flip rate", "net (pp)",
+                 "exact McNemar p"],
+                rows,
+            )
+            solv = rr.get("pooled", {}).get("solvable")
+            unre = rr.get("pooled", {}).get("unreachable")
+            if solv:
+                pv = solv["mcnemar"]["p_exact_two_sided"]
+                # quote section 6's own endpoint numbers rather than restating them
+                ends = []
+                for pr in res["transmission"]["pairs"]:
+                    by_f = pr.get("decomposition_by_f") or []
+                    if by_f:
+                        d = max(by_f, key=lambda r: r["f_realised"])
+                        ends.append(
+                            f"{_pp(d['total'])} pp for "
+                            f"`{pr['model_slug_v1'].replace('-sal', '')}` at "
+                            f"f = {_f(d['f_realised'])}"
+                        )
+                L += [
+                    "**How this compares with the v1 -> v2 shift.** On solvable items "
+                    f"{_pct(solv['flip_rate'])} of pairs disagree with themselves — same "
+                    "task, same batch slot, same model, one execution apart — while the "
+                    f"net drift over {solv['n']:,} pairs is only "
+                    f"{_pp(solv['net_change'])} pp"
+                    + (f" (exact McNemar p = {pv:.3g})" if pv is not None else "")
+                    + ". The endpoint shifts section 6b reports are "
+                    + " and ".join(ends)
+                    + ". Those sit *below* the gross churn and *above* the net drift, "
+                      "and both halves of that belong in any statement about them. A "
+                      "single item-run is about a one-in-nine chance of flipping on its "
+                      "own, so no individual trajectory is evidence of anything; but "
+                      "replicate batches do not drift far in aggregate, so the v1 -> v2 "
+                      "gap is several times the drift a bare re-run produces. Read the "
+                      "environment comparison as suggestive at that scale, not as a "
+                      "measurement whose noise is negligible.",
+                    "",
+                ]
+            if unre:
+                L += [
+                    f"Unreachable items are noisier again — {_pct(unre['flip_rate'])} of "
+                    f"{unre['n']:,} pairs flip, against "
+                    f"{_pct(solv['flip_rate']) if solv else '—'} on solvable ones — which "
+                    "is what a rate sitting near the middle of its range does. The dose "
+                    "measure that sections 4 and 5 condition on inherits that noise.",
+                    "",
+                ]
+            seen = {ln["model_slug"] for ln in rr["lines"]}
+            missing = [s for s in rr.get("lines_with_no_pairs", []) if s not in seen]
+            if missing:
+                L += [
+                    "Lines with no analysable pairs at all: "
+                    + ", ".join(f"`{s}`" for s in missing)
+                    + " — every overlapping key there was excluded, so nothing in this "
+                      "section speaks to those lines.",
+                    "",
+                ]
     return "\n".join(L) + "\n"
 
 
@@ -1683,6 +2064,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", default="results/analysis/mechanism.md")
     ap.add_argument("--n-boot", type=int, default=N_BOOT)
     ap.add_argument("--seed", type=int, default=BOOT_SEED)
+    ap.add_argument("--replication-dir", default=REPLICATION_DIR,
+                    help="aborted attempts re-run under an identical "
+                         "configuration (section 8)")
     args = ap.parse_args(argv)
 
     df = build_frame(args.runs)
@@ -1690,7 +2074,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no analysable item-runs under {args.runs}", file=sys.stderr)
         return 1
 
-    res = compute_mechanism(df, n_boot=args.n_boot, seed=args.seed)
+    res = compute_mechanism(df, n_boot=args.n_boot, seed=args.seed,
+                            runs_dir=args.runs,
+                            replication_dir=args.replication_dir)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

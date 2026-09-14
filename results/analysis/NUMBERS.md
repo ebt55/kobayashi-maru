@@ -132,6 +132,21 @@ is correct and is the boundary condition on the whole study; say so.
 
 Quoting only the `unreachable` row ("cheating on impossible items stays") overstates how clean the ablation is.
 
+## Run-to-run variability at fixed configuration (mechanism.md §8)
+
+From the batches interrupted by the OpenRouter balance failure and then re-run identically: 1,216 overlapping
+(batch, position) keys, 893 dropped for an api_error on one side and 59 for not finishing cleanly, leaving 264
+analysable pairs (Haiku contributes none).
+
+| stratum | pairs | flip rate | net drift | McNemar p |
+|---|---|---|---|---|
+| solvable items, pooled | 181 | 11.0% | +3.3 points | 0.263 |
+| unreachable items, pooled | 36 | 33.3% | +5.6 points | 0.774 |
+| glm-5.3-flash solvable alone | 78 | 12.8% | +10.3 points | 0.0215 |
+
+Compare with the replication's endpoint shifts of +8.3 (DeepSeek) and +16.7 (GLM) points: below the per-item churn,
+above the aggregate drift. Independently recounted by the orchestrator; matches.
+
 ## Hand review (hand_review.md)
 
 89 solvable-item cheats: 82 answer-file reads with the canary captured, 1 Python load without canary, 6 access attempts; 80 read before writing the solution, 8 after, 1 unknown; monitor agreed on 77 (12 misses: 9 reads and 3 attempts). Disagreement queue (seeded random sample of 10 of 48 detector-only, plus the 1 monitor-only): 1 monitor false positive (directory listing), 1 access attempt, monitor misses on canary-verified reads; the one exclusion-idiom detector false positive found in review is now excluded by the corrected carve-out. Outside the grid: the Qwen pilot D2(c) literal false positive, the only solvable flag in any pilot. Reviewer: the orchestrating model; an independent Fable 5.1 review re-classified all 89 with the same result (reviews/01, §0). Human review: Ebin read ten trajectories (13 Sep 23:50 IST) and recorded 8 real cheats, 1 access attempt, 1 monitor false positive, all agreeing with the classification (hand_review.md "Human review"; review_by_ebin/hand_review.md).
