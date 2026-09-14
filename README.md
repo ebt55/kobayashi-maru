@@ -82,7 +82,9 @@ Two things about this are deliberate.
 
 ### 1. The effect is real, and it depends on the model
 
-![Cheat rate on solvable tasks against the fraction of impossible ones](results/analysis/figure_main.png)
+![Cheat rate on solvable tasks against the fraction of impossible ones](results/analysis/report/fig1_dose.png)
+
+*Left: cheating on the ten solvable tasks as the batch fills with impossible ones. Right: the same rate on the impossible tasks, which shows whether a model was tempted at all. Dashed lines are the re-runs with two environment leaks closed. Shaded band marks the 30-40% figure from the incident investigation.*
 
 Six model families were tested. Only four of them ever took the bait at all, and of those four, two started cheating on the solvable tasks as the batch filled up with impossible ones:
 
@@ -136,7 +138,9 @@ And here is the detail that makes this a real mechanism rather than "the agent j
 
 The note is what sends the agent to the grader everywhere the task itself does not.
 
-![How the behaviour spreads, and the ablation that switches it off](results/analysis/figure_mechanism.png)
+![How the behaviour spreads, and the ablation that switches it off](results/analysis/report/fig2_mechanism.png)
+
+*Left: how often each model cheats on a solvable task, split by whether its own earlier note mentioned the answer file. This is a correlation. Right: the experiment that tests it. Hollow markers are the two kinds of impossible task on the same scale, and they move in opposite directions when the notes are withheld.*
 
 ### 3. But none of it changed a single answer
 
