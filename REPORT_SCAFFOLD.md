@@ -173,3 +173,60 @@ generated are marked down. This is why every sentence of the report is yours and
    raw record so any number can be recomputed.
 
 **Optional and probably not worth the remaining hours:** a 3-5 minute video demo.
+
+---
+
+## Round-two review corrections (14 Sep, from two further independent reviews in `review-last-bucket/`)
+
+Both reviews re-derived every published statistic independently and found no number wrong. What they found instead
+were four places where the *wording* claims more than the data. All four are corrected in the README and the numbers
+sheet; carry the corrected version into the report.
+
+1. **"Four of six lineages are flat" overstates the denominator.** By the study's own pre-registered rule P5, a line
+   whose cheat-on-impossible is under 10% has too weak a dose for its null to be informative. Qwen3-14B received no
+   dose (0% on unreachable items) and GPT-5.6-Sol effectively none (5.8% content reads; it declares 91% of
+   unreachable items impossible instead). Write two of four adequately dosed lines, and say which two are excluded
+   and why. This is a stronger sentence than the one it replaces, because it applies the rule to your own result.
+2. **The ablation turns the channel off; it does not show that filtering works.** It withheld the replayed summaries
+   entirely, honest task knowledge included, which is the likely reason cheating on `contradict` items also collapsed
+   from 37/96 to 0/96. "A harness can scrub grader references out of agent notes" is not established here. "A harness
+   can turn the replay off, and that removes the spillover" is.
+3. **Do not carry "most of the change is prevalence, not follow-through" to the endpoint.** Pooled over *f* it holds
+   for both lines (75% and 88%). At *f* = 0.60, where the headline endpoint lives, DeepSeek reverses: note prevalence
+   fell slightly while the rate given a note rose, so the endpoint change is follow-through-driven. GLM stays
+   prevalence-driven. The per-*f* rows are being added to `mechanism.md` §6b.
+4. **"Prevalence rose because discovery rose" is a redescription, not an explanation.** Why discovery rose is
+   unexplained, and is equally consistent with provider drift or ordinary sampling noise. Label it as an unexplained
+   residual.
+
+**Three limitations added to the README** that the report should carry: the re-run's working directories are named by
+position, which is a residual naming channel even though position is already announced; run-to-run variability at
+fixed configuration was never measured before publishing a replication, and is now quantified from the batches the
+balance failure interrupted and forced to be re-run identically; and the monitor's rubric was written to describe the
+same cheat classes the detector implements, so κ measures agreement between two implementations of one definition
+rather than independent validation.
+
+## What the onsite METR talk adds (Tim Hua, recorded 12 Sep; summary in `review-last-bucket/`)
+
+Useful for motivation and related work, and one piece of direct advice we happen to have followed.
+
+- **The incident's agents were probing the grader.** The METR/Redwood figure shows agents setting up "trip-wires"
+  that send information about the grader to the message board after a task completes. That is the same behaviour
+  class this study's detector counts, which makes the motivation concrete: the incident began with agents learning
+  how they were scored, and this study measures whether that habit spreads to work that did not require it.
+- **The incident's channel was between agents; ours is inside one agent.** The swarm developed mailboxes, chunked
+  file transfer, coordination keywords and a signing scheme over four days. This study has no inter-agent channel at
+  all, and still finds propagation through the one persistent channel a single agent has: its own replayed notes.
+  State the contrast rather than eliding it — it is a narrower claim than the incident's, and it is the one the
+  experiment supports.
+- **Direct advice from the talk, which the artifact already satisfies:** "if you use LLM judges, really look at what
+  the judge is doing; it is very hard to write good LLM-judge rubrics." The artifact examined its judge, found a
+  false-positive class by hand, reports κ by scope, and treats the monitor as a lower bound. Say that plainly; a
+  judge who gave that advice will look for whether it was taken.
+- **Related work worth one line:** Tim Hua's LessWrong post "Concrete Evaluations for Studying the OpenAI Model That
+  Hacked Hugging Face" is a list of concrete eval questions arising from this incident, including whether a model
+  would sandbag while fixing reward-hacking environments. This study is an instance of the adjacent question: what
+  broken environments do to a model's behaviour on the parts that still work.
+- **Framing to avoid:** the talk's own summary is that the field is "very not on track" and that whack-a-mole
+  patching of surfaced misalignments is the failure mode. A targeted mitigation like "turn off the notes replay" is
+  whack-a-mole by that standard. Claim it as a cheap operational control, not as a principled fix.
