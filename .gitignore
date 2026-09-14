@@ -8,3 +8,15 @@ results/monitor_cache/
 *.log
 results/logs/
 results/*.json
+
+# raw record directories kept for audit; published in the GitHub release instead
+results/dropped_nemo/
+results/failed_credit/
+results/failed_rate/
+results/pilot_v1/
+results/runs_dryrun/
+results/runs_smoke/
+
+# PDF build intermediate and local text dumps
+report/_build.html
+report/km2*.txt

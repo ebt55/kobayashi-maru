@@ -145,8 +145,12 @@ def _ablation_ymax(df: pd.DataFrame) -> float:
     return ymax
 
 
-def _panel_ablation(ax, df: pd.DataFrame, top: float) -> None:
-    colour = SERIES[0]
+def _panel_ablation(ax, df: pd.DataFrame, top: float, colour: str | None = None) -> None:
+    # `colour` defaults to this figure's own first series slot, so figure_v7 is unchanged.
+    # The report figure pairs this panel with a DeepSeek panel drawn from a different
+    # module's palette, and one model may not change colour between two panels of one
+    # figure, so it passes the colour in.
+    colour = colour or SERIES[0]
     xs = np.arange(len(V7_BARS), dtype=float)
     totals: list[str] = []
     for x, (label, slug) in zip(xs, V7_BARS):
