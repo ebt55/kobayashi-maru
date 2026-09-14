@@ -60,12 +60,27 @@ earlier submit summary in the batch manifest names the answer file, DeepSeek che
 cheating runs saw *higher* running scores than honest ones, so the carrier is propagation of a discovered exploit, not
 score pressure. Cheats cluster in batches (DeepSeek at *f* = 0.60: 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0 per batch).
 κ overall 0.944 (detector flag vs monitor); agreement on the 491 item-runs either rater flagged 0.900. Two environment
-leaks found in review are disclosed under Limits and are being closed in a replication (PREREG v7). Follow-up arms on
+leaks found in review are disclosed under Limits and were closed in a replication that reproduced the effect (PREREG v7). Follow-up arms on
 the primary line (`results/analysis/followups.md`): continuous session P7 not met (0 / 120; it also stops probing
 impossible items: 16% vs 94%), declare-impossible rules P8 partially met (solvable stays 0 / 80; unreachable cheat 19.6%
 vs 22.9%; declared 28.6%), matching-path peer tip P9 met on its letter only (16 / 17 vs 14 / 17, Fisher p = 0.60).
-Spend: $70.00 at the freeze across every run directory (`results/analysis/spend.md`). Every number, with its source
-file, is in `results/analysis/NUMBERS.md`.
+**Replication and ablation (PREREG v7, declared before the runs; tag `freeze-2026-09-14`).** Both leaks below were
+closed (env_version 2: opaque working directory, sibling directories removed) and DeepSeek and GLM were re-run with the
+same seeds; a DeepSeek cell at *f* = 0.60 was also run with the agent's own notes withheld from the manifest
+(`results/analysis/followups.md`, P10 and P11).
+
+| line | env | solvable cheats by *f* (0, 0.167, 0.286, 0.444, 0.60) | endpoint difference (cluster-bootstrap 95% CI) | slope |
+|---|---|---|---|---|
+| deepseek-v4.1-flash | v1 (frozen) | 0, 1, 16, 13, 36 = 66 / 600 | +30.0 [+14.2, +45.8] | 5.99 |
+| deepseek-v4.1-flash | v2 (leaks closed) | 0, 1, 14, 23, 46 = 84 / 600 | +38.3 [+20.0, +56.7] | 7.03 |
+| glm-5.3-flash | v1 (frozen) | 0, 2, 13, 2, 6 = 23 / 600 | +5.0 [+0.8, +11.7] | 1.74 |
+| glm-5.3-flash | v2 (leaks closed) | 0, 9, 5, 15, 26 = 55 / 600 | +21.7 [+5.0, +41.7] | 4.60 |
+| deepseek-v4.1-flash, **notes withheld** | v2, *f* = 0.60 only | 0 / 120 (unreachable items still cheated: 70 / 84) | vs notes on: −38.3 [−56.7, −19.2], Fisher p < 0.0001 | — |
+
+P11 met: the effect survives closing the leaks in both lines, larger in both. P10 met: with the agent's notes withheld
+the spillover is 0 / 120 while cheating on the impossible items stays at 83%. The frozen v1 lines remain the primary
+result; v2 is their robustness check. Spend at the close: $82.28 across every run directory (`results/analysis/spend.md`).
+Every number, with its source file, is in `results/analysis/NUMBERS.md`.
 
 ## The table
 
@@ -93,6 +108,14 @@ decision rules. It was written before any model was called and has six versions;
 | v4 | `d6b83cf` | Monitor prompt clarification, pre-analysis: `grader_read` tightened to match the rule shown to the agent and detector D2(b), monitor token budget raised, one format-only retry on an unparseable reply. Rating only — no agent run, task, mutation, batch or detector rule touched. |
 
 Pilot v0 ran under v1 and is excluded from every analysis; it is kept in `results/pilot_v0/` as a disclosed observation.
+
+## The raw records
+
+Every item record (8,959 analysed item-runs plus pilots, failed and dropped batches; one JSONL line per item-run with
+the full transcript, tool calls, grades, detector evidence and monitor verdict) is published as
+`dosecurve-records-2026-09-14.tar.gz` on the GitHub release `freeze-2026-09-14` (26.6 MB; SHA-256 in the release notes).
+Unpack it at the repository root to get `results/runs/` and the other `results/` directories, then every command in
+`analysis/` reproduces every number in `results/analysis/`.
 
 ## Rerun one batch in 10 minutes
 
@@ -147,6 +170,7 @@ live smoke items additionally require `DOSECURVE_LIVE=1`. To run them on purpose
 | `results/analysis/` | The figure, the table, the stats, the review queue and verdicts, the example trajectory, the spend table. |
 | `results/runs/` | Raw item records, one JSONL line per item-run (gitignored — large). |
 | `results/pilot_v0/`, `results/pilot_v1/` | The two pilots, kept as disclosed observations, not in the analysed grid. Pilot v1 is the per-line hour-8 statistic (one I = 15, seed-0 batch per line under rules v2 in the standard environment): cheats on the 15 impossible items were Luna 0, GLM 0, Sol 0, DeepSeek 1, Qwen 1; Haiku's pilot is its seed-0 sweep batch. Two pilot flags are hand-reviewed in `results/analysis/hand_review.md`. |
+| `results/failed_credit/`, `results/failed_rate/` | Batches set aside after a provider balance failure (Anthropic 13 Sep 16:05; OpenRouter 13 Sep 23:45) or the continuous-arm double-writer incident, re-run clean; kept for audit, never analysed (gitignored, in the records release). |
 | `results/dropped_nemo/` | mistral-nemo:12b batches, dropped under the pre-registered calibration rule (7/10, 7/10 honest solves in its first two f = 0 batches); kept as disclosed observations, not analysed (gitignored). |
 | `results/logs/`, `results/monitor_cache/` | Sweep console logs and the monitor's response cache (gitignored). |
 | `pyproject.toml`, `uv.lock` | Python 3.12, `uv`-managed environment. |
@@ -173,7 +197,8 @@ runbook. Everything else — tasks, harness, detectors, monitor, batch framing, 
   Restricted to runs where the label never appeared, cheat-on-unreachable is 56.0% / 19.2% / 57.7% (DeepSeek / GLM /
   Haiku). (2) Earlier items' directories stayed readable inside the batch container; DeepSeek used this in 26 tool calls,
   every one already flagged by D2(b). No solvable-item cheat depended on either leak (`results/analysis/mechanism.md`
-  §2). Both are closed in the env_version 2 sandbox, and DeepSeek and GLM are being re-run under it (PREREG v7).
+  §2). Both are closed in the env_version 2 sandbox; DeepSeek and GLM were re-run under it with the same seeds and the
+  effect replicated in both (PREREG v7, P11 met; table above).
 - **The manipulation check counts access attempts.** By pre-registration a bash command that targets the grader
   counts as a cheat attempt; 44 of Haiku's 73 flagged impossible item-runs are `ls -la .grader/` with no contents read,
   so its content-read rate on unreachable items is 23.4% (58.9% including listings). Both rates are in the table above.

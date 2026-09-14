@@ -37,6 +37,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from analysis.cells import _finite
 from analysis.load import load_runs
 from analysis.stats import bootstrap_diff_ci, wilson_ci
 
@@ -627,14 +628,14 @@ def render_markdown(res: dict) -> str:
             endpoint = f"_incomplete ({short}/{exp} batches)_"
             ci = reseed = "-"
         else:
-            endpoint = ("-" if r["endpoint_diff"] is None
-                        or not np.isfinite(r["endpoint_diff"])
-                        else f"{100 * r['endpoint_diff']:+.1f}")
-            ci = ("-" if r["ci_lo"] is None or not np.isfinite(r["ci_lo"])
-                  else f"[{100 * r['ci_lo']:+.1f}, {100 * r['ci_hi']:+.1f}]")
-            reseed = ("-" if r.get("ci_lo_min") is None
-                      else f"[{100 * r['ci_lo_min']:+.1f}, {100 * r['ci_lo_max']:+.1f}]")
-        if r["slope"] is None or not np.isfinite(r["slope"]):
+            endpoint = (f"{100 * r['endpoint_diff']:+.1f}"
+                        if _finite(r.get("endpoint_diff")) else "-")
+            ci = (f"[{100 * r['ci_lo']:+.1f}, {100 * r['ci_hi']:+.1f}]"
+                  if _finite(r.get("ci_lo")) and _finite(r.get("ci_hi")) else "-")
+            reseed = (f"[{100 * r['ci_lo_min']:+.1f}, {100 * r['ci_lo_max']:+.1f}]"
+                      if _finite(r.get("ci_lo_min")) and _finite(r.get("ci_lo_max"))
+                      else "-")
+        if not _finite(r.get("slope")):
             slope = "-"
         else:
             levels, want = r.get("levels", PREREG_V7_LEVELS), r.get("levels_expected",

@@ -19,9 +19,15 @@ agent,openai,gpt-5.6-sol,sol,baseline,standard,pilot_v1,gpt-5.6-sol,25,64227,270
 agent,openai,gpt-5.6-sol,sol-sal,baseline,standard,runs,gpt-5.6-sol,948,2064544,8322358,267268,6257814,4.0,20.0,True,16.1067
 agent,openrouter,deepseek/deepseek-v4.1-flash,dsv41flash,baseline,standard,pilot_v1,deepseek/deepseek-v4.1-flash,25,148414,250686,12048,102272,0.15,0.6,True,0.031
 agent,openrouter,deepseek/deepseek-v4.1-flash,dsv41flash-sal,baseline,standard,runs,deepseek/deepseek-v4.1-flash,948,4953720,13357176,1194949,8403456,0.15,0.6,True,1.5861
+agent,openrouter,deepseek/deepseek-v4.1-flash,dsv41flash-sal-v2,baseline,standard,failed_credit,deepseek/deepseek-v4.1-flash,418,500997,1431685,157153,930688,0.15,0.6,True,0.1834
+agent,openrouter,deepseek/deepseek-v4.1-flash,dsv41flash-sal-v2,baseline,standard,runs,deepseek/deepseek-v4.1-flash,948,3831965,12904733,1161230,9072768,0.15,0.6,True,1.4076
+agent,openrouter,deepseek/deepseek-v4.1-flash,dsv41flash-sal-v2-nonotes,baseline,standard,failed_credit,deepseek/deepseek-v4.1-flash,50,367975,909159,104141,541184,0.15,0.6,True,0.1258
+agent,openrouter,deepseek/deepseek-v4.1-flash,dsv41flash-sal-v2-nonotes,baseline,standard,runs,deepseek/deepseek-v4.1-flash,300,1280112,4558192,531568,3278080,0.15,0.6,True,0.5601
 agent,openrouter,z-ai/glm-5.3-flash,glm53flash,baseline,standard,pilot_v1,z-ai/glm-5.3-flash,25,172363,456651,33309,284288,0.15,0.5,True,0.0468
 agent,openrouter,z-ai/glm-5.3-flash,glm53flash-sal,baseline,standard,runs,z-ai/glm-5.3-flash,948,4980989,13616381,1246532,8635392,0.15,0.5,True,1.4999
+agent,openrouter,z-ai/glm-5.3-flash,glm53flash-sal-v2,baseline,standard,failed_credit,z-ai/glm-5.3-flash,504,688663,1886231,218815,1197568,0.15,0.5,True,0.2307
+agent,openrouter,z-ai/glm-5.3-flash,glm53flash-sal-v2,baseline,standard,runs,z-ai/glm-5.3-flash,948,5430523,14264892,1578671,8834369,0.15,0.5,True,1.7364
 monitor,openrouter,deepseek/deepseek-v4-pro-0813,-,-,-,pilot_v1,deepseek/deepseek-v4-pro-0813,75,193015,193015,24104,120576,0.578,1.734,True,0.1603
-monitor,openrouter,deepseek/deepseek-v4-pro-0813,-,-,-,runs,deepseek/deepseek-v4-pro-0813,5812,12161617,12161617,2680227,12151808,0.578,1.734,True,12.3793
+monitor,openrouter,deepseek/deepseek-v4-pro-0813,-,-,-,runs,deepseek/deepseek-v4-pro-0813,6744,14962309,14962309,3440785,14177536,0.578,1.734,True,15.434
 monitor,openrouter,z-ai/glm-5.3,-,-,-,pilot_v1,z-ai/glm-5.3,25,61729,61729,3691,27648,1.092,3.432,True,0.0831
-monitor,openrouter,z-ai/glm-5.3,-,-,-,runs,z-ai/glm-5.3,948,1941888,1941888,56505,2048128,1.092,3.432,True,2.5381
+monitor,openrouter,z-ai/glm-5.3,-,-,-,runs,z-ai/glm-5.3,2163,4369621,4369621,644307,4979456,1.092,3.432,True,7.5266

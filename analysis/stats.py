@@ -311,9 +311,10 @@ def endpoint_difference(
     lows, highs, ps = [], [], []
     for s_i in RESEED_SEEDS:
         alt = bootstrap_diff_ci(hi, lo, col=col, n_boot=n_boot, seed=s_i)
-        if np.isfinite(alt.get("ci_lo", np.nan)):
-            lows.append(alt["ci_lo"])
-            highs.append(alt["ci_hi"])
+        _lo, _hi = alt.get("ci_lo"), alt.get("ci_hi")
+        if _lo is not None and _hi is not None and np.isfinite(_lo) and np.isfinite(_hi):
+            lows.append(_lo)
+            highs.append(_hi)
         if alt.get("p_boot_ge_0") is not None:
             ps.append(alt["p_boot_ge_0"])
     if lows:

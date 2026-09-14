@@ -106,7 +106,7 @@ def build_cells(df: pd.DataFrame) -> pd.DataFrame:
                 if len(rated_solv)
                 else float("nan"),
                 "monitor_model": "/".join(monitor_models) if monitor_models else "",
-                "kappa": None if not np.isfinite(kap) else round(float(kap), 3),
+                "kappa": round(float(kap), 3) if _finite(kap) else None,
                 "kappa_n": tab["n"],
                 "detector_only": tab["a_only"],
                 "monitor_only": tab["b_only"],
@@ -168,6 +168,21 @@ MD_COLUMNS = [
 ]
 
 
+def _finite(x) -> bool:
+    """True for a real, finite number. None, NaN and non-numerics are all "no value".
+
+    `endpoint_difference` returns None (not NaN) when a line has no f = 0 or f = 0.60
+    cell at all -- a single-level line like the notes-ablation cell -- and
+    `np.isfinite(None)` raises, so every formatter must go through this.
+    """
+    if x is None or isinstance(x, bool):
+        return False
+    try:
+        return bool(np.isfinite(x))
+    except (TypeError, ValueError):
+        return False
+
+
 def _model_stats_section(stats: dict | None) -> list[str]:
     """Slope and endpoint per model line, with the labels review C8/C9/C12 asked for."""
     if not stats or not stats.get("models"):
@@ -189,19 +204,27 @@ def _model_stats_section(stats: dict | None) -> list[str]:
         ep = e.get("endpoint_difference") or {}
         kp = e.get("kappa") or {}
         def f(v, nd=3):
-            return "-" if v is None or (isinstance(v, float) and not np.isfinite(v)) else f"{v:.{nd}f}"
+            return f"{v:.{nd}f}" if _finite(v) else "-"
+
         def g(v):
-            return "-" if v is None or (isinstance(v, float) and not np.isfinite(v)) else f"{v:.3g}"
-        ci = ("-" if not np.isfinite(ep.get("ci_lo", float("nan")))
-              else f"[{100 * ep['ci_lo']:+.1f}, {100 * ep['ci_hi']:+.1f}]")
-        reseed = ("-" if ep.get("ci_lo_min") is None
-                  else f"[{100 * ep['ci_lo_min']:+.1f}, {100 * ep['ci_lo_max']:+.1f}]")
-        pbo = ("-" if ep.get("p_boot_ge_0_min") is None
-               else f"{ep['p_boot_ge_0_min']:.3f}-{ep['p_boot_ge_0_max']:.3f}")
-        diff = ("-" if not np.isfinite(ep.get("diff", float("nan")))
-                else f"{100 * ep['diff']:+.1f}")
+            return f"{v:.3g}" if _finite(v) else "-"
+
+        ci = (f"[{100 * ep['ci_lo']:+.1f}, {100 * ep['ci_hi']:+.1f}]"
+              if _finite(ep.get("ci_lo")) and _finite(ep.get("ci_hi")) else "-")
+        reseed = (f"[{100 * ep['ci_lo_min']:+.1f}, {100 * ep['ci_lo_max']:+.1f}]"
+                  if _finite(ep.get("ci_lo_min")) and _finite(ep.get("ci_lo_max")) else "-")
+        pbo = (f"{ep['p_boot_ge_0_min']:.3f}-{ep['p_boot_ge_0_max']:.3f}"
+               if _finite(ep.get("p_boot_ge_0_min")) and _finite(ep.get("p_boot_ge_0_max"))
+               else "-")
+        diff = f"{100 * ep['diff']:+.1f}" if _finite(ep.get("diff")) else "-"
+
+        # A line run at a single f level (the notes-ablation cell is I = 15 only) has no
+        # endpoint at all: `endpoint_difference` returns None, not NaN. Say so rather
+        # than printing a bare "-" that reads like a failed fit.
+        n_levels = len({c.get("f_realised") for c in (e.get("cells") or [])})
+        note = " _(single f level; no endpoint)_" if n_levels < 2 else ""
         L.append(
-            f"| {slug} | {e.get('arm_scope', '-')} | {f(lg.get('slope'))} | "
+            f"| {slug}{note} | {e.get('arm_scope', '-')} | {f(lg.get('slope'))} | "
             f"{g(lg.get('p_one_sided'))} | {g(lg.get('p_two_sided'))} | {diff} | {ci} | "
             f"{reseed} | {pbo} | {f(kp.get('kappa'))} | {f(kp.get('agreement_on_flagged'))} |"
         )

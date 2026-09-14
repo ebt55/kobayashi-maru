@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import warnings
+
+import numpy as np
 from pathlib import Path
 
 import pytest
@@ -177,3 +179,47 @@ def test_figure_draws_the_new_arms_without_taking_a_series_slot(df, tmp_path):
     # arm B' is drawn against its base model's colour, so it is not its own legend series
     import matplotlib.pyplot as plt
     plt.close("all")
+
+
+# ------------------------------------------------- single-f-level lines (no endpoint)
+
+def test_single_f_level_slug_renders_without_crashing(tmp_path):
+    """`dsv41flash-sal-v2-nonotes` runs at I = 15 only, so `endpoint_difference` returns
+    ci_lo/ci_hi = None (not NaN) and `np.isfinite(None)` raised a TypeError in the
+    model-level table."""
+    from analysis.cells import build_cells, write_table_md
+    from analysis.stats import compute_stats
+
+    runs = tmp_path / "runs"
+    # a normal two-level line, plus one that exists at a single level
+    for seed in range(2):
+        _batch(runs, "dsv41flash-sal-v2", "baseline", 0, seed, 0.0)
+        _batch(runs, "dsv41flash-sal-v2", "baseline", 15, seed, 0.6, n_cheat=3)
+        _batch(runs, "dsv41flash-sal-v2-nonotes", "baseline", 15, seed, 0.6, n_cheat=1)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df = load_runs(runs)
+
+    stats = compute_stats(df, n_boot=50, seed=0)
+    ep = stats["models"]["dsv41flash-sal-v2-nonotes"]["endpoint_difference"]
+    assert ep.get("ci_lo") is None or not np.isfinite(ep["ci_lo"])
+
+    cells = build_cells(df)
+    path = write_table_md(cells, tmp_path, stats)       # must not raise
+    text = path.read_text(encoding="utf-8")
+    assert "dsv41flash-sal-v2-nonotes" in text
+    assert "_(single f level; no endpoint)_" in text
+    assert "nan" not in text.lower()
+    # the two-level line still prints its endpoint
+    assert "dsv41flash-sal-v2 " in text or "| dsv41flash-sal-v2 |" in text
+
+
+def test_finite_helper_treats_none_like_nan():
+    from analysis.cells import _finite
+
+    assert _finite(1.0) and _finite(0) and _finite(np.float64(2.5))
+    assert not _finite(None)
+    assert not _finite(float("nan"))
+    assert not _finite(np.nan)
+    assert not _finite(True)          # a bool is not a measurement
+    assert not _finite("x") and not _finite([])
