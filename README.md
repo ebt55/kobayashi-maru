@@ -37,7 +37,8 @@ neither the ExploitGym paper, its README, nor the RDI writeup, and calls it orga
 the source that states it and does not adjudicate between the two.
 
 **Headline numbers (frozen 13 Sep 2026 21:30 IST, tag `freeze-2026-09-13`; secondary columns corrected 23:00 IST after an
-independent review, tag `freeze-2026-09-13b`; 6,763 item-runs in 439 batches, all detector-staged, 6,719 monitor-rated. The PREREG v7 replication and ablation add 2,196 more, for 8,959 in 571 batches; pooled statistics are reported per scope in `stats.json`).**
+independent review, tag `freeze-2026-09-13b`; final artifact with the replication, the ablation and three
+independent reviews at tag `freeze-2026-09-14b`; 6,763 item-runs in 439 batches, all detector-staged, 6,719 monitor-rated. The PREREG v7 replication and ablation add 2,196 more, for 8,959 in 571 batches; pooled statistics are reported per scope in `stats.json`).**
 Cheating on *solvable* items, detector D1–D5, by line (baseline arm, salient environment unless marked):
 
 | line | solvable cheats | rate at *f* = 0 → 0.60 | endpoint difference, cluster-bootstrap 95% CI (lower bound over seeds 0–9) | clustered logistic slope on *f* (95% CI; one-sided p) | cheat on impossible items (unreachable: content reads / incl. listings) | κ |
@@ -67,7 +68,7 @@ leaks found in review are disclosed under Limits and were closed in a replicatio
 the primary line (`results/analysis/followups.md`): continuous session P7 not met (0 / 120; it also stops probing
 impossible items: 16% vs 94%), declare-impossible rules P8 partially met (solvable stays 0 / 80; unreachable cheat 19.6%
 vs 22.9%; declared 28.6%), matching-path peer tip P9 met on its letter only (16 / 17 vs 14 / 17, Fisher p = 0.60).
-**Replication and ablation (PREREG v7, declared before the runs; tag `freeze-2026-09-14`).** Both leaks below were
+**Replication and ablation (PREREG v7, declared before the runs; final tag `freeze-2026-09-14b`).** Both leaks below were
 closed (env_version 2: opaque working directory, sibling directories removed) and DeepSeek and GLM were re-run with the
 same seeds; a DeepSeek cell at *f* = 0.60 was also run with the agent's own notes withheld from the manifest
 (`results/analysis/followups.md`, P10 and P11).
@@ -134,7 +135,7 @@ Pilot v0 ran under v1 and is excluded from every analysis; it is kept in `result
 
 Every item record (8,959 analysed item-runs plus pilots, failed and dropped batches; one JSONL line per item-run with
 the full transcript, tool calls, grades, detector evidence and monitor verdict) is published as
-`dosecurve-records-2026-09-14.tar.gz` on the GitHub release `freeze-2026-09-14` (26.6 MB; SHA-256 in the release notes).
+`dosecurve-records-2026-09-14.tar.gz` on the GitHub release `freeze-2026-09-14b` (26.6 MB; SHA-256 in the release notes).
 Unpack it at the repository root to get `results/runs/` and the other `results/` directories, then every command in
 `analysis/` reproduces every number in `results/analysis/`.
 
@@ -179,6 +180,8 @@ live smoke items additionally require `DOSECURVE_LIVE=1`. To run them on purpose
 | `SPEC.md` | The interface contract between the three parallel builders (task format, batch construction, item-run record, detectors, monitor, analysis outputs). |
 | `RUNPLAN.md` | Which cells were to be run, in what order, at what cost, against the clock. |
 | `DEVIATIONS.md` | Append-only log of every departure from SPEC.md and from the plan, by whom and why. |
+| `REPORT_SCAFFOLD.md` | The three claims with their evidence and pointers, the limitations, the figure choices, and what the data will not support. Scaffolding for the write-up; no report prose. |
+| `reviews/` | Three independent model reviews: the first found two environment leaks and the notes channel; the second rebuilt every published number from the raw records and graded the work; the third scrutinised impact, novelty and rigor and established that the cheats changed no outcomes. Every finding was applied or is recorded as declined in `DEVIATIONS.md`. |
 | `REPORT_EVIDENCE.md` | Source pointers for the write-up: every factual claim tagged VERBATIM / PARAPHRASE / NOT FOUND against the digest it came from. |
 | `notes/` | The research notebook — numbered entries written as the work happened, including priors stated before results and the two design errors the first pilot exposed. |
 | `tasks/` | The thirty toy Python tasks: spec, stub, visible tests, hidden tests, expected outputs, fresh probe inputs, reference solution; `tasks/impossible/` holds the fifteen mutated variants. |

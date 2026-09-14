@@ -5,8 +5,8 @@ who has never seen this repository. The report is being written by Ebin (the hum
 Incident Response Sprint, deadline Monday 14 Sep 2026 11:59 UTC (17:29 IST), eight pages maximum.
 
 **Read this whole file before checking anything.** The body below is current as of the final freeze (git tag
-`freeze-2026-09-14`); the addendum at the end lists what happened between the first review and now, and the
-"Still in flight" section lists the few files a builder may be rewriting while you work. Everything in this file
+`freeze-2026-09-14b`, the final artifact); the addendum at the end lists what happened between the first review and
+the final freeze. Nothing is being edited any more: all runs, analysis and reviews are complete. Everything in this file
 is the orchestrator's account and may itself be wrong — verify against `results/analysis/` and `results/runs/`,
 and report any place where this document disagrees with them.
 
@@ -18,7 +18,7 @@ and report any place where this document disagrees with them.
 - No live API calls. The `.env` keys are not yours to spend. `--provider fake` and `--dry-run` need no key.
 - Do not modify source files. Report; do not fix. If a bug would change a reported number, say exactly which
   number and by how much, with the code path.
-- Write your review to `reviews/01-fable-5.1-review.md` (create the directory). Markdown, no prose about
+- Write your review to `reviews/` under the filename your own instructions give you. Markdown, no prose about
   yourself, no praise padding. Every claim about the code should point at a file and line.
 - Budget yourself: the useful review is the one that arrives in about an hour and names the three things
   most worth doing with the remaining time.
@@ -130,8 +130,9 @@ exists and is a property of lineage, not of *f* or the environment alone. Judge 
 | `results/analysis/` | Final outputs: `table.md`, `cells.csv`, `stats.json`, `figure.png/svg`, `figure_v7.png/svg`, `impossible_by_mutation.md`, `followups.md` (P7–P11), `mechanism.md` + `.json` (the notes channel, the leaks, reads vs attempts, per-batch counts, sensitivity), `flags_for_review.md`, `hand_review.md` (model verdicts + Ebin's own in `review_by_ebin/`), `example_cheat_trajectory.md` (DeepSeek, solvable item), `example_cheat_trajectory_impossible_item.md` (Luna), `spend.md`, `NUMBERS.md` (every number with its source). |
 | `results/runs/` (gitignored, present on this machine) | One directory per batch: `batch.json`, `items.jsonl` (one record per item-run, schema in SPEC §3, with full transcript, tool calls, grades, detector evidence, monitor verdict). |
 | `results/pilot_v0/`, `results/pilot_v1/`, `results/failed_credit/`, `results/failed_rate/`, `results/dropped_nemo/` | Excluded data, kept as disclosed observations. `failed_credit/` holds batches hit by two provider balance failures (Anthropic 13 Sep 16:05, OpenRouter 13 Sep 23:45); every one was re-run clean from the same cells file and the same seeds. |
-| `reviews/` | `01-fable-5.1-review.md` is the first independent review; your review goes here under the filename your own instructions give you. |
-| GitHub release `freeze-2026-09-14` | All raw records as `dosecurve-records-2026-09-14.tar.gz` (26.6 MB), so a judge can rerun the analysis. `gh release view freeze-2026-09-14`. |
+| `reviews/` | Three independent reviews: `01-fable-5.1-review.md` (first pass, found the two environment leaks and the notes channel), `02-opus-5-verify-and-grade.md` (rebuilt every number from the records and graded), `03-opus-5-adversarial.md` (scrutinised impact, novelty and rigor; found that the cheats changed no outcomes). |
+| GitHub release `freeze-2026-09-14b` | All raw records as `dosecurve-records-2026-09-14.tar.gz` (26.6 MB), so a judge can rerun the analysis. `gh release view freeze-2026-09-14b`. The earlier `freeze-2026-09-14` release is marked superseded. |
+| `REPORT_SCAFFOLD.md` | The three claims with their evidence and pointers, the limitations, the figure choices, and the list of things the data will not support — structured to the writing guidance in `../neel-mats-12/notes/neel-core-posts.md` §6. Scaffolding for the human author; contains no report prose. |
 
 Commands: `uv run pytest -q` (harness tests use Docker for a few cases; `analysis/tests` and `detectors/tests` do
 not), `uv run python -m analysis.run --runs results/runs --out /tmp/check` (rebuild every number from the
@@ -184,15 +185,42 @@ records (no `__unreachable`/`__contradict` in any v2 tool output; no cross-item 
 and the paired/unpaired bootstrap choices; (5) read DEVIATIONS.md for gaps between what happened (notes 14–21) and what is
 logged; (6) look at both figures for anything misleading; (7) list anything a judge could call an inconsistency between
 README, NUMBERS.md, PREREG.md, followups.md, mechanism.md, hand_review.md and the notebook. Write to
-`reviews/02-fable-5.1-final-check.md`: a short verdict, then findings ranked by whether they must be fixed before
-submission, then the remaining post-sprint items. Same ground rules as above. `analysis/figure.py` may still be under
-edit by Builder B when you start — review the figures last, from disk.
+your own review file under `reviews/`: a short verdict, then findings ranked by whether they must be fixed before
+submission, then the remaining post-sprint items. Same ground rules as above.
 
-## Still in flight while you review (14 Sep 08:10 IST) — do not report these as defects without checking twice
+## What changed after the second and third reviews (14 Sep, final state)
+
+Both reviews are in `reviews/` and every finding either was applied or is recorded as declined. What moved:
+
+- **The cheats changed no outcomes.** 227 of the 228 solvable-item cheats across all lines shipped a solution that
+  passes the hidden tests and nine fresh probe inputs; the exception submitted nothing. Non-cheat runs pass at
+  5,481/5,482. The contribution is therefore a reconnaissance habit spreading, not an outcome-changing exploit, and
+  the README and `NUMBERS.md` now say so in the results rather than the limitations.
+- **Two overclaims of the orchestrator's were withdrawn.** The replication is not measurably larger than the frozen
+  result (pooled +3.0 [−5.7, +10.8] and +5.3 [−0.5, +12.0]; DeepSeek's paired McNemar p = 0.184), and the ablation
+  does not leave impossible-item cheating untouched (it falls 95/180 → 70/180, because `contradict` items go
+  37/96 → 0/96 while `unreachable` items rise 58/84 → 70/84).
+- **Pooled statistics are now scoped.** `stats.json` carries `pooled.frozen` (the 13 Sep grid: κ 0.944, cumulative
+  dose 0.194 [0.135, 0.254] over 4,390 runs, 89 events), `pooled.preregistered_baseline` (baseline arms only:
+  κ 0.937, 0.196 [0.132, 0.260] over 3,390 runs, same 89 events) and `pooled.all` (including the v7 lines: κ 0.899,
+  0.196 [0.159, 0.234] over 5,710 runs, 228 events), each with its own `definition` string. The follow-up arms
+  contributed no solvable-item cheat, which is why only the denominators move between the first two.
+- **Ledger corrections**: seven pre-registration versions now listed with commits (the table had four); Luna's
+  manipulation-check figure corrected to 36.8% pooled across arms, 25.3% for the baseline arm alone; GLM's
+  read-versus-attempt split 34 + 17 and its declared-impossible rate 48.0%; the seven Haiku batches that were never
+  re-run after the line was cut are now stated.
+- **`analysis/mechanism.py` §6 and §7** add the decomposition of the v1→v2 change (75% and 88% of it is a change in
+  how many items carry a note naming the answer file, not in what an agent does once it has one) and the item-paired
+  comparison on (seed, position), which matches task_id 120/120 in both lines.
+- Both figures were regenerated: the replication lines draw as dashed variants of their base colour, the
+  single-level ablation cell is excluded from the dose panels with the caption saying so, and `figure_v7.png` shows
+  the replication and the ablation together.
+
+## Historical note: what was in flight during the second and third reviews
 
 - `analysis/figure.py` is being restyled: the v2 lines are becoming dashed variants of their base colour, the
   single-level ablation slug is being dropped from panels A–D, the legend is moving out of the data area, and a new
   `results/analysis/figure_v7.png/.svg` (replication + ablation) is being added. Read the figures last, from disk.
 - `analysis/mechanism.py` §6 (transmission rate across environments) and §7 (item-paired comparison) landed at
   08:35 IST; `mechanism.md` and `mechanism.json` are regenerated.
-- Nothing else is being edited. No runs are in progress; no further API spend is planned.
+- Nothing else was being edited. All of the above landed before the final freeze.

@@ -84,3 +84,20 @@ Price note: OpenRouter's listing for z-ai/glm-5.3-flash was $0.15/$0.50 at 14:10
   "endpoints only ≈ $55" estimate was about right for the wrong reason: Sol and Luna were far cheaper than modelled and Haiku
   far dearer (no cache hits).
 - Freeze of the hosted result: evening of Sun 13 Sep rather than Mon 07:00, because every hosted line finished by 17:50.
+
+## Day two, Mon 14 Sep (written 09:40 IST)
+
+- 22:40 Sun: PREREG v7 committed (`5b54802`), then three runs launched on the leak-closed sandbox (env_version 2):
+  `dsv41flash-sal-v2` and `glm53flash-sal-v2` (5 levels × 12 batches, same seeds as v1) and
+  `dsv41flash-sal-v2-nonotes` (f = 0.60 × 12, the agent's own summaries withheld). Ebin approved the paid re-runs.
+- 23:45 Sun: OpenRouter balance exhausted; 683 items across 77 batches returned HTTP 402. Every affected batch moved
+  to `results/failed_credit/` and re-run from the same cells file after a top-up. No analysed batch carries a balance
+  error.
+- ~03:00 Mon: the machine slept; the final monitor pass stopped 42 verdicts short and was completed at 07:20.
+- 07:30 Mon: final analysis over 8,959 item-runs in 571 batches; P10 met, P11 met; tag `freeze-2026-09-14` and the
+  raw records published as a release asset.
+- 08:00–09:30 Mon: two further independent reviews (`reviews/02`, `reviews/03`). They rebuilt every number from the
+  records, found that the cheats changed no outcomes (227/228 shipped correct solutions), and caught two overclaims
+  and five stale ledger rows. All corrected; pooled statistics now reported under three named scopes. Final tag
+  `freeze-2026-09-14b`.
+- Spend at the close: $82.28 against a $60 target. The v7 runs, their failed batches and their monitoring cost $12.
