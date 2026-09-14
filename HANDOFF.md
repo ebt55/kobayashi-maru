@@ -123,3 +123,25 @@ disclosed in the figure caption; the monitor is a lower bound; the orchestrator 
 null for four hours because of a staging lag (internal, no data affected); the first spend tool double-counted
 cached tokens (fixed, disclosed); the Qwen D2(c) false positive in pilot v1; pooled cheat-on-impossible is below
 the pre-registered 30% target for Luna, Sol and GLM even in the salient environment.
+
+## Addendum for the second review (14 Sep 2026, 07:45 IST) — final check before submission
+
+Since the first review (`reviews/01-fable-5.1-review.md`): its secondary corrections were applied (tag `freeze-2026-09-13b`,
+before/after table in `results/analysis/NUMBERS.md`); `analysis/mechanism.py` turned T1/T4/T5/T6 into tables; PREREG v7
+(commit `5b54802`) declared a leak-closed replication (env_version 2) of DeepSeek and GLM and a DeepSeek notes-ablation
+cell before those batches ran; an OpenRouter balance failure hit the v7 runs (77 batches → `results/failed_credit/`, re-run
+clean); the final freeze is tag `freeze-2026-09-14` with all raw records published as a release asset. P10 and P11 are
+met (`results/analysis/followups.md`); notes 19–21 and the deviation log cover the night. Ebin's own hand review is in
+`results/analysis/review_by_ebin/`.
+
+What the second review should do, in priority order: (1) confirm every number in README's headline and v7 blocks and in
+NUMBERS.md matches `results/analysis/*.md|json` and rebuilds from `results/runs`; (2) confirm the PREREG v7 commit
+precedes the first v7 batch's `started_at` and that no analysed v7 batch contains a 402/credit error while
+`results/failed_credit/` holds all that do; (3) check the env_version 2 fix actually removed the two leaks in the v2
+records (no `__unreachable`/`__contradict` in any v2 tool output; no cross-item reads); (4) re-check P10/P11 arithmetic
+and the paired/unpaired bootstrap choices; (5) read DEVIATIONS.md for gaps between what happened (notes 14–21) and what is
+logged; (6) look at both figures for anything misleading; (7) list anything a judge could call an inconsistency between
+README, NUMBERS.md, PREREG.md, followups.md, mechanism.md, hand_review.md and the notebook. Write to
+`reviews/02-fable-5.1-final-check.md`: a short verdict, then findings ranked by whether they must be fixed before
+submission, then the remaining post-sprint items. Same ground rules as above. `analysis/figure.py` may still be under
+edit by Builder B when you start — review the figures last, from disk.
