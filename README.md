@@ -257,6 +257,16 @@ The convention of treating a model's refusal as data, logging it and never rewor
 
 Everything else, including the tasks, the harness, the detectors, the monitor and the analysis, was built during the sprint.
 
+## Licence
+
+The code is **MIT** (see `LICENSE`): the harness, the detectors, the monitor, the analysis, the tasks and the mutation script. Use it for anything.
+
+The written material and the data are **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**: the report, this README, the pre-registration, the notebook, and the raw records attached to the release. Reuse them freely with attribution.
+
+Copyright 2026 Ebin Babu Thomas.
+
+One thing worth knowing if you reuse the records: they contain outputs from models run under several providers' terms. My licence covers my collection and presentation of them, not whatever those providers say about their own model outputs. Check that yourself if it matters for your use.
+
 ## Cost
 
 Total spend across every run: **$82.32**. Full breakdown by provider and model in `results/analysis/spend.md`.
