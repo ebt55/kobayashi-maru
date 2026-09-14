@@ -223,3 +223,92 @@ def test_finite_helper_treats_none_like_nan():
     assert not _finite(np.nan)
     assert not _finite(True)          # a bool is not a measurement
     assert not _finite("x") and not _finite([])
+
+
+# --------------------------------------------- figure: v2 variants and single-level cells
+
+def test_v2_slug_maps_to_its_base_and_nonotes_does_not():
+    from analysis.figure import continuous_base, v2_base, variant_of
+
+    assert v2_base("dsv41flash-sal-v2") == "dsv41flash-sal"
+    assert v2_base("glm53flash-sal-v2") == "glm53flash-sal"
+    assert v2_base("dsv41flash-sal") is None
+    # the ablation cell is NOT a v2 variant of anything: it ends with -nonotes
+    assert v2_base("dsv41flash-sal-v2-nonotes") is None
+    assert variant_of("dsv41flash-sal-v2") == ("dsv41flash-sal", "v2")
+    assert variant_of("luna-sal-cont") == ("luna-sal", "cont")
+    assert variant_of("dsv41flash-sal-v2-nonotes") is None
+    assert continuous_base("dsv41flash-sal-v2") is None
+
+
+def test_single_level_slugs_are_detected(tmp_path):
+    from analysis.figure import single_level_slugs
+
+    runs = tmp_path / "runs"
+    for seed in range(2):
+        _batch(runs, "dsv41flash-sal-v2", "baseline", 0, seed, 0.0)
+        _batch(runs, "dsv41flash-sal-v2", "baseline", 15, seed, 0.6, n_cheat=3)
+        _batch(runs, "dsv41flash-sal-v2-nonotes", "baseline", 15, seed, 0.6)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df = load_runs(runs)
+    assert single_level_slugs(df) == {"dsv41flash-sal-v2-nonotes"}
+
+
+def test_v2_variant_shares_its_base_colour_and_nonotes_is_excluded(tmp_path):
+    """The v2 line takes no colour slot of its own, and the single-level ablation cell
+    appears in no panel of the main figure."""
+    import matplotlib.pyplot as plt
+    from analysis.figure import make_figure
+
+    runs = tmp_path / "runs"
+    for seed in range(2):
+        for I, f in ((0, 0.0), (15, 0.6)):
+            _batch(runs, "dsv41flash-sal", "baseline", I, seed, f, n_cheat=(3 if f else 0))
+            _batch(runs, "dsv41flash-sal-v2", "baseline", I, seed, f, n_cheat=(2 if f else 0))
+        _batch(runs, "dsv41flash-sal-v2-nonotes", "baseline", 15, seed, 0.6)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df = load_runs(runs)
+
+    paths = make_figure(df, tmp_path, n_boot=20, seed=0)
+    plt.close("all")
+    assert all(Path(p).is_file() for p in paths)
+
+    svg = Path([p for p in paths if str(p).endswith(".svg")][0]).read_text(encoding="utf-8")
+    # the v2 line is labelled as a variant of its base, not as a model of its own
+    assert "v2 (leaks closed)" in svg
+    # the single-level ablation cell is drawn in no panel; it may appear only in the
+    # caption, which names what was excluded and why. The caption is wrapped, so assert
+    # on tokens that cannot straddle a line break.
+    assert "no dose curve" in svg
+    assert "figure_v7" in svg
+    # the excluded slug is named in the caption (wrapped, so its own name can straddle a
+    # line break -- assert on the reason text, which does not)
+    assert "single f level" in svg
+
+
+def test_v7_figure_is_written_with_both_panels(tmp_path):
+    from analysis.figure_v7 import V7_BARS, V7_CAPTION, make_v7_figure
+
+    runs = tmp_path / "runs"
+    for seed in range(2):
+        for I, f in ((0, 0.0), (15, 0.6)):
+            _batch(runs, "dsv41flash-sal", "baseline", I, seed, f, n_cheat=(3 if f else 0))
+            _batch(runs, "dsv41flash-sal-v2", "baseline", I, seed, f, n_cheat=(4 if f else 0))
+            _batch(runs, "glm53flash-sal", "baseline", I, seed, f, n_cheat=(1 if f else 0))
+            _batch(runs, "glm53flash-sal-v2", "baseline", I, seed, f, n_cheat=(1 if f else 0))
+        _batch(runs, "dsv41flash-sal-v2-nonotes", "baseline", 15, seed, 0.6, n_cheat=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df = load_runs(runs)
+
+    paths = make_v7_figure(df, tmp_path, n_boot=20, seed=0)
+    assert [p.name for p in paths] == ["figure_v7.png", "figure_v7.svg"]
+    assert all(p.is_file() and p.stat().st_size > 0 for p in paths)
+    svg = paths[1].read_text(encoding="utf-8")
+    assert "Leak-closed replication" in svg
+    assert "Notes ablation" in svg
+    assert len(V7_BARS) == 3
+    assert "PREREG v7" in V7_CAPTION and "env_version 2" in V7_CAPTION
+    assert "v1 remains the frozen primary result" in V7_CAPTION

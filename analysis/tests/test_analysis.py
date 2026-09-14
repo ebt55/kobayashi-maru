@@ -166,7 +166,12 @@ def test_figure_panel_b_has_no_f_zero_point(rendered_fig):
 
 def test_figure_legend_labels_carry_the_environment(rendered_fig):
     a, b, _c, _d = panels(rendered_fig)
-    labels = [t.get_text() for t in a.get_legend().get_texts()]
+    # the legend is a single shared row BELOW the panels (it used to sit over panel A's
+    # data); series identity is unchanged
+    assert a.get_legend() is None
+    fig = a.get_figure()
+    assert fig.legends, "the figure-level legend is missing"
+    labels = [t.get_text() for t in fig.legends[0].get_texts()]
     assert any(lab.endswith("(standard)") for lab in labels), labels
     assert "haiku45 (standard)" in labels
     # B uses the same series identity
@@ -372,9 +377,10 @@ def test_panel_c_carries_both_series(rendered_fig):
     assert all(ln.get_markerfacecolor() != "none" for ln in named)
     # same colour per model in both series
     assert {ln.get_color() for ln in named} == {ln.get_color() for ln in hidden}
-    # a two-entry legend explains the pairing
-    texts = [t.get_text() for t in c.get_legend().get_texts()]
-    assert texts == ["solvable items", "impossible items"]
+    # the pairing is explained in the figure's shared legend row, not over the data
+    assert c.get_legend() is None
+    texts = [t.get_text() for t in c.get_figure().legends[0].get_texts()]
+    assert "solvable items" in texts and "impossible items" in texts
 
 
 def test_stats_has_the_secondary_discoverable_slope(sloped):

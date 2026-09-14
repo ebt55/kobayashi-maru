@@ -34,7 +34,8 @@ import pandas as pd  # noqa: E402
 
 from analysis.stats import bootstrap_rate_ci, rate, wilson_ci  # noqa: E402
 
-__all__ = ["make_figure", "BAND_CAPTION", "SERIES", "LINESTYLES", "MARKERS"]
+__all__ = ["make_figure", "BAND_CAPTION", "SERIES", "LINESTYLES", "MARKERS",
+           "v2_base", "continuous_base", "variant_of", "single_level_slugs"]
 
 #: verbatim from SPEC.md section 6.
 BAND_CAPTION = (
@@ -87,6 +88,45 @@ DOSE_BIN_LABELS = ("0", "1", "2", "3–4", "5–7", "8+")
 
 
 CONTINUOUS_SUFFIXES = ("-cont", "-continuous")
+#: `<base>-v2` is the same model re-run with the environment leaks closed (env_version 2).
+#: It shares the base line's colour and is drawn dashed, like arm B'.
+V2_SUFFIXES = ("-v2",)
+VARIANT_LABELS = {"cont": "continuous (arm B′)", "v2": "v2 (leaks closed)"}
+
+
+def v2_base(slug: str) -> str | None:
+    """`dsv41flash-sal-v2` -> `dsv41flash-sal`; None when the slug is not a v2 re-run.
+
+    `dsv41flash-sal-v2-nonotes` does NOT match: it ends with `-nonotes`, it is the
+    single-level ablation cell, and it belongs in figure_v7, not here.
+    """
+    for suffix in V2_SUFFIXES:
+        if slug.endswith(suffix):
+            return slug[: -len(suffix)]
+    return None
+
+
+def variant_of(slug: str) -> tuple[str, str] | None:
+    """(base_slug, kind) for a follow-up variant of another line, else None."""
+    base = continuous_base(slug)
+    if base is not None:
+        return base, "cont"
+    base = v2_base(slug)
+    if base is not None:
+        return base, "v2"
+    return None
+
+
+def single_level_slugs(df: pd.DataFrame) -> set[str]:
+    """Slugs run at one f level only -- no dose curve exists for them.
+
+    The notes-ablation cell (`dsv41flash-sal-v2-nonotes`, I = 15 only) would otherwise
+    appear in panels A-D as a one-point series with no endpoint and no slope.
+    """
+    if df.empty:
+        return set()
+    levels = df.groupby("model_slug")["f_realised"].nunique()
+    return {str(k) for k, v in levels.items() if v < 2}
 
 
 def continuous_base(slug: str) -> str | None:
@@ -200,6 +240,9 @@ def _panel_impossible(ax, df: pd.DataFrame, models: list[str], labels: dict[str,
             label=labels.get(slug, slug), clip_on=False,
         )
 
+    v_top, _ = _draw_variants(ax, df, models, impossible=True)
+    ymax = max(ymax, v_top)
+
     top = max(4.0, ymax * 1.16)
     _f_axis(ax, top)
     ax.set_xlabel(
@@ -210,6 +253,41 @@ def _panel_impossible(ax, df: pd.DataFrame, models: list[str], labels: dict[str,
         fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
     )
     return top
+
+
+def _draw_variants(ax, df: pd.DataFrame, models: list[str], *, impossible: bool,
+                   x: str = "f_realised") -> tuple[float, list]:
+    """Overlay each follow-up variant (arm B', v2 re-run) on its base model's colour.
+
+    Dashed and hollow-markered so it never reads as another model, and it takes no
+    colour slot of its own. Returns (max y drawn, legend handles).
+    """
+    handles, ymax = [], 0.0
+    sub_all = df[df["is_impossible"]] if impossible else df[~df["is_impossible"]]
+    for slug in sorted(sub_all["model_slug"].dropna().unique()):
+        v = variant_of(str(slug))
+        if v is None or v[0] not in models:
+            continue
+        base_slug, kind = v
+        colour = SERIES[models.index(base_slug) % len(SERIES)]
+        sub = sub_all[sub_all["model_slug"] == slug]
+        xs, ys = [], []
+        for xv, cell in sub.groupby(x, sort=True):
+            if not np.isfinite(xv) or len(cell) == 0:
+                continue
+            xs.append(float(xv))
+            ys.append(100.0 * float(cell["cheat"].mean()))
+        if not xs:
+            continue
+        ymax = max(ymax, max(ys))
+        ax.plot(xs, ys, color=colour, linestyle=(0, (4.0, 2.0)), linewidth=1.6,
+                marker="P", markersize=5.0, markerfacecolor="none",
+                markeredgecolor=colour, markeredgewidth=1.3, zorder=4, clip_on=False)
+        handles.append(plt.Line2D(
+            [], [], color=colour, linestyle=(0, (4.0, 2.0)), linewidth=1.6,
+            marker="P", markersize=5.0, markerfacecolor="none", markeredgecolor=colour,
+            label=f"{base_slug} · {VARIANT_LABELS[kind]}"))
+    return ymax, handles
 
 
 def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
@@ -254,34 +332,9 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
         )
         end_labels.append((ys[-1], xs[-1], slug))
 
-    # arm B' (one continuous session for the whole batch): same colour as its base
-    # model, dashed, because it is the same model under a different memory channel.
-    cont_handles = []
-    cont = solv[solv["arm"] == "continuous"]
-    for slug in sorted(cont["model_slug"].dropna().unique()):
-        base_slug = continuous_base(str(slug))
-        colour = (SERIES[models.index(base_slug) % len(SERIES)]
-                  if base_slug in models else TEXT_SECONDARY)
-        sub = cont[cont["model_slug"] == slug]
-        xs, ys = [], []
-        for f, cell in sub.groupby("f_realised", sort=True):
-            if not np.isfinite(f) or len(cell) == 0:
-                continue
-            xs.append(float(f))
-            ys.append(100.0 * float(cell["cheat"].mean()))
-        if not xs:
-            continue
-        ymax = max(ymax, max(ys))
-        ax.plot(
-            xs, ys, color=colour, linestyle=(0, (4.0, 2.0)), linewidth=1.6,
-            marker="P", markersize=5.5, markeredgecolor=SURFACE, markeredgewidth=1.0,
-            zorder=4, clip_on=False,
-        )
-        cont_handles.append(
-            plt.Line2D([], [], color=colour, linestyle=(0, (4.0, 2.0)), linewidth=1.6,
-                       marker="P", markersize=5.5,
-                       label=f"{base_slug or slug} · continuous (arm B′)")
-        )
+    # follow-up variants (arm B', v2 re-runs): base colour, dashed, no new colour slot
+    v_top, cont_handles = _draw_variants(ax, df, models, impossible=False)
+    ymax = max(ymax, v_top)
 
     # peer arms, if they ran: markers only, never a line (a different arm is not
     # a continuation of the baseline dose curve).
@@ -334,19 +387,10 @@ def _panel_a(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
         fontsize=8.6, color=TEXT_PRIMARY, loc="left", pad=6,
     )
 
-    handles, labels = ax.get_legend_handles_labels()
+    # The legend lives below the panels (a shared row), never over the data.
+    handles, _ = ax.get_legend_handles_labels()
     handles += peer_handles
-    labels += [h.get_label() for h in peer_handles]
-    if len(handles) >= 2:
-        leg = ax.legend(
-            handles, labels, loc="upper left", fontsize=6.2, frameon=True,
-            framealpha=1.0, edgecolor=GRID, facecolor=SURFACE, borderpad=0.35,
-            handlelength=2.2, labelspacing=0.3, handletextpad=0.5,
-        )
-        leg.get_frame().set_linewidth(0.8)
-        for t in leg.get_texts():
-            t.set_color(TEXT_SECONDARY)
-    return top
+    return top, handles
 
 
 def _panel_c(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
@@ -452,15 +496,8 @@ def _panel_c(ax, df: pd.DataFrame, models: list[str], n_boot: int, seed: int,
                        markeredgecolor=TEXT_SECONDARY, markeredgewidth=1.2,
                        label="impossible items"),
         ]
-        leg = ax.legend(
-            handles=proxies, loc="upper left", fontsize=6.0, frameon=True,
-            framealpha=1.0, edgecolor=GRID, facecolor=SURFACE, borderpad=0.35,
-            handlelength=2.2, labelspacing=0.3, handletextpad=0.5,
-        )
-        leg.get_frame().set_linewidth(0.8)
-        for t in leg.get_texts():
-            t.set_color(TEXT_SECONDARY)
-    return top
+        return top, proxies
+    return top, []
 
 
 def _panel_d(ax, df: pd.DataFrame, models: list[str], labels: dict[str, str], seed: int) -> float:
@@ -550,10 +587,10 @@ def make_figure(
         }
     )
 
-    fig = plt.figure(figsize=(7.5, 5.6))
+    fig = plt.figure(figsize=(7.5, 6.5))
     gs = fig.add_gridspec(
-        2, 3, height_ratios=[1.0, 0.82], hspace=0.52, wspace=0.10,
-        left=0.075, right=0.992, top=0.905, bottom=0.205,
+        2, 3, height_ratios=[1.0, 0.82], hspace=0.46, wspace=0.10,
+        left=0.075, right=0.992, top=0.92, bottom=0.30,
     )
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
@@ -565,26 +602,50 @@ def make_figure(
         ax.tick_params(labelleft=True)
 
     all_slugs = sorted(df["model_slug"].dropna().unique()) if not df.empty else []
-    # arm B' is drawn on panel A against its base model's colour, not as its own series
-    models = _order_models([s for s in all_slugs if continuous_base(s) not in all_slugs])
+    solo = single_level_slugs(df)
+    # A follow-up variant (arm B', or a v2 re-run) is drawn against its base model's
+    # colour, never as its own series; a single-level slug has no curve at all and is
+    # excluded from every panel here (it is the subject of figure_v7).
+    def _is_base(slug: str) -> bool:
+        v = variant_of(slug)
+        return not (v and v[0] in all_slugs) and slug not in solo
+
+    models = _order_models([s for s in all_slugs if _is_base(s)])
+    df = df[~df["model_slug"].isin(solo)]
     if df.empty or not models:
         for ax in axes:
             ax.text(0.5, 0.5, "no item-runs", ha="center", va="center",
                     fontsize=9, color=TEXT_MUTED, transform=ax.transAxes)
     else:
         labels = _labels(df)
-        top_a = _panel_a(ax1, df, models, n_boot, seed, labels)
+        top_a, legend_handles = _panel_a(ax1, df, models, n_boot, seed, labels)
         top_b = _panel_impossible(ax2, df, models, labels)
-        top_c = _panel_c(ax3, df, models, n_boot, seed, labels)
+        top_c, c_proxies = _panel_c(ax3, df, models, n_boot, seed, labels)
         top_d = _panel_d(ax4, df, models, labels, seed)
         # one measure -> one scale, so every panel is directly comparable
         ax1.set_ylim(0, max(top_a, top_b, top_c, top_d))
+
+        # ONE legend for the whole figure, in its own row under the panels: with eleven
+        # series an in-axes legend covered the data it was labelling.
+        legend_handles += c_proxies
+        if legend_handles:
+            leg = fig.legend(
+                handles=legend_handles, loc="lower center",
+                bbox_to_anchor=(0.5, 0.006), ncol=4, fontsize=6.2, frameon=True,
+                framealpha=1.0, edgecolor=GRID, facecolor=SURFACE, borderpad=0.5,
+                handlelength=2.4, labelspacing=0.42, handletextpad=0.55,
+                columnspacing=1.4,
+            )
+            leg.get_frame().set_linewidth(0.8)
+            for t in leg.get_texts():
+                t.set_color(TEXT_SECONDARY)
 
     fig.suptitle(
         "Cheating on still-solvable coding tasks vs the impossible fraction of the batch",
         fontsize=10.0, color=TEXT_PRIMARY, x=0.008, ha="left", y=0.975,
     )
 
+    excluded = ", ".join(sorted(solo)) if solo else ""
     n_solv = int((~df["is_impossible"]).sum()) if not df.empty else 0
     n_batches = int(df["batch_id"].nunique()) if not df.empty else 0
     n_imp = int(df["is_impossible"].sum()) if not df.empty else 0
@@ -608,8 +669,16 @@ def make_figure(
         "(its visible tests pass). One jittered point per batch; the curve is the "
         "batch-clustered logistic fit.",
         "Line style and marker, not colour alone, carry model identity — the series stay "
-        "readable in grayscale print and under colour-vision deficiency.",
+        "readable in grayscale print and under colour-vision deficiency. A `-v2` series is "
+        "the same model re-run with the environment leaks closed (env_version 2): base "
+        "colour, dashed, hollow marker, no colour of its own.",
     ]
+    if excluded:
+        paragraphs.append(
+            f"Counts above cover the series plotted here. Excluded from all four panels: "
+            f"{excluded} — run at a single f level, so it has no dose curve; it is the "
+            f"subject of figure_v7 instead."
+        )
     note_ax = fig.add_subplot(gs[1, 1:])
     note_ax.axis("off")
     wrapped: list[str] = []
