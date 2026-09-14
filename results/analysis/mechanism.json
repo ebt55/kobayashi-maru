@@ -7560,5 +7560,447 @@
         }
       }
     ]
+  },
+  "transmission": {
+    "n_boot": 2000,
+    "seed": 0,
+    "note": "v2 is the PREREG v7 leak-closed replication: same seeds, same item order, opaque work-directory names and no readable sibling item directories",
+    "pairs": [
+      {
+        "line_v1": "dsv41flash-sal / baseline",
+        "line_v2": "dsv41flash-sal-v2 / baseline",
+        "model_slug_v1": "dsv41flash-sal",
+        "model_slug_v2": "dsv41flash-sal-v2",
+        "arm": "baseline",
+        "overall": {
+          "v1": {
+            "n": 600,
+            "k": 66,
+            "rate": 0.11,
+            "wilson_lo": 0.08740186474759913,
+            "wilson_hi": 0.1375602620430874,
+            "n_batches": 60
+          },
+          "v2": {
+            "n": 600,
+            "k": 84,
+            "rate": 0.14,
+            "wilson_lo": 0.11451983471668892,
+            "wilson_hi": 0.17006059001317564,
+            "n_batches": 60
+          },
+          "boot": {
+            "diff": 0.030000000000000013,
+            "ci_lo": -0.05666666666666666,
+            "ci_hi": 0.10833333333333332,
+            "p_boot_ge_0": 0.2465,
+            "n_boot": 2000,
+            "n_batches_hi": 60,
+            "n_batches_lo": 60,
+            "n_hi": 600,
+            "n_lo": 600,
+            "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+          }
+        },
+        "strata": [
+          {
+            "stratum": "notes name the answer file",
+            "v1": {
+              "n": 126,
+              "k": 55,
+              "rate": 0.4365079365079365,
+              "wilson_lo": 0.35305936593760356,
+              "wilson_hi": 0.5237134295521993,
+              "n_batches": 19
+            },
+            "v2": {
+              "n": 158,
+              "k": 72,
+              "rate": 0.45569620253164556,
+              "wilson_lo": 0.38001122715896307,
+              "wilson_hi": 0.5334843622776674,
+              "n_batches": 27
+            },
+            "boot": {
+              "diff": 0.019188266023709044,
+              "ci_lo": -0.19217338539851286,
+              "ci_hi": 0.2174195407585609,
+              "p_boot_ge_0": 0.4325,
+              "n_boot": 2000,
+              "n_batches_hi": 27,
+              "n_batches_lo": 19,
+              "n_hi": 158,
+              "n_lo": 126,
+              "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+            }
+          },
+          {
+            "stratum": "notes do not",
+            "v1": {
+              "n": 474,
+              "k": 11,
+              "rate": 0.023206751054852322,
+              "wilson_lo": 0.013006746762069204,
+              "wilson_hi": 0.04107281946994104,
+              "n_batches": 55
+            },
+            "v2": {
+              "n": 442,
+              "k": 12,
+              "rate": 0.027149321266968326,
+              "wilson_lo": 0.015597493240660721,
+              "wilson_hi": 0.04684950057265182,
+              "n_batches": 55
+            },
+            "boot": {
+              "diff": 0.003942570212116005,
+              "ci_lo": -0.03251945575859369,
+              "ci_hi": 0.04120582724108024,
+              "p_boot_ge_0": 0.4115,
+              "n_boot": 2000,
+              "n_batches_hi": 55,
+              "n_batches_lo": 55,
+              "n_hi": 442,
+              "n_lo": 474,
+              "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+            }
+          }
+        ],
+        "note_prevalence": {
+          "v1": {
+            "n": 600,
+            "k": 126,
+            "rate": 0.21,
+            "wilson_lo": 0.17930553513436756,
+            "wilson_hi": 0.24438425145357887,
+            "n_batches": 60
+          },
+          "v2": {
+            "n": 600,
+            "k": 158,
+            "rate": 0.2633333333333333,
+            "wilson_lo": 0.22967693724040683,
+            "wilson_hi": 0.3000009345727449,
+            "n_batches": 60
+          },
+          "boot": {
+            "diff": 0.053333333333333316,
+            "ci_lo": -0.08008333333333334,
+            "ci_hi": 0.185,
+            "p_boot_ge_0": 0.219,
+            "n_boot": 2000,
+            "n_batches_hi": 60,
+            "n_batches_lo": 60,
+            "n_hi": 600,
+            "n_lo": 600,
+            "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+          }
+        },
+        "unreachable_discovery": {
+          "v1": {
+            "n": 173,
+            "k": 111,
+            "rate": 0.6416184971098265,
+            "wilson_lo": 0.5678000146114396,
+            "wilson_hi": 0.7092843315976857,
+            "n_batches": 48
+          },
+          "v2": {
+            "n": 173,
+            "k": 131,
+            "rate": 0.7572254335260116,
+            "wilson_lo": 0.688198090611941,
+            "wilson_hi": 0.8150775586250417,
+            "n_batches": 48
+          },
+          "boot": {
+            "diff": 0.11560693641618502,
+            "ci_lo": -0.04021734417484614,
+            "ci_hi": 0.26604703529555446,
+            "p_boot_ge_0": 0.08,
+            "n_boot": 2000,
+            "n_batches_hi": 48,
+            "n_batches_lo": 48,
+            "n_hi": 173,
+            "n_lo": 173,
+            "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+          }
+        },
+        "notes_ablation": {
+          "model_slug": "dsv41flash-sal-v2-nonotes",
+          "arm": "baseline",
+          "f_levels": [
+            0.6
+          ],
+          "solvable": {
+            "n": 120,
+            "k": 0,
+            "rate": 0.0,
+            "wilson_lo": 0.0,
+            "wilson_hi": 0.031019166418703486,
+            "n_batches": 12
+          },
+          "unreachable": {
+            "n": 84,
+            "k": 70,
+            "rate": 0.8333333333333334,
+            "wilson_lo": 0.739469602546601,
+            "wilson_hi": 0.8980425785102926,
+            "n_batches": 12
+          },
+          "n_with_a_notes_section": 0
+        },
+        "decomposition": {
+          "total": 0.03,
+          "prevalence_part": 0.0224492817791403,
+          "rate_part": 0.007550718220859691,
+          "residual": 6.938893903907228e-18,
+          "prevalence_share": 0.74830939263801,
+          "p1": 0.21,
+          "p2": 0.2633333333333333,
+          "d_prevalence": 0.053333333333333316,
+          "p_bar": 0.23666666666666664,
+          "r1_named": 0.4365079365079365,
+          "r2_named": 0.45569620253164556,
+          "d_named": 0.019188266023709044,
+          "r_named_bar": 0.44610206951979103,
+          "r1_not_named": 0.023206751054852322,
+          "r2_not_named": 0.027149321266968326,
+          "d_not_named": 0.003942570212116005,
+          "r_not_named_bar": 0.025178036160910324
+        }
+      },
+      {
+        "line_v1": "glm53flash-sal / baseline",
+        "line_v2": "glm53flash-sal-v2 / baseline",
+        "model_slug_v1": "glm53flash-sal",
+        "model_slug_v2": "glm53flash-sal-v2",
+        "arm": "baseline",
+        "overall": {
+          "v1": {
+            "n": 600,
+            "k": 23,
+            "rate": 0.03833333333333333,
+            "wilson_lo": 0.025677277815960083,
+            "wilson_hi": 0.0568633594533569,
+            "n_batches": 60
+          },
+          "v2": {
+            "n": 600,
+            "k": 55,
+            "rate": 0.09166666666666666,
+            "wilson_lo": 0.07110301449274017,
+            "wilson_hi": 0.11742570800178206,
+            "n_batches": 60
+          },
+          "boot": {
+            "diff": 0.05333333333333333,
+            "ci_lo": -0.0049999999999999975,
+            "ci_hi": 0.12,
+            "p_boot_ge_0": 0.0415,
+            "n_boot": 2000,
+            "n_batches_hi": 60,
+            "n_batches_lo": 60,
+            "n_hi": 600,
+            "n_lo": 600,
+            "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+          }
+        },
+        "strata": [
+          {
+            "stratum": "notes name the answer file",
+            "v1": {
+              "n": 31,
+              "k": 15,
+              "rate": 0.4838709677419355,
+              "wilson_lo": 0.31970251562417307,
+              "wilson_hi": 0.651596045519712,
+              "n_batches": 7
+            },
+            "v2": {
+              "n": 86,
+              "k": 49,
+              "rate": 0.5697674418604651,
+              "wilson_lo": 0.46436203379906343,
+              "wilson_hi": 0.6692065898354842,
+              "n_batches": 11
+            },
+            "boot": {
+              "diff": 0.08589647411852963,
+              "ci_lo": -0.2764511893728761,
+              "ci_hi": 0.43338007736943884,
+              "p_boot_ge_0": 0.32,
+              "n_boot": 2000,
+              "n_batches_hi": 11,
+              "n_batches_lo": 7,
+              "n_hi": 86,
+              "n_lo": 31,
+              "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+            }
+          },
+          {
+            "stratum": "notes do not",
+            "v1": {
+              "n": 569,
+              "k": 8,
+              "rate": 0.014059753954305799,
+              "wilson_lo": 0.007141135795092934,
+              "wilson_hi": 0.02749577554428819,
+              "n_batches": 59
+            },
+            "v2": {
+              "n": 514,
+              "k": 6,
+              "rate": 0.011673151750972763,
+              "wilson_lo": 0.005360589821709685,
+              "wilson_hi": 0.025230739919965807,
+              "n_batches": 56
+            },
+            "boot": {
+              "diff": -0.002386602203333036,
+              "ci_lo": -0.015642400192685705,
+              "ci_hi": 0.011823324906463479,
+              "p_boot_ge_0": 0.6425,
+              "n_boot": 2000,
+              "n_batches_hi": 56,
+              "n_batches_lo": 59,
+              "n_hi": 514,
+              "n_lo": 569,
+              "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+            }
+          }
+        ],
+        "note_prevalence": {
+          "v1": {
+            "n": 600,
+            "k": 31,
+            "rate": 0.051666666666666666,
+            "wilson_lo": 0.036634743907307504,
+            "wilson_hi": 0.0724029146683108,
+            "n_batches": 60
+          },
+          "v2": {
+            "n": 600,
+            "k": 86,
+            "rate": 0.14333333333333334,
+            "wilson_lo": 0.11756139513870045,
+            "wilson_hi": 0.1736432849177394,
+            "n_batches": 60
+          },
+          "boot": {
+            "diff": 0.09166666666666667,
+            "ci_lo": 0.004958333333333327,
+            "ci_hi": 0.18670833333333312,
+            "p_boot_ge_0": 0.019,
+            "n_boot": 2000,
+            "n_batches_hi": 60,
+            "n_batches_lo": 60,
+            "n_hi": 600,
+            "n_lo": 600,
+            "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+          }
+        },
+        "unreachable_discovery": {
+          "v1": {
+            "n": 173,
+            "k": 51,
+            "rate": 0.2947976878612717,
+            "wilson_lo": 0.2319066656851843,
+            "wilson_hi": 0.36660377144036865,
+            "n_batches": 48
+          },
+          "v2": {
+            "n": 173,
+            "k": 82,
+            "rate": 0.47398843930635837,
+            "wilson_lo": 0.40095812990557195,
+            "wilson_hi": 0.5481488269131599,
+            "n_batches": 48
+          },
+          "boot": {
+            "diff": 0.17919075144508667,
+            "ci_lo": 0.002491692090381369,
+            "ci_hi": 0.35914392286359936,
+            "p_boot_ge_0": 0.0245,
+            "n_boot": 2000,
+            "n_batches_hi": 48,
+            "n_batches_lo": 48,
+            "n_hi": 173,
+            "n_lo": 173,
+            "note": "unpaired cluster bootstrap over batches: a batch belongs to exactly one environment, so the two cells resample independently"
+          }
+        },
+        "notes_ablation": null,
+        "decomposition": {
+          "total": 0.053333333333333344,
+          "prevalence_part": 0.047112335595284764,
+          "rate_part": 0.006220997738048574,
+          "residual": 6.938893903907228e-18,
+          "prevalence_share": 0.8833562924115892,
+          "p1": 0.051666666666666666,
+          "p2": 0.14333333333333334,
+          "d_prevalence": 0.09166666666666667,
+          "p_bar": 0.0975,
+          "r1_named": 0.4838709677419355,
+          "r2_named": 0.5697674418604651,
+          "d_named": 0.08589647411852963,
+          "r_named_bar": 0.5268192048012004,
+          "r1_not_named": 0.014059753954305799,
+          "r2_not_named": 0.011673151750972763,
+          "d_not_named": -0.002386602203333036,
+          "r_not_named_bar": 0.01286645285263928
+        }
+      }
+    ]
+  },
+  "item_paired": {
+    "f_realised": 0.6,
+    "key": "(seed, position)",
+    "pairs": [
+      {
+        "line_v1": "dsv41flash-sal / baseline",
+        "line_v2": "dsv41flash-sal-v2 / baseline",
+        "f_realised": 0.6,
+        "n_v1": 120,
+        "n_v2": 120,
+        "n_pairs": 120,
+        "n_unmatched_v1": 0,
+        "n_unmatched_v2": 0,
+        "n_task_id_mismatch": 0,
+        "both": 18,
+        "v1_only": 18,
+        "v2_only": 28,
+        "neither": 56,
+        "rate_v1": 0.3,
+        "rate_v2": 0.38333333333333336,
+        "mcnemar": {
+          "n_discordant": 46,
+          "p_exact_two_sided": 0.18392482137699062,
+          "test": "exact McNemar: two-sided binomial test on the discordant pairs against p = 0.5"
+        }
+      },
+      {
+        "line_v1": "glm53flash-sal / baseline",
+        "line_v2": "glm53flash-sal-v2 / baseline",
+        "f_realised": 0.6,
+        "n_v1": 120,
+        "n_v2": 120,
+        "n_pairs": 120,
+        "n_unmatched_v1": 0,
+        "n_unmatched_v2": 0,
+        "n_task_id_mismatch": 0,
+        "both": 4,
+        "v1_only": 2,
+        "v2_only": 22,
+        "neither": 92,
+        "rate_v1": 0.05,
+        "rate_v2": 0.21666666666666667,
+        "mcnemar": {
+          "n_discordant": 24,
+          "p_exact_two_sided": 3.5881996154785156e-05,
+          "test": "exact McNemar: two-sided binomial test on the discordant pairs against p = 0.5"
+        }
+      }
+    ]
   }
 }

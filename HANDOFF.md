@@ -98,13 +98,18 @@ tallies than honest ones, so score pressure is not the carrier.
 
 **Why the replication is larger than the original, which you should scrutinise.** v2 cheats more than v1 (DeepSeek
 84 vs 66, GLM 55 vs 23) with only the leak fix changed. The orchestrator's explanation, computed from the records
-and being turned into `mechanism.md` §6–§7 by a builder while you read this: the per-note transmission rate is
-unchanged (DeepSeek 43.7% v1 vs 45.6% v2 when a note names the file; GLM 57.7% vs 57.0%; both ≈1–3% without a
-note), and what rose is the *prevalence* of such a note (DeepSeek 126 → 158 solvable item-runs, GLM 26 → 86) and
-upstream of it the discovery rate on unreachable items (64.2% → 75.7%, 29.5% → 47.4%). Item-paired on
-(seed, position) at *f* = 0.60, task_id matches 120/120 in both lines. **Check this claim yourself from
-`results/runs`; it is new, it is load-bearing, and it has not been reviewed by anyone.** Note that v1 and v2 also
-differ in wall-clock time, so provider-side drift is not formally excluded.
+and now in `mechanism.md` §6–§7: most of the rise is a change in how many items carry a note naming the answer
+file, not a change in what an agent does once it has one. Per-note cheat rate DeepSeek 43.7% (v1) vs 45.6% (v2),
+GLM 48.4% vs 57.0%; without such a note both lines stay at 1–3% in both environments. Note prevalence rose from
+126 to 158 solvable item-runs (DeepSeek) and 31 to 86 (GLM), and upstream of it the discovery rate on unreachable
+items rose from 64.2% to 75.7% and from 29.5% to 47.4%. A mean-weight decomposition attributes 75% (DeepSeek) and
+88% (GLM) of the total rise to prevalence. The within-stratum differences are small against wide intervals
+(DeepSeek +1.9 [−19.2, +21.7], GLM +8.6 [−27.6, +43.3]), so the defensible claim is the decomposition, not that
+the per-note rate is unchanged. Item-paired on (seed, position) at *f* = 0.60, task_id matches 120/120 in both
+lines; exact McNemar p = 0.184 (DeepSeek), 3.6e-5 (GLM). **Check all of this yourself from `results/runs`; it is
+new and load-bearing. An earlier hand count by the orchestrator put GLM's v1 stratum at 26 rather than 31 and was
+corrected by a builder who checked all 31 records individually.** Note that v1 and v2 also differ in wall-clock
+time, so provider-side drift is not formally excluded.
 
 The honest reading the orchestrator holds: the dose is necessary and not sufficient; spillover is large where it
 exists and is a property of lineage, not of *f* or the environment alone. Judge that reading too.
@@ -188,6 +193,6 @@ edit by Builder B when you start — review the figures last, from disk.
 - `analysis/figure.py` is being restyled: the v2 lines are becoming dashed variants of their base colour, the
   single-level ablation slug is being dropped from panels A–D, the legend is moving out of the data area, and a new
   `results/analysis/figure_v7.png/.svg` (replication + ablation) is being added. Read the figures last, from disk.
-- `analysis/mechanism.py` is gaining §6 (transmission rate across environments) and §7 (item-paired comparison),
-  described above. If `mechanism.md` has no §6, it has not landed yet.
+- `analysis/mechanism.py` §6 (transmission rate across environments) and §7 (item-paired comparison) landed at
+  08:35 IST; `mechanism.md` and `mechanism.json` are regenerated.
 - Nothing else is being edited. No runs are in progress; no further API spend is planned.

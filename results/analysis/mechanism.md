@@ -372,3 +372,59 @@ Read the endpoint interval of `dsv41flash-sal / baseline` (b) as undefined, not 
 
 The logistic p is statsmodels' two-sided value, as in `stats.json`; the pre-registered test is one-sided (halve it when the slope is positive).
 
+## 6. Transmission rate across environments (v1 vs v2)
+
+**Measures.** Whether the leak-closed replication's higher solvable-item cheat rate is a change in how often the agent's own notes carried the answer file, or a change in how often such a note was acted on: the environment x note-present 2x2 per line, an exact decomposition of the total change into those two parts, and the upstream discovery rate on unreachable items.
+
+**Cannot show.** That closing the leaks caused the discovery change. v2 ran later, against the same endpoints, with no concurrent v1 control and every fix applied at once; time-of-day and provider-side drift are not excluded, and neither is any other difference between the two sweeps.
+
+v2 is the PREREG v7 leak-closed replication: same seeds, same item order, opaque work-directory names and no readable sibling item directories.
+
+### 6a. Environment x note-present
+
+| line | stratum | v1 | rate | 95% CI | v2 | rate | 95% CI | v2 - v1 (pp, cluster boot) |
+|---|---|---|---|---|---|---|---|---|
+| dsv41flash | all solvable | 66/600 | 11.0% | [8.7%, 13.8%] | 84/600 | 14.0% | [11.5%, 17.0%] | +3.0 [-5.7, +10.8] |
+| dsv41flash | notes name the answer file | 55/126 | 43.7% | [35.3%, 52.4%] | 72/158 | 45.6% | [38.0%, 53.3%] | +1.9 [-19.2, +21.7] |
+| dsv41flash | notes do not | 11/474 | 2.3% | [1.3%, 4.1%] | 12/442 | 2.7% | [1.6%, 4.7%] | +0.4 [-3.3, +4.1] |
+| glm53flash | all solvable | 23/600 | 3.8% | [2.6%, 5.7%] | 55/600 | 9.2% | [7.1%, 11.7%] | +5.3 [-0.5, +12.0] |
+| glm53flash | notes name the answer file | 15/31 | 48.4% | [32.0%, 65.2%] | 49/86 | 57.0% | [46.4%, 66.9%] | +8.6 [-27.6, +43.3] |
+| glm53flash | notes do not | 8/569 | 1.4% | [0.7%, 2.7%] | 6/514 | 1.2% | [0.5%, 2.5%] | -0.2 [-1.6, +1.2] |
+
+The difference column is the frozen **unpaired** two-group cluster bootstrap (`analysis.stats.bootstrap_diff_ci`): a batch belongs to exactly one environment, which is the assumption that function is written for. Section 1's within-batch split is the case where it does not hold and a paired resample is used instead.
+
+### 6b. Decomposition of the total change
+
+With `R = p * r_named + (1 - p) * r_not`, the change splits exactly into a prevalence part and a rate part at mean weights: `R2 - R1 = (p2 - p1)(r_named_bar - r_not_bar) + p_bar(r2n - r1n) + (1 - p_bar)(r2u - r1u)`. This is an identity, not a model; the residual column shows it closing to floating-point dust.
+
+| line | total change (pp) | from note prevalence (pp, share) | from per-stratum rates (pp) | note prevalence | rate with a note | rate without one | residual |
+|---|---|---|---|---|---|---|---|
+| dsv41flash | +3.0 | +2.2 (75%) | +0.8 | 21.0% -> 26.3% | 43.7% -> 45.6% | 2.3% -> 2.7% | 6.94e-18 |
+| glm53flash | +5.3 | +4.7 (88%) | +0.6 | 5.2% -> 14.3% | 48.4% -> 57.0% | 1.4% -> 1.2% | 6.94e-18 |
+
+`dsv41flash-sal`: (0.2633 - 0.2100) x (0.4461 - 0.0252) = +0.0224; 0.2367 x +0.0192 + 0.7633 x +0.0039 = +0.0076; sum +0.0300 = total +0.0300.
+
+`glm53flash-sal`: (0.1433 - 0.0517) x (0.5268 - 0.0129) = +0.0471; 0.0975 x +0.0859 + 0.9025 x -0.0024 = +0.0062; sum +0.0533 = total +0.0533.
+
+### 6c. The upstream chain
+
+| line | cheat on unreachable v1 | v2 | note prevalence (solvable) | cheat rate given a note | v2 - v1 given a note (pp) |
+|---|---|---|---|---|---|
+| dsv41flash | 111/173 (64.2%) | 131/173 (75.7%) | 21.0% -> 26.3% | 43.7% -> 45.6% | +1.9 [-19.2, +21.7] |
+| glm53flash | 51/173 (29.5%) | 82/173 (47.4%) | 5.2% -> 14.3% | 48.4% -> 57.0% | +8.6 [-27.6, +43.3] |
+
+The chain's last link is the one the crosstab cannot establish, and there is an intervention for it: `dsv41flash-sal-v2-nonotes` — the same v2 environment and cell with the manifest's notes section withheld (0 of 120 solvable item-runs carry one) — reaches the answer file on 70/84 (83.3%) of its unreachable items while cheating on 0/120 (0.0%) of its solvable ones. Discovery without a channel does not spill over.
+
+## 7. Item-paired comparison (v1 vs v2)
+
+**Measures.** The same solvable tasks at f = 0.6 in both environments, paired on `(seed, position)` so the task and its place in the batch are held fixed (the task identity of every pair is checked, and a mismatch raises rather than being compared); the discordant-pair table and an exact McNemar test on it.
+
+**Cannot show.** A per-item causal effect. The pairing fixes the task and the position but not the trajectory that reached them — the impossible items before a pair were the same tasks, but what the agent did on them was not — so a discordant pair is a difference between two whole batch histories. Pairs within a batch are also not independent, which the exact McNemar test does not adjust for.
+
+| line | pairs | both cheat | v1 only | v2 only | neither | v1 rate | v2 rate | exact McNemar p |
+|---|---|---|---|---|---|---|---|---|
+| dsv41flash | 120 | 18 | 18 | 28 | 56 | 30.0% | 38.3% | 0.184 |
+| glm53flash | 120 | 4 | 2 | 22 | 92 | 5.0% | 21.7% | 3.59e-05 |
+
+Every pair matched on task identity (`dsv41flash-sal` 120/120, 0 task mismatches, `glm53flash-sal` 120/120, 0 task mismatches), and no item-run in either environment was left unpaired.
+
