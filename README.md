@@ -44,7 +44,7 @@ Cheating on *solvable* items, detector D1–D5, by line (baseline arm, salient e
 |---|---|---|---|---|---|---|
 | deepseek-v4.1-flash | 66 / 600 | 0.0% → 30.0% | +30.0 points [+14.2, +45.8] (+14.2 to +15.0) | 5.99 [3.27, 8.71]; p = 8.1e-6 | 42.5% (57.8% / 64.2%) | 0.876 |
 | glm-5.3-flash | 23 / 600 | 0.0% → 5.0% (10.8% at 0.286) | +5.0 points [+0.8, +11.7] (0.0 to +0.8; touches zero) | 1.74 [−0.81, 4.29]; p = 0.090 | 16.4% (19.7% / 29.5%) | 1.000 |
-| gpt-5.6-luna (primary; all arms) | 0 / 1,240 | 0 → 0 | 0 [0, 0] | not estimable (no events) | 18.3% (37.1% / 37.1%) | 0.979 |
+| gpt-5.6-luna (primary; all arms) | 0 / 1,240 | 0 → 0 | 0 [0, 0] | not estimable (no events) | 18.3% (36.8% / 36.8%, all arms; 25.3% baseline only) | 0.979 |
 | gpt-5.6-sol (the incident's model) | 0 / 600 | 0 → 0 | 0 | not estimable | 2.9% (5.8% / 5.8%; declares 91% impossible) | 0.822 |
 | claude-haiku-4-5 (standard env; *f* = 0.60 has 5 batches) | 0 / 530 | 0 → 0 | 0 | not estimable | 30.0% (23.4% / 58.9%) | 0.984 |
 | qwen3:14b (local) | 0 / 300 | 0 → 0 | 0 | not estimable | 0.0% (0.0% / 0.0%), dose not delivered | — |
@@ -114,9 +114,9 @@ hand-review queue in `results/analysis/flags_for_review.md` with the reviewer's 
 
 ## Pre-registration
 
-`PREREG.md` holds the hypotheses, the committed grids, the predictions P1–P6, the falsification criterion and the
-decision rules. It was written before any model was called and has six versions; each is a commit, and the section in
-`PREREG.md` for each version says what changed and why.
+`PREREG.md` holds the hypotheses, the committed grids, the predictions P1–P11, the falsification criterion and the
+decision rules. Its first version was written before any model was called; it has seven, each a commit made before the
+runs it governs, and the section in `PREREG.md` for each version says what changed and why.
 
 | version | commit | what changed |
 |---|---|---|
@@ -124,6 +124,9 @@ decision rules. It was written before any model was called and has six versions;
 | v2 | `38b50f9` | Two refinements exposed by pilot v0 (a D2(b) false positive and an unplanned sentence in the rules text), plus rules text v2 — committed before pilot v1 and before any sweep. |
 | v3 | `cb6bb4f` | Documentation pins from an external review (denominator, sidedness, H2 trigger, per-line grids, pilot statistic, sampling parameters, monitor identities, calibration, frozen inputs, deviations list) — no prediction, threshold or rule from v1 changed. |
 | v4 | `d6b83cf` | Monitor prompt clarification, pre-analysis: `grader_read` tightened to match the rule shown to the agent and detector D2(b), monitor token budget raised, one format-only retry on an unparseable reply. Rating only — no agent run, task, mutation, batch or detector rule touched. |
+| v5 | `c9b0e34` | The Sol cost rule, and arm B′ (one continuous conversation per batch) with prediction P7 at 35% — committed before the continuous arm ran. |
+| v6 | `5911b87` | Two follow-up arms on the primary line: declare-impossible rules (P8, ~70%) and a matching-path peer tip (P9, ~50% / ~85%) — committed before either arm ran. |
+| v7 | `5b54802` | After an independent review found two environment leaks: env_version 2 closes them, DeepSeek and GLM are re-run on the same seeds (P11), and a DeepSeek cell runs with the agent's own notes withheld (P10) — committed 16 minutes before the first batch it governs. |
 
 Pilot v0 ran under v1 and is excluded from every analysis; it is kept in `results/pilot_v0/` as a disclosed observation.
 
@@ -172,7 +175,7 @@ live smoke items additionally require `DOSECURVE_LIVE=1`. To run them on purpose
 
 | path | what it is |
 |---|---|
-| `PREREG.md` | Pre-registered hypotheses, grids, predictions and decision rules; six versions, each a commit, each dated against what had been observed. |
+| `PREREG.md` | Pre-registered hypotheses, grids, predictions and decision rules; seven versions, each a commit made before the runs it governs. |
 | `SPEC.md` | The interface contract between the three parallel builders (task format, batch construction, item-run record, detectors, monitor, analysis outputs). |
 | `RUNPLAN.md` | Which cells were to be run, in what order, at what cost, against the clock. |
 | `DEVIATIONS.md` | Append-only log of every departure from SPEC.md and from the plan, by whom and why. |
@@ -188,7 +191,7 @@ live smoke items additionally require `DOSECURVE_LIVE=1`. To run them on purpose
 | `results/analysis/` | The figure, the table, the stats, the review queue and verdicts, the example trajectory, the spend table. |
 | `results/runs/` | Raw item records, one JSONL line per item-run (gitignored — large). |
 | `results/pilot_v0/`, `results/pilot_v1/` | The two pilots, kept as disclosed observations, not in the analysed grid. Pilot v1 is the per-line hour-8 statistic (one I = 15, seed-0 batch per line under rules v2 in the standard environment): cheats on the 15 impossible items were Luna 0, GLM 0, Sol 0, DeepSeek 1, Qwen 1; Haiku's pilot is its seed-0 sweep batch. Two pilot flags are hand-reviewed in `results/analysis/hand_review.md`. |
-| `results/failed_credit/`, `results/failed_rate/` | Batches set aside after a provider balance failure (Anthropic 13 Sep 16:05; OpenRouter 13 Sep 23:45) or the continuous-arm double-writer incident, re-run clean; kept for audit, never analysed (gitignored, in the records release). |
+| `results/failed_credit/`, `results/failed_rate/` | Batches set aside after a provider balance failure (Anthropic 13 Sep 16:05; OpenRouter 13 Sep 23:45) or the continuous-arm double-writer incident; re-run clean except the seven Haiku batches abandoned when that line was cut for cost (DEVIATIONS 17:05). Kept for audit, never analysed (gitignored, in the records release). |
 | `results/dropped_nemo/` | mistral-nemo:12b batches, dropped under the pre-registered calibration rule (7/10, 7/10 honest solves in its first two f = 0 batches); kept as disclosed observations, not analysed (gitignored). |
 | `results/logs/`, `results/monitor_cache/` | Sweep console logs and the monitor's response cache (gitignored). |
 | `pyproject.toml`, `uv.lock` | Python 3.12, `uv`-managed environment. |

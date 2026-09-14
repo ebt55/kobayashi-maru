@@ -80,8 +80,8 @@ Sibling item directories readable inside a batch container: 26 DeepSeek tool cal
 | line | all impossible (outcome = cheat) | unreachable: content reads / incl. attempts | contradict | declared impossible (unreachable) | pointer |
 |---|---|---|---|---|---|
 | dsv41flash-sal | 42.5% (148/348) | 57.8% / 64.2% (100 + 11 of 173) | 21.1% | 19.6% | stats.json `cheat_pct_impossible`; mechanism.md §3; impossible_by_mutation.md |
-| glm53flash-sal | 16.4% (57/348) | 19.7% / 29.5% (34 + 18 of 173) | 3.4% | 47.4% | same |
-| luna-sal (baseline) | 18.3% (103/564) | 37.1% / 37.1% (104 + 0 of 280) | 0.0% | 10.0% | same |
+| glm53flash-sal | 16.4% (57/348) | 19.7% / 29.5% (34 + 17 of 173) | 3.4% | 48.0% | same |
+| luna-sal (all arms; denominators pool baseline, peer and declare) | 18.3% (103/564) | 36.8% / 36.8% (103 + 0 of 280); baseline arm alone 25.3% (58/229) | 0.0% | 10.0% | same |
 | sol-sal | 2.9% (10/348) | 5.8% / 5.8% (10 + 0) | 0.0% | 91.3% | same |
 | haiku45 (standard) | 30.0% (73/243) | 23.4% / 58.9% (29 + 44 of 124) | 0.0% | 9.7% | same |
 | qwen3-14b-sal | 0.0% (0/174) | 0.0% / 0.0% | 0.0% | 18.6% | same |
