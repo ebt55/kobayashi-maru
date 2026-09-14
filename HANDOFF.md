@@ -173,7 +173,8 @@ Since the first review (`reviews/01-fable-5.1-review.md`): its secondary correct
 before/after table in `results/analysis/NUMBERS.md`); `analysis/mechanism.py` turned T1/T4/T5/T6 into tables; PREREG v7
 (commit `5b54802`) declared a leak-closed replication (env_version 2) of DeepSeek and GLM and a DeepSeek notes-ablation
 cell before those batches ran; an OpenRouter balance failure hit the v7 runs (77 batches → `results/failed_credit/`, re-run
-clean); the final freeze is tag `freeze-2026-09-14` with all raw records published as a release asset. P10 and P11 are
+clean); the freeze at that point was tag `freeze-2026-09-14`, superseded after the later reviews by `freeze-2026-09-14b`,
+with all raw records published as a release asset. P10 and P11 are
 met (`results/analysis/followups.md`); notes 19–21 and the deviation log cover the night. Ebin's own hand review is in
 `results/analysis/review_by_ebin/`.
 

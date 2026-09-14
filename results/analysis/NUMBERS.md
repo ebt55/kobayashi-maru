@@ -2,7 +2,7 @@
 
 Frozen 13 Sep 2026 21:30 IST (tag `freeze-2026-09-13`); secondary numbers corrected 23:00 IST after the independent
 review in `reviews/01-fable-5.1-review.md` (tag `freeze-2026-09-13b`); PREREG v7 replication and ablation added 14 Sep
-07:40 IST (tag `freeze-2026-09-14`, final). **No solvable-item cheat count, slope, endpoint
+07:40 IST; corrected after two further independent reviews and published as tag `freeze-2026-09-14b`, the final artifact. **No solvable-item cheat count, slope, endpoint
 difference or κ changed between the two tags**; the corrections are listed in the last section. Every number below is
 copied from a file in this directory; the pointer says which. No interpretation here.
 
