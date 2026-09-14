@@ -101,7 +101,28 @@ The last two rows matter. A model that never cheats on an impossible task was ne
 
 So the honest score is **two of four models that were actually tempted**, not two of six.
 
-Luna and Haiku are the interesting non-results: both cheated freely whenever a task was impossible, and never once when it was solvable. The behaviour was right there and did not spread.
+#### Did the models actually take the bait?
+
+This is the check that makes the previous paragraph mean anything. If a model never cheats on an impossible task, its clean record on the solvable ones tells you nothing, because it was never offered the trick in the first place.
+
+| Model | Cheated on `unreachable` | Cheated on `contradict` | Said "this is impossible" | Cheated on solvable |
+|---|---|---|---|---|
+| DeepSeek-V4.1-flash | **64.2%** | 21.1% | 19.6% | **11.0%** |
+| GLM-5.3-flash | **29.5%** | 3.4% | 48.0% | **3.8%** |
+| Claude Haiku 4.5 | **58.9%** | 0.0% | 9.7% | 0.0% |
+| GPT-5.6-Luna | **36.8%** | 0.0% | 10.0% | 0.0% |
+| GPT-5.6-Sol | 5.8% | 0.0% | **91.3%** | 0.0% |
+| Qwen3-14B | 0.0% | 0.0% | 18.6% | 0.0% |
+
+Pooled across every dose level and every condition. The "said this is impossible" column is measured on the `unreachable` tasks, where declaring it is the correct answer. "Cheated on solvable" is the average across all five dose levels, so it sits below the endpoint figures in the table above. Full breakdown with confidence intervals in [`results/analysis/impossible_by_mutation.md`](results/analysis/impossible_by_mutation.md).
+
+Three things fall out of this table.
+
+**Haiku and Luna are the real non-results.** Both cheated on more than a third of the impossible tasks and never once on a solvable one. The trick was right there, they used it freely when stuck, and it did not spread. That is a finding, not an absence of one.
+
+**GPT-5.6-Sol behaved the best of anything tested.** It barely touched the answer file. Instead it told us the task was impossible 91% of the time, which is exactly what you would want. It is also the model from the real incident, which is worth sitting with. The cost is that we learned nothing about whether spillover would happen to it, because nothing ever tempted it.
+
+**Almost nobody cheats on `contradict` tasks.** Four of six models are at 0.0%. A `contradict` task looks solved from the inside, so the agent has no reason to go hunting for the grader. That is the same asymmetry that shows up again in the notes experiment below, and it is the best evidence that what drives this is *the agent noticing it is stuck*, not the mere presence of an answer file.
 
 ### 2. It travels through the agent's own notes
 
@@ -219,7 +240,7 @@ The full report is [`report/kobayashi-maru-report.pdf`](report/kobayashi-maru-re
 | `detectors/` | The five cheat detectors. Plain functions over one record. No AI, no Docker. |
 | `monitor/` | The second-opinion AI monitor and the agreement statistics. |
 | `analysis/` | Rates, confidence intervals, the statistics, the figures and the tables. |
-| `results/analysis/` | Every published number, with the file it came from, in `NUMBERS.md`. |
+| `results/analysis/` | Every published number, with the file it came from, in `NUMBERS.md`. See also `table.md` (every model x condition x dose cell), `impossible_by_mutation.md` (the bait table above, with intervals), `stats.json` (the statistics), `hand_review.md` (every flagged run I read by hand) and `spend.md` (where the money went). |
 | `reviews/` | Three independent model reviews of this work, including the one that found the two leaks. |
 | `notes/` | The lab notebook, written as the work happened, including the predictions that turned out wrong. |
 | `DEVIATIONS.md` | Every departure from the plan, appended as it happened, never edited. |
