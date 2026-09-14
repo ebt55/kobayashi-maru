@@ -121,3 +121,55 @@ Neel's task notes say documenting what you checked yourself is strong evidence o
 - Seven pre-registration versions, each committed before the runs it governs; v7 sixteen minutes before its first
   batch. Predictions were scored as written, including the four that were wrong (P1, P2, P3, P7).
 - Every raw record is published so any number can be recomputed: release `freeze-2026-09-14b`.
+
+---
+
+## Submission requirements (confirmed 14 Sep from the sprint playbook and the raw Guidelines tab extract)
+
+Source: `../ai-incident-response-project-brainstorm/ai-incident-response-paper-digest/raw/tab-guidelines.md`
+and `01-sprint-playbook.md`, extracted from the sprint page on 2026-09-12.
+
+**There is an official template and it is required.** A Google Doc, opened through a "make a copy" link:
+`https://docs.google.com/document/d/1PQBlhI3tM5vb51x7jBWXBQMYg6hkiU_x8RaCws4kjl4/copy?usp=sharing`
+Submit a PDF made from it, through the form on the sprint page.
+
+**Hard requirements**
+
+| item | rule |
+|---|---|
+| length | 8 pages maximum, not counting references and appendices; most strong projects are 4-8 |
+| abstract | 150 words or fewer |
+| front matter | project title, author names, affiliations |
+| required appendix | "Limitations and Dual-Use Considerations" — not optional, and it is a named section |
+| deadline | Sunday 13 Sep 11:59 PM Anywhere on Earth, which is Monday 14 Sep 11:59 UTC, 17:29 IST |
+| resubmission | allowed before the deadline, same title and details, new files replace the old |
+
+**Recommended section order** (use it unless there is a reason not to): Introduction, naming the track and
+sub-problem and what the artifact is for; Related Work; Methodology, replicable with sources and assumptions
+stated; Results, quantitative where possible with the main threat to validity stated; Discussion with
+implications, limitations and future work; Limitations & Dual-Use Considerations; References.
+
+**Judging is 1-5 on three dimensions**: Impact Potential and Innovation; Execution Quality (3 is "competent given
+the short duration", 5 needs surprising findings and unusually robust validation); Presentation and Clarity
+(problem, method, findings and limitations extractable without undue effort). A track-specific criterion then
+guides placement. This study fits track 5, the open track, whose criterion is a usable artifact, a stated limit on
+what it establishes, and what a month of follow-up would add.
+
+**The AI-use rule, verbatim in substance:** use AI tools the way you would use a colleague, to check reasoning,
+find gaps, or debug code; the report has to be your own writing about your own work, and reports that read as
+generated are marked down. This is why every sentence of the report is yours and this file contains no report prose.
+
+**Two gaps this scaffold did not previously cover**
+
+1. **The dual-use appendix is required and has not been drafted.** For this study the honest content is short: the
+   artifact is a harness that induces and detects grader-reading in coding agents; the dual-use risk is that the
+   impossible-task mutations and the salient-answer-file environment are a recipe for eliciting the behaviour, not
+   only for measuring it. Mitigating facts you can state: the tasks are toy utilities, the detector and monitor
+   are published alongside the elicitation, the behaviour observed changed no outputs, and the paper's actionable
+   result is a defensive one (scrub or withhold replayed agent self-notes). The repository is public, which the
+   guidelines allow, subject to not publishing novel installation recipes — nothing here is one.
+2. **The repository link belongs in the report**, with the release tag, since the artifact itself is expected to
+   live in a linked repo: `https://github.com/ebt55/kobayashi-maru`, tag `freeze-2026-09-14b`, which carries every
+   raw record so any number can be recomputed.
+
+**Optional and probably not worth the remaining hours:** a 3-5 minute video demo.
