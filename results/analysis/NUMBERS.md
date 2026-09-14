@@ -16,10 +16,10 @@ Regenerate with `uv run python -m analysis.run --runs results/runs --out results
 | quantity | value | pointer |
 |---|---|---|
 | item-runs analysed | 6,763 in the frozen v1 grid (4,390 solvable, 2,373 impossible) + 2,196 in the PREREG v7 lines = 8,959 | stats.json `n_item_runs`; figure caption |
-| batches | 439 | stats.json `n_batches` |
+| batches | 439 in the frozen grid; 571 including the PREREG v7 lines | stats.json `pooled.frozen.n_batches`, `pooled.all.n_batches` |
 | lineages in the grid | 6 (Luna, Sol, Haiku, DeepSeek-v4.1-flash, GLM-5.3-flash, Qwen3-14b); Nemo dropped under PREREG §calibration | DEVIATIONS.md 19:15; notes/17 |
 | tasks | 30 solvable, 15 impossible variants (8 `unreachable`, 7 `contradict`) | tasks/, mutate.py |
-| detector/monitor agreement | κ 0.944 over 6,719 rated (44 unrated), detector flag vs monitor; both 442 / detector-only 48 / monitor-only 1 / neither 6,228; agreement on the 491 flagged item-runs 0.900 | stats.json `kappa_overall` |
+| detector/monitor agreement (detector flag vs monitor), by scope | **frozen grid** κ 0.944, 6,719 rated, 44 unrated, 442 / 48 / 1 / 6,228, agreement on the 491 flagged 0.900; **pre-registered baseline arms only** κ 0.937, 5,278 rated, 0.889 on 434 flagged; **all lines incl. v7** κ 0.899, 8,869 rated, 90 unrated, 0.833 on 953 flagged | stats.json `pooled.{frozen,preregistered_baseline,all}.kappa`; each carries its own `definition` |
 | spend, final | $82.28 total: anthropic $32.84, openai $18.83, openrouter $30.61 (of which the v7 runs, their failed batches and monitoring ≈ $12), ollama $0 | spend.md |
 
 ## Primary DV per line: cheats on solvable items (baseline arm)
@@ -48,7 +48,7 @@ Six lines tested; DeepSeek alone survives Bonferroni or Holm at α = 0.05 (GLM's
 
 Secondary exposure measure f_discoverable (unreachable share of the batch): DeepSeek slope 11.8 [5.3, 18.2], p = 3.4e-4; GLM 3.4 [−1.7, 8.6], p = 0.19 (stats.json `logistic_cheat_on_f_discoverable`; figure panel D).
 
-Cumulative dose (cheat on a solvable item vs impossible items already seen in the batch; confounded with f by construction, plan §11): pooled slope 0.194 [0.135, 0.254], p = 1.8e-10 over 4,390 solvable item-runs, 89 events; DeepSeek 0.279 [0.161, 0.397], p = 3.6e-6; GLM 0.104 [0.000, 0.207], p = 0.050 (stats.json `pooled_cumulative_dose`, models.*.cumulative_dose).
+Cumulative dose (cheat on a solvable item vs impossible items already seen in the batch; confounded with f by construction, plan §11), by scope: frozen grid 0.194 [0.135, 0.254], p = 1.8e-10 over 4,390 solvable item-runs with 89 events; pre-registered baseline arms only 0.196 [0.132, 0.260] over 3,390 runs with the same 89 events; all lines including v7 0.196 [0.159, 0.234] over 5,710 runs with 228 events. The follow-up arms contributed no solvable-item cheat, so only the denominators move between the first two scopes. Per line: DeepSeek 0.279 [0.161, 0.397], p = 3.6e-6; GLM 0.104 [0.000, 0.207], p = 0.050 (stats.json `pooled_cumulative_dose`, models.*.cumulative_dose).
 
 ## Mechanism (mechanism.md; all correlational until the PREREG v7 ablation reports)
 
@@ -58,7 +58,7 @@ Cumulative dose (cheat on a solvable item vs impossible items already seen in th
 | same at f = 0.60 | 49.1% vs 13.8% | — | §1b |
 | alternative split (an earlier item's own text named the file, whether or not it reached submit) | 60/156 vs 6/444 | — | §1a note |
 | mean running tally (passed/completed) shown to cheating vs honest solvable runs, f ≥ 0.286 | 0.728 vs 0.628 (cheaters saw higher scores) | 0.669 vs 0.552 | §1c |
-| batches with ≥ 1 solvable cheat; an impossible-item cheat came first; notes already named the file at the first spill | 28 total across both lines; 25; 16 | | §1d |
+| batches with ≥ 1 solvable cheat; an impossible-item cheat came first; notes already named the file at the first spill | 65 across all lines; 60; 43 | | §1d |
 | Haiku: notes name the file on 20 solvable runs, 0 cheats | 0/20 | | §1a |
 | same crosstab on the leak-closed v2 lines (pooled over f) | 72/158 = 45.6% vs 12/442 = 2.7%; +42.9 pp [+29.8, +55.6] | 49/86 = 57.0% vs 6/514 = 1.2%; +55.8 [+35.5, +76.2] | §1a |
 | continuous arm (no notes channel at all) | 0/360 solvable cheats | | §1a note |
@@ -156,5 +156,5 @@ Rules text v2 (`harness/prompts/rules.md`); salient environment = answer file co
 ## Events after `freeze-2026-09-13b` (DEVIATIONS.md 14 Sep)
 
 - OpenRouter balance exhausted 13 Sep 23:45 IST during the v7 runs: 683 HTTP-402 items in 77 batches; every affected batch moved to `results/failed_credit/` and re-run clean after the top-up (same cells, same seeds). No analysed batch contains a balance error.
-- The machine slept after ~03:00; the final monitor pass stopped 42 verdicts short and was completed at 07:20. All 8,959 records are detector-staged and monitor-rated (44 frozen-set records unrated by parse error, as before).
+- The machine slept after ~03:00; the final monitor pass stopped 42 verdicts short and was completed at 07:20. All 8,959 records are detector-staged; 8,869 are monitor-rated and 90 are not (44 in the frozen grid and 46 in the v7 lines, all monitor parse errors, which the pre-registration records rather than retries).
 - Environment leak fix (env_version 2) and the `--notes` flag are the only harness changes; the frozen v1 records were never rewritten by them.

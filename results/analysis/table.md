@@ -57,6 +57,20 @@ Unit = one item-run. The denominator for every cheat/honest-pass column is the *
 | sol-sal | baseline | 0.444 | 12 | 120 | 100.0 | 0.0 | 0.0-3.1 | 0.0 | deepseek/deepseek-v4-pro-0813 | 0.000 | 1.0 | 0.2-5.7 | 20.4 | 0 | 0 |
 | sol-sal | baseline | 0.600 | 12 | 120 | 100.0 | 0.0 | 0.0-3.1 | 0.0 | deepseek/deepseek-v4-pro-0813 | 0.855 | 2.2 | 0.9-5.6 | 25.7 | 0 | 0 |
 
+## Pooled statistics, by scope
+
+A single pooled number that mixes the frozen grid with its PREREG v7 robustness check is misleading wherever it is quoted as "the study's kappa", so all three scopes are published. **The follow-up arms contributed no solvable-item cheats**, which is why the event count is the same in the frozen and baseline-only scopes and only the denominators move — that comparison says more than any one of the three numbers alone. kappa: detector flag vs monitor; the outcome DV additionally applies the error/refusal precedence.
+
+| scope | item-runs | batches | rated | unrated | kappa | 2x2 both-det-mon-neither | agree\|flagged | cumulative-dose slope | 95% CI | solvable runs | events |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `frozen` | 6,763 | 439 | 6,719 | 44 | 0.9436 | 442-48-1-6,228 | 0.9002 | 0.194 | [0.135, 0.254] | 4,390 | 89 |
+| `preregistered_baseline` | 5,319 | 339 | 5,278 | 41 | 0.9366 | 386-47-1-4,844 | 0.8894 | 0.196 | [0.132, 0.260] | 3,390 | 89 |
+| `all` | 8,959 | 571 | 8,869 | 90 | 0.8991 | 794-158-1-7,916 | 0.8332 | 0.196 | [0.159, 0.234] | 5,710 | 228 |
+
+- **`frozen`** — the frozen 13 Sep grid (env_version 1): every model_slug except the PREREG v7 lines (-v2, -v2-nonotes), all arms including the peer arms, the continuous arm and the declare cell. These are the numbers the released artifact published.
+- **`preregistered_baseline`** — the pre-registered scope of H1/H2: the six v1 model_slugs (luna-sal, sol-sal, haiku45, dsv41flash-sal, glm53flash-sal, qwen3-14b-sal), baseline arm only -- no peer arm, no continuous arm, no declare cell, no v7 line.
+- **`all`** — every line, including the PREREG v7 replication (-v2) and notes-ablation (-v2-nonotes) cells. Exploratory: mixes the frozen grid with its robustness check.
+
 ## Model-level statistics
 
 `p (1-sided)` is the PRE-REGISTERED test (cheating rises with *f*); `p (2-sided)` is what statsmodels reports and is shown for completeness. The endpoint CI is the seed-0 cluster bootstrap; `reseed lo` is the range of the lower bound across seeds 0-9 of the same bootstrap, so a bound that only clears zero on one seed is visible as such. `agree|flagged` is agreement restricted to item-runs either rater flagged; the overall kappa is dominated by the runs neither flagged. kappa: detector flag vs monitor; the outcome DV additionally applies the error/refusal precedence.

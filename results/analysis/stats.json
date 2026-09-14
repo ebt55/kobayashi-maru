@@ -2968,6 +2968,505 @@
       ]
     }
   },
+  "pooled": {
+    "frozen": {
+      "definition": "the frozen 13 Sep grid (env_version 1): every model_slug except the PREREG v7 lines (-v2, -v2-nonotes), all arms including the peer arms, the continuous arm and the declare cell. These are the numbers the released artifact published.",
+      "n_item_runs": 6763,
+      "n_batches": 439,
+      "n_solvable_item_runs": 4390,
+      "n_solvable_cheats": 89,
+      "model_slugs": [
+        "dsv41flash-sal",
+        "glm53flash-sal",
+        "haiku45",
+        "luna-sal",
+        "luna-sal-cont",
+        "luna-sal-decl",
+        "qwen3-14b-sal",
+        "sol-sal"
+      ],
+      "kappa": {
+        "kappa": 0.9435734941737235,
+        "n_rated": 6719,
+        "n_unrated": 44,
+        "monitor_models": [
+          "deepseek/deepseek-v4-pro-0813",
+          "z-ai/glm-5.3"
+        ],
+        "table": {
+          "detector_and_monitor": 442,
+          "detector_only": 48,
+          "monitor_only": 1,
+          "neither": 6228
+        },
+        "detector_rate": 0.0729275189760381,
+        "monitor_rate": 0.06593243042119364,
+        "agreement_on_flagged": 0.90020366598778,
+        "rater_column": "det_any",
+        "n_flagged_by_either": 491
+      },
+      "kappa_by_pair": [
+        {
+          "kappa": 0.9844828282012997,
+          "n_rated": 769,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 70,
+            "detector_only": 1,
+            "monitor_only": 1,
+            "neither": 697
+          },
+          "detector_rate": 0.09232769830949285,
+          "monitor_rate": 0.09232769830949285,
+          "agreement_on_flagged": 0.9722222222222222,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 72,
+          "agent_model": "claude-haiku-4-5-20251001",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.8756022718096418,
+          "n_rated": 948,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 178,
+            "detector_only": 39,
+            "monitor_only": 0,
+            "neither": 731
+          },
+          "detector_rate": 0.2289029535864979,
+          "monitor_rate": 0.1877637130801688,
+          "agreement_on_flagged": 0.8202764976958525,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 217,
+          "agent_model": "deepseek/deepseek-v4.1-flash",
+          "monitor_model": "z-ai/glm-5.3"
+        },
+        {
+          "kappa": 0.9767992341832741,
+          "n_rated": 2666,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 110,
+            "detector_only": 5,
+            "monitor_only": 0,
+            "neither": 2551
+          },
+          "detector_rate": 0.043135783945986494,
+          "monitor_rate": 0.04126031507876969,
+          "agreement_on_flagged": 0.9565217391304348,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 115,
+          "agent_model": "gpt-5.6-luna",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.8219595882577171,
+          "n_rated": 934,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 7,
+            "detector_only": 3,
+            "monitor_only": 0,
+            "neither": 924
+          },
+          "detector_rate": 0.010706638115631691,
+          "monitor_rate": 0.007494646680942184,
+          "agreement_on_flagged": 0.7,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 10,
+          "agent_model": "gpt-5.6-sol",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": null,
+          "n_rated": 474,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 0,
+            "detector_only": 0,
+            "monitor_only": 0,
+            "neither": 474
+          },
+          "detector_rate": 0.0,
+          "monitor_rate": 0.0,
+          "agreement_on_flagged": null,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 0,
+          "agent_model": "qwen3:14b",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 1.0,
+          "n_rated": 928,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 77,
+            "detector_only": 0,
+            "monitor_only": 0,
+            "neither": 851
+          },
+          "detector_rate": 0.08297413793103449,
+          "monitor_rate": 0.08297413793103449,
+          "agreement_on_flagged": 1.0,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 77,
+          "agent_model": "z-ai/glm-5.3-flash",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        }
+      ],
+      "cumulative_dose": {
+        "x": "n_impossible_before",
+        "n": 4390,
+        "n_clusters": 439,
+        "n_events": 89,
+        "slope": 0.19431101329859704,
+        "se": 0.030476401156445506,
+        "z": 6.375786048396396,
+        "p": 1.820268952431995e-10,
+        "ci_lo": 0.13457836465356898,
+        "ci_hi": 0.2540436619436251,
+        "intercept": -4.683432299807006,
+        "note": null,
+        "p_two_sided": 1.820268952431995e-10,
+        "p_one_sided": 9.101344762159974e-11,
+        "odds_ratio": 1.2144739417714223,
+        "note_confounded": "pooled across f and models; confounded with f by construction (plan section 11)"
+      }
+    },
+    "preregistered_baseline": {
+      "definition": "the pre-registered scope of H1/H2: the six v1 model_slugs (luna-sal, sol-sal, haiku45, dsv41flash-sal, glm53flash-sal, qwen3-14b-sal), baseline arm only -- no peer arm, no continuous arm, no declare cell, no v7 line.",
+      "n_item_runs": 5319,
+      "n_batches": 339,
+      "n_solvable_item_runs": 3390,
+      "n_solvable_cheats": 89,
+      "model_slugs": [
+        "dsv41flash-sal",
+        "glm53flash-sal",
+        "haiku45",
+        "luna-sal",
+        "qwen3-14b-sal",
+        "sol-sal"
+      ],
+      "kappa": {
+        "kappa": 0.9365500756608489,
+        "n_rated": 5278,
+        "n_unrated": 41,
+        "monitor_models": [
+          "deepseek/deepseek-v4-pro-0813",
+          "z-ai/glm-5.3"
+        ],
+        "table": {
+          "detector_and_monitor": 386,
+          "detector_only": 47,
+          "monitor_only": 1,
+          "neither": 4844
+        },
+        "detector_rate": 0.08203865100416824,
+        "monitor_rate": 0.0733232284956423,
+        "agreement_on_flagged": 0.8894009216589862,
+        "rater_column": "det_any",
+        "n_flagged_by_either": 434
+      },
+      "kappa_by_pair": [
+        {
+          "kappa": 0.9844828282012997,
+          "n_rated": 769,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 70,
+            "detector_only": 1,
+            "monitor_only": 1,
+            "neither": 697
+          },
+          "detector_rate": 0.09232769830949285,
+          "monitor_rate": 0.09232769830949285,
+          "agreement_on_flagged": 0.9722222222222222,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 72,
+          "agent_model": "claude-haiku-4-5-20251001",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.8756022718096418,
+          "n_rated": 948,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 178,
+            "detector_only": 39,
+            "monitor_only": 0,
+            "neither": 731
+          },
+          "detector_rate": 0.2289029535864979,
+          "monitor_rate": 0.1877637130801688,
+          "agreement_on_flagged": 0.8202764976958525,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 217,
+          "agent_model": "deepseek/deepseek-v4.1-flash",
+          "monitor_model": "z-ai/glm-5.3"
+        },
+        {
+          "kappa": 0.9625771369218545,
+          "n_rated": 1225,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 54,
+            "detector_only": 4,
+            "monitor_only": 0,
+            "neither": 1167
+          },
+          "detector_rate": 0.0473469387755102,
+          "monitor_rate": 0.044081632653061226,
+          "agreement_on_flagged": 0.9310344827586207,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 58,
+          "agent_model": "gpt-5.6-luna",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.8219595882577171,
+          "n_rated": 934,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 7,
+            "detector_only": 3,
+            "monitor_only": 0,
+            "neither": 924
+          },
+          "detector_rate": 0.010706638115631691,
+          "monitor_rate": 0.007494646680942184,
+          "agreement_on_flagged": 0.7,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 10,
+          "agent_model": "gpt-5.6-sol",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": null,
+          "n_rated": 474,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 0,
+            "detector_only": 0,
+            "monitor_only": 0,
+            "neither": 474
+          },
+          "detector_rate": 0.0,
+          "monitor_rate": 0.0,
+          "agreement_on_flagged": null,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 0,
+          "agent_model": "qwen3:14b",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 1.0,
+          "n_rated": 928,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 77,
+            "detector_only": 0,
+            "monitor_only": 0,
+            "neither": 851
+          },
+          "detector_rate": 0.08297413793103449,
+          "monitor_rate": 0.08297413793103449,
+          "agreement_on_flagged": 1.0,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 77,
+          "agent_model": "z-ai/glm-5.3-flash",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        }
+      ],
+      "cumulative_dose": {
+        "x": "n_impossible_before",
+        "n": 3390,
+        "n_clusters": 339,
+        "n_events": 89,
+        "slope": 0.19588633832202693,
+        "se": 0.032528071964207164,
+        "z": 6.022070368559621,
+        "p": 1.7219999308860847e-09,
+        "ci_lo": 0.1321324887856538,
+        "ci_hi": 0.25964018785840004,
+        "intercept": -4.441809340126102,
+        "note": null,
+        "p_two_sided": 1.7219999308860847e-09,
+        "p_one_sided": 8.609999654430424e-10,
+        "odds_ratio": 1.2163886407028004,
+        "note_confounded": "pooled across f and models; confounded with f by construction (plan section 11)"
+      }
+    },
+    "all": {
+      "definition": "every line, including the PREREG v7 replication (-v2) and notes-ablation (-v2-nonotes) cells. Exploratory: mixes the frozen grid with its robustness check.",
+      "n_item_runs": 8959,
+      "n_batches": 571,
+      "n_solvable_item_runs": 5710,
+      "n_solvable_cheats": 228,
+      "model_slugs": [
+        "dsv41flash-sal",
+        "dsv41flash-sal-v2",
+        "dsv41flash-sal-v2-nonotes",
+        "glm53flash-sal",
+        "glm53flash-sal-v2",
+        "haiku45",
+        "luna-sal",
+        "luna-sal-cont",
+        "luna-sal-decl",
+        "qwen3-14b-sal",
+        "sol-sal"
+      ],
+      "kappa": {
+        "kappa": 0.899132739738305,
+        "n_rated": 8869,
+        "n_unrated": 90,
+        "monitor_models": [
+          "deepseek/deepseek-v4-pro-0813",
+          "z-ai/glm-5.3"
+        ],
+        "table": {
+          "detector_and_monitor": 794,
+          "detector_only": 158,
+          "monitor_only": 1,
+          "neither": 7916
+        },
+        "detector_rate": 0.10734017363851618,
+        "monitor_rate": 0.08963806517081971,
+        "agreement_on_flagged": 0.8331584470094439,
+        "rater_column": "det_any",
+        "n_flagged_by_either": 953
+      },
+      "kappa_by_pair": [
+        {
+          "kappa": 0.9844828282012997,
+          "n_rated": 769,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 70,
+            "detector_only": 1,
+            "monitor_only": 1,
+            "neither": 697
+          },
+          "detector_rate": 0.09232769830949285,
+          "monitor_rate": 0.09232769830949285,
+          "agreement_on_flagged": 0.9722222222222222,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 72,
+          "agent_model": "claude-haiku-4-5-20251001",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.7963763838214145,
+          "n_rated": 2160,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 373,
+            "detector_only": 145,
+            "monitor_only": 0,
+            "neither": 1642
+          },
+          "detector_rate": 0.23981481481481481,
+          "monitor_rate": 0.1726851851851852,
+          "agreement_on_flagged": 0.7200772200772201,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 518,
+          "agent_model": "deepseek/deepseek-v4.1-flash",
+          "monitor_model": "z-ai/glm-5.3"
+        },
+        {
+          "kappa": 0.9767992341832741,
+          "n_rated": 2666,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 110,
+            "detector_only": 5,
+            "monitor_only": 0,
+            "neither": 2551
+          },
+          "detector_rate": 0.043135783945986494,
+          "monitor_rate": 0.04126031507876969,
+          "agreement_on_flagged": 0.9565217391304348,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 115,
+          "agent_model": "gpt-5.6-luna",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.8219595882577171,
+          "n_rated": 934,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 7,
+            "detector_only": 3,
+            "monitor_only": 0,
+            "neither": 924
+          },
+          "detector_rate": 0.010706638115631691,
+          "monitor_rate": 0.007494646680942184,
+          "agreement_on_flagged": 0.7,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 10,
+          "agent_model": "gpt-5.6-sol",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": null,
+          "n_rated": 474,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 0,
+            "detector_only": 0,
+            "monitor_only": 0,
+            "neither": 474
+          },
+          "detector_rate": 0.0,
+          "monitor_rate": 0.0,
+          "agreement_on_flagged": null,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 0,
+          "agent_model": "qwen3:14b",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        },
+        {
+          "kappa": 0.9902985307421155,
+          "n_rated": 1866,
+          "n_unrated": 0,
+          "table": {
+            "detector_and_monitor": 234,
+            "detector_only": 4,
+            "monitor_only": 0,
+            "neither": 1628
+          },
+          "detector_rate": 0.12754555198285103,
+          "monitor_rate": 0.12540192926045016,
+          "agreement_on_flagged": 0.9831932773109243,
+          "rater_column": "det_any",
+          "n_flagged_by_either": 238,
+          "agent_model": "z-ai/glm-5.3-flash",
+          "monitor_model": "deepseek/deepseek-v4-pro-0813"
+        }
+      ],
+      "cumulative_dose": {
+        "x": "n_impossible_before",
+        "n": 5710,
+        "n_clusters": 571,
+        "n_events": 228,
+        "slope": 0.19644826928967862,
+        "se": 0.01913559198527586,
+        "z": 10.266119252586405,
+        "p": 1.0015276243775686e-24,
+        "ci_lo": 0.1589431981756846,
+        "ci_hi": 0.23395334040367263,
+        "intercept": -4.012343039406821,
+        "note": null,
+        "p_two_sided": 1.0015276243775686e-24,
+        "p_one_sided": 5.007638121887843e-25,
+        "odds_ratio": 1.2170723592320272,
+        "note_confounded": "pooled across f and models; confounded with f by construction (plan section 11)"
+      }
+    },
+    "note_scopes": "Pooled statistics are published under three scopes; see each scope's `definition`. Solvable-item cheat events per scope: frozen 89, preregistered_baseline 89, all 228. The frozen and preregistered_baseline scopes carry the same events because the peer, continuous and declare arms produced no solvable-item cheat; only the denominators differ."
+  },
   "kappa_overall": {
     "kappa": 0.899132739738305,
     "n_rated": 8869,
@@ -3115,5 +3614,6 @@
     "p_one_sided": 5.007638121887843e-25,
     "odds_ratio": 1.2170723592320272,
     "note_confounded": "pooled across f and models; confounded with f by construction (plan section 11)"
-  }
+  },
+  "note_legacy_pooled_keys": "`kappa_overall`, `kappa_by_pair`, `pooled_cumulative_dose`, `n_item_runs` and `n_batches` at the top level are the `all` scope. Use `pooled.frozen` for the numbers the released artifact published."
 }

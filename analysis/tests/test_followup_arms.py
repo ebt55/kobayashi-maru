@@ -312,3 +312,50 @@ def test_v7_figure_is_written_with_both_panels(tmp_path):
     assert len(V7_BARS) == 3
     assert "PREREG v7" in V7_CAPTION and "env_version 2" in V7_CAPTION
     assert "v1 remains the frozen primary result" in V7_CAPTION
+
+
+def test_grow_to_fit_lifts_an_overflowing_caption_into_the_canvas():
+    """A caption that overflows loses its last lines silently. `_grow_to_fit` grows the
+    canvas until the block clears the given floor; font sizes are absolute, so a taller
+    canvas gives the text proportionally more room."""
+    import matplotlib.pyplot as plt
+    from analysis.figure import _grow_to_fit
+
+    fig = plt.figure(figsize=(7.5, 2.0))
+    ax = fig.add_axes([0.05, 0.55, 0.9, 0.4])
+    ax.axis("off")
+    body = chr(10).join(f"caption line {i}" for i in range(40))
+    text = ax.text(0.0, 1.0, body, fontsize=6.0, va="top", ha="left",
+                   linespacing=1.5, transform=ax.transAxes)
+
+    fig.canvas.draw()
+    inv = fig.transFigure.inverted()
+    before_y0 = inv.transform(
+        text.get_window_extent(fig.canvas.get_renderer()).corners())[:, 1].min()
+    before_h = fig.get_figheight()
+    assert before_y0 < 0.0, "the fixture should start with the text off the canvas"
+
+    _grow_to_fit(fig, text, floor=0.10)
+
+    fig.canvas.draw()
+    inv = fig.transFigure.inverted()
+    after_y0 = inv.transform(
+        text.get_window_extent(fig.canvas.get_renderer()).corners())[:, 1].min()
+    assert fig.get_figheight() > before_h
+    assert after_y0 >= 0.10, f"caption still below the floor (y0={after_y0:.3f})"
+    plt.close("all")
+
+
+def test_grow_to_fit_leaves_a_caption_that_already_fits_alone():
+    import matplotlib.pyplot as plt
+    from analysis.figure import _grow_to_fit
+
+    fig = plt.figure(figsize=(7.5, 6.0))
+    ax = fig.add_axes([0.05, 0.5, 0.9, 0.45])
+    ax.axis("off")
+    text = ax.text(0.0, 1.0, "one short line", fontsize=6.0, va="top",
+                   transform=ax.transAxes)
+    h = fig.get_figheight()
+    _grow_to_fit(fig, text, floor=0.05)
+    assert fig.get_figheight() == h
+    plt.close("all")

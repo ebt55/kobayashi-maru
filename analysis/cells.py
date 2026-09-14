@@ -183,6 +183,42 @@ def _finite(x) -> bool:
         return False
 
 
+def _pooled_section(stats: dict | None) -> list[str]:
+    """The three pooled scopes side by side, with the fact that explains the difference."""
+    pooled = (stats or {}).get("pooled") or {}
+    scopes = [k for k in ("frozen", "preregistered_baseline", "all") if k in pooled]
+    if not scopes:
+        return []
+    L = ["## Pooled statistics, by scope", "",
+         "A single pooled number that mixes the frozen grid with its PREREG v7 robustness "
+         "check is misleading wherever it is quoted as \"the study's kappa\", so all three "
+         "scopes are published. **The follow-up arms contributed no solvable-item cheats**, "
+         "which is why the event count is the same in the frozen and baseline-only scopes "
+         "and only the denominators move — that comparison says more than any one of the "
+         "three numbers alone. kappa: detector flag vs monitor; the outcome DV additionally "
+         "applies the error/refusal precedence.", "",
+         "| scope | item-runs | batches | rated | unrated | kappa | 2x2 both-det-mon-neither "
+         "| agree" + chr(92) + "|flagged | cumulative-dose slope | 95% CI | solvable runs | events |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for scope in scopes:
+        b = pooled[scope]
+        kp, cd, t = b["kappa"], b["cumulative_dose"], b["kappa"]["table"]
+        L.append(
+            f"| `{scope}` | {b['n_item_runs']:,} | {b['n_batches']:,} | "
+            f"{kp['n_rated']:,} | {kp['n_unrated']} | {_fmt(kp.get('kappa'), 4)} | "
+            f"{t['detector_and_monitor']}-{t['detector_only']}-{t['monitor_only']}-"
+            f"{t['neither']:,} | {_fmt(kp.get('agreement_on_flagged'), 4)} | "
+            f"{_fmt(cd.get('slope'), 3)} | "
+            f"[{_fmt(cd.get('ci_lo'), 3)}, {_fmt(cd.get('ci_hi'), 3)}] | "
+            f"{b['n_solvable_item_runs']:,} | {b['n_solvable_cheats']} |"
+        )
+    L.append("")
+    for scope in scopes:
+        L.append(f"- **`{scope}`** — {pooled[scope]['definition']}")
+    L.append("")
+    return L
+
+
 def _model_stats_section(stats: dict | None) -> list[str]:
     """Slope and endpoint per model line, with the labels review C8/C9/C12 asked for."""
     if not stats or not stats.get("models"):
@@ -269,6 +305,7 @@ def write_table_md(cells: pd.DataFrame, out_dir: str | Path,
         lines.append("| " + " | ".join(out) + " |")
 
     lines.append("")
+    lines += _pooled_section(stats)
     lines += _model_stats_section(stats)
     lines.append("## Per-batch solvable-cheat counts")
     lines.append("")

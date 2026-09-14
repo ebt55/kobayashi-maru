@@ -37,7 +37,7 @@ neither the ExploitGym paper, its README, nor the RDI writeup, and calls it orga
 the source that states it and does not adjudicate between the two.
 
 **Headline numbers (frozen 13 Sep 2026 21:30 IST, tag `freeze-2026-09-13`; secondary columns corrected 23:00 IST after an
-independent review, tag `freeze-2026-09-13b`; 6,763 item-runs, 439 batches, all detector-staged, 6,719 monitor-rated).**
+independent review, tag `freeze-2026-09-13b`; 6,763 item-runs in 439 batches, all detector-staged, 6,719 monitor-rated. The PREREG v7 replication and ablation add 2,196 more, for 8,959 in 571 batches; pooled statistics are reported per scope in `stats.json`).**
 Cheating on *solvable* items, detector D1–D5, by line (baseline arm, salient environment unless marked):
 
 | line | solvable cheats | rate at *f* = 0 → 0.60 | endpoint difference, cluster-bootstrap 95% CI (lower bound over seeds 0–9) | clustered logistic slope on *f* (95% CI; one-sided p) | cheat on impossible items (unreachable: content reads / incl. listings) | κ |
@@ -62,7 +62,7 @@ earlier submit summary in the batch manifest names the answer file, DeepSeek che
 2.3% when none does (paired cluster-bootstrap difference +41 points [+24, +59]); GLM 48.4% against 1.4% (+47 [+16, +79]);
 cheating runs saw *higher* running scores than honest ones, so the carrier is propagation of a discovered exploit, not
 score pressure. Cheats cluster in batches (DeepSeek at *f* = 0.60: 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0 per batch).
-κ overall 0.944 (detector flag vs monitor); agreement on the 491 item-runs either rater flagged 0.900. Two environment
+κ 0.944 over the frozen grid (detector flag vs monitor; agreement on the 491 item-runs either rater flagged 0.900), 0.899 over all lines including the v7 replication, 0.937 over the pre-registered baseline arms alone. Two environment
 leaks found in review are disclosed under Limits and were closed in a replication that reproduced the effect (PREREG v7). Follow-up arms on
 the primary line (`results/analysis/followups.md`): continuous session P7 not met (0 / 120; it also stops probing
 impossible items: 16% vs 94%), declare-impossible rules P8 partially met (solvable stays 0 / 80; unreachable cheat 19.6%

@@ -445,6 +445,69 @@ def _jsonable(obj):
     return str(obj)
 
 
+#: The six model_slugs of the pre-registered v1 grid.
+PREREG_SLUGS = ("luna-sal", "sol-sal", "haiku45", "dsv41flash-sal", "glm53flash-sal",
+                "qwen3-14b-sal")
+#: Suffixes marking a PREREG v7 follow-up line (env_version 2).
+V7_SUFFIXES = ("-v2", "-v2-nonotes")
+
+#: Pooled statistics are emitted once per scope. A single pooled number that mixes the
+#: frozen grid with its v7 robustness check is misleading wherever it is quoted as "the
+#: study's kappa", and choosing one silently would make the published figures
+#: unrecomputable -- so all three are published, each carrying its own definition.
+POOLED_SCOPES = {
+    "frozen": (
+        "the frozen 13 Sep grid (env_version 1): every model_slug except the PREREG v7 "
+        "lines (-v2, -v2-nonotes), all arms including the peer arms, the continuous arm "
+        "and the declare cell. These are the numbers the released artifact published."
+    ),
+    "preregistered_baseline": (
+        "the pre-registered scope of H1/H2: the six v1 model_slugs "
+        "(luna-sal, sol-sal, haiku45, dsv41flash-sal, glm53flash-sal, qwen3-14b-sal), "
+        "baseline arm only -- no peer arm, no continuous arm, no declare cell, no v7 line."
+    ),
+    "all": (
+        "every line, including the PREREG v7 replication (-v2) and notes-ablation "
+        "(-v2-nonotes) cells. Exploratory: mixes the frozen grid with its robustness check."
+    ),
+}
+
+
+def scope_frame(df: pd.DataFrame, scope: str) -> pd.DataFrame:
+    """The item-runs a pooled statistic covers under ``scope``."""
+    if scope == "all" or df.empty:
+        return df
+    slug = df["model_slug"].astype(str)
+    if scope == "frozen":
+        return df[~slug.str.endswith(V7_SUFFIXES)]
+    if scope == "preregistered_baseline":
+        return df[slug.isin(PREREG_SLUGS) & (df["arm"] == "baseline")]
+    raise ValueError(f"unknown scope {scope!r}; known: {sorted(POOLED_SCOPES)}")
+
+
+def pooled_block(df: pd.DataFrame, scope: str) -> dict:
+    """Every pooled statistic for one scope, with the definition it was computed under."""
+    sub = scope_frame(df, scope)
+    solv = sub[~sub["is_impossible"]] if len(sub) else sub
+    return {
+        "definition": POOLED_SCOPES[scope],
+        "n_item_runs": int(len(sub)),
+        "n_batches": int(sub["batch_id"].nunique()) if len(sub) else 0,
+        "n_solvable_item_runs": int(len(solv)),
+        "n_solvable_cheats": int(solv["cheat"].sum()) if len(solv) else 0,
+        "model_slugs": sorted({str(m) for m in sub["model_slug"].dropna().unique()}),
+        "kappa": kappa_block(sub),
+        "kappa_by_pair": _kappa_by_pair(sub),
+        "cumulative_dose": {
+            **logistic_clustered(solv, "n_impossible_before"),
+            "note_confounded": (
+                "pooled across f and models; confounded with f by construction "
+                "(plan section 11)"
+            ),
+        },
+    }
+
+
 def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED) -> dict:
     """Everything SPEC section 6 asks ``stats.json`` to hold."""
     out: dict = {
@@ -569,6 +632,22 @@ def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED)
         }
         out["models"][str(model_slug)] = entry
 
+    out["pooled"] = {scope: pooled_block(df, scope) for scope in POOLED_SCOPES}
+    # The follow-up arms contributed no solvable-item cheats, so the event count is the
+    # same in the frozen and baseline-only scopes and only the denominators move. That
+    # fact is more informative than any one of the three numbers alone.
+    events = {k: v["n_solvable_cheats"] for k, v in out["pooled"].items()}
+    out["pooled"]["note_scopes"] = (
+        "Pooled statistics are published under three scopes; see each scope's "
+        "`definition`. Solvable-item cheat events per scope: "
+        + ", ".join(f"{k} {v}" for k, v in events.items())
+        + ". The frozen and preregistered_baseline scopes carry the same events because "
+        "the peer, continuous and declare arms produced no solvable-item cheat; only the "
+        "denominators differ."
+    )
+
+    # Legacy keys, kept so nothing that already reads stats.json breaks. They are the
+    # `all` scope, which is what they have always been -- read `pooled` instead.
     out["kappa_overall"] = kappa_block(df)
     out["kappa_by_pair"] = _kappa_by_pair(df)
     out["pooled_cumulative_dose"] = {
@@ -577,6 +656,11 @@ def compute_stats(df: pd.DataFrame, n_boot: int = N_BOOT, seed: int = BOOT_SEED)
             "pooled across f and models; confounded with f by construction (plan section 11)"
         ),
     }
+    out["note_legacy_pooled_keys"] = (
+        "`kappa_overall`, `kappa_by_pair`, `pooled_cumulative_dose`, `n_item_runs` and "
+        "`n_batches` at the top level are the `all` scope. Use `pooled.frozen` for the "
+        "numbers the released artifact published."
+    )
     return _jsonable(out)
 
 

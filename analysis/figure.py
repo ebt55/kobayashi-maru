@@ -565,6 +565,34 @@ def _panel_d(ax, df: pd.DataFrame, models: list[str], labels: dict[str, str], se
     return max(4.0, ymax * 1.16)
 
 
+def _legend_top(fig) -> float:
+    """Top edge of the figure-level legend in figure coordinates (0 when there is none)."""
+    if not fig.legends:
+        return 0.0
+    fig.canvas.draw()
+    bb = fig.legends[0].get_window_extent(fig.canvas.get_renderer())
+    return float(bb.transformed(fig.transFigure.inverted()).y1)
+
+
+def _grow_to_fit(fig, artist, floor: float = 0.0, pad_in: float = 0.10,
+                 max_passes: int = 6) -> None:
+    """Grow the canvas until ``artist``'s bottom clears ``floor`` (figure coords).
+
+    Font sizes are absolute (points) while the layout is relative, so a taller canvas
+    gives a text block proportionally more room. Two or three passes converge.
+    """
+    for _ in range(max_passes):
+        fig.canvas.draw()
+        bb = artist.get_window_extent(fig.canvas.get_renderer())
+        y0 = float(bb.transformed(fig.transFigure.inverted()).y0)
+        deficit = (floor + pad_in / fig.get_figheight()) - y0
+        if deficit <= 0.0:
+            return
+        fig.set_size_inches(fig.get_figwidth(),
+                            fig.get_figheight() * (1.0 + max(deficit, 0.02)),
+                            forward=True)
+
+
 def make_figure(
     df: pd.DataFrame,
     out_dir: str | Path,
@@ -611,6 +639,10 @@ def make_figure(
         return not (v and v[0] in all_slugs) and slug not in solo
 
     models = _order_models([s for s in all_slugs if _is_base(s)])
+    # totals BEFORE the single-level exclusion, so the caption can say plainly why its
+    # counts are smaller than the `all` scope quoted elsewhere
+    total_runs = int(len(df))
+    total_batches = int(df["batch_id"].nunique()) if len(df) else 0
     df = df[~df["model_slug"].isin(solo)]
     if df.empty or not models:
         for ax in axes:
@@ -675,19 +707,26 @@ def make_figure(
     ]
     if excluded:
         paragraphs.append(
-            f"Counts above cover the series plotted here. Excluded from all four panels: "
-            f"{excluded} — run at a single f level, so it has no dose curve; it is the "
-            f"subject of figure_v7 instead."
+            f"SCOPE: these panels plot the `frozen` grid (env_version 1) PLUS the v2 "
+            f"replication lines, and exclude {excluded} — run at a single f level, so it "
+            f"has no dose curve; it is the subject of figure_v7. The counts above are for "
+            f"that plotted set, which is why they are smaller than the `all` scope in "
+            f"stats.json and the README (every line, {total_runs:,} item-runs in "
+            f"{total_batches:,} batches). stats.json publishes all three scopes."
         )
     note_ax = fig.add_subplot(gs[1, 1:])
     note_ax.axis("off")
     wrapped: list[str] = []
     for para in paragraphs:
         wrapped.extend(textwrap.wrap(para, width=96) or [""])
-    note_ax.text(
+    note = note_ax.text(
         0.0, 1.0, "\n".join(wrapped), fontsize=6.0, color=TEXT_MUTED,
         va="top", ha="left", linespacing=1.5, transform=note_ax.transAxes,
     )
+    # The caption grows whenever a paragraph is added (a new series kind, an exclusion
+    # note), and a fixed canvas silently cuts the last lines off the bottom. Measure it
+    # and grow the canvas until the whole caption sits above the legend row.
+    _grow_to_fit(fig, note, floor=_legend_top(fig))
 
     paths = []
     for ext in ("png", "svg"):
