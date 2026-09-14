@@ -51,7 +51,11 @@ Cheating on *solvable* items, detector D1–D5, by line (baseline arm, salient e
 | qwen3:14b (local) | 0 / 300 | 0 → 0 | 0 | not estimable | 0.0% (0.0% / 0.0%), dose not delivered | — |
 
 Six lines were tested at α = 0.05 one-sided; DeepSeek alone survives any multiplicity correction. The pre-registered
-primary line (Luna) is null; the positive result is on two secondary lines. Every one of the 89 solvable-item cheats is
+primary line (Luna) is null; the positive result is on two secondary lines. **Two of the six nulls are uninformative
+by the study's own pre-registered rule** (P5: a line whose cheat-on-impossible is under 10% has too weak a dose for
+its null to mean anything): Qwen3-14B received no dose at all (0% on unreachable items) and GPT-5.6-Sol effectively
+none (5.8% content reads; it declares 91% of unreachable items impossible instead). The honest denominator is
+therefore two of four adequately dosed lines, not two of six. Every one of the 89 solvable-item cheats is
 a read of the answer file left in the working directory (82 with the grader's canary captured, one loaded from Python,
 six access attempts; 80 before the solution was written); no test edit, skip marker, grader edit or hardcoded literal
 was detected on any solvable item-run. **Reading the key changed nothing that was submitted:** 227 of the 228
@@ -97,6 +101,10 @@ passed at essentially the same rate whether or not the agent read the answer key
 So what spills over is a reconnaissance habit — reading the grader on tasks that did not require it — and not an
 outcome-changing exploit. That is the honest scope of the finding, and it is the scope an incident responder should
 plan against: the leading indicator is the reading, which is visible in the transcript before any output is affected.
+What the ablation establishes is that **the channel can be turned off**, not that filtering it works: it withheld the
+replayed summaries entirely, taking the agent's honest notes about earlier items with them, which is the likely reason
+cheating on `contradict` items also collapsed. Selective scrubbing — keeping the useful notes and removing the
+grader references — is untested here and should not be claimed.
 
 The frozen v1 lines remain the primary result; v2 is their robustness check. Spend at the close: $82.28 across every run
 directory (`results/analysis/spend.md`). Every number, with its source file, is in `results/analysis/NUMBERS.md`.
@@ -229,6 +237,18 @@ runbook. Everything else — tasks, harness, detectors, monitor, batch framing, 
 - **Only answer-key reading was observed.** In the salient environment every cheat, on impossible and solvable items
   alike, is a read of or reach for the planted answer file; the test editing seen in the incident never occurred, even
   when a peer note suggested it. What was measured is exploit propagation in an environment that planted the exploit.
+- **A residual environment channel remains in the re-run.** The leak-closed sandbox names each working directory
+  `/work/item_NN` by position. Position is already announced to the agent in the batch manifest by design, so this
+  discloses nothing new, but it is a naming channel and is named here rather than left to be found.
+- **Run-to-run variability at fixed configuration is not something the study measured before publishing a
+  replication.** The v1 and v2 grids differ in wall-clock time as well as environment, and the per-item outcome on
+  impossible tasks is not deterministic at the sampling temperature used. `results/analysis/mechanism.md` quantifies
+  this from the batches that were interrupted by the provider balance failure and then re-run under an identical
+  configuration; read the v1-to-v2 comparison against that noise floor, not against zero.
+- **The monitor is not fully independent of the detector.** Its rubric was written to describe the same cheat classes
+  the detector implements, so κ measures agreement between two implementations of one definition rather than
+  agreement between two independent notions of cheating. It remains a lower bound and a useful cross-check; it is not
+  external validation.
 - **The hand review is two-layered.** The orchestrating model classified every solvable-item cheat programmatically and
   read a seeded random sample of the disagreement queue; Ebin then read ten trajectories himself (five DeepSeek
   solvable-item cheats, three GLM read-after-write cases, two Haiku impossible-item flags) and recorded his own verdicts,

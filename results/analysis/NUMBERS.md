@@ -20,7 +20,7 @@ Regenerate with `uv run python -m analysis.run --runs results/runs --out results
 | lineages in the grid | 6 (Luna, Sol, Haiku, DeepSeek-v4.1-flash, GLM-5.3-flash, Qwen3-14b); Nemo dropped under PREREG §calibration | DEVIATIONS.md 19:15; notes/17 |
 | tasks | 30 solvable, 15 impossible variants (8 `unreachable`, 7 `contradict`) | tasks/, mutate.py |
 | detector/monitor agreement (detector flag vs monitor), by scope | **frozen grid** κ 0.944, 6,719 rated, 44 unrated, 442 / 48 / 1 / 6,228, agreement on the 491 flagged 0.900; **pre-registered baseline arms only** κ 0.937, 5,278 rated, 0.889 on 434 flagged; **all lines incl. v7** κ 0.899, 8,869 rated, 90 unrated, 0.833 on 953 flagged | stats.json `pooled.{frozen,preregistered_baseline,all}.kappa`; each carries its own `definition` |
-| spend, final | $82.28 total: anthropic $32.84, openai $18.83, openrouter $30.61 (of which the v7 runs, their failed batches and monitoring ≈ $12), ollama $0 | spend.md |
+| spend, final | $82.32 total: anthropic $32.84, openai $18.83, openrouter $30.65 (of which the v7 runs, their failed batches and monitoring ≈ $12), ollama $0 | spend.md |
 
 ## Primary DV per line: cheats on solvable items (baseline arm)
 
@@ -118,6 +118,9 @@ Per-level cheat-on-impossible with Wilson CIs: table.md column "cheat % on impos
 
 Reading the answer key did not change what was submitted: solvable items pass at the same rate either way. The spillover
 is a reconnaissance habit, not an outcome-changing exploit. This belongs in the results, not only in the limitations.
+Two hostile readings to pre-empt rather than dodge: that a dose curve of consequence-free policy violations is a curve
+of nothing, and that the harmlessness is an artifact of tasks easy enough that every line passes at every f. The second
+is correct and is the boundary condition on the whole study; say so.
 
 ## Ablation by mutation kind (followups.md P10; recount from records)
 

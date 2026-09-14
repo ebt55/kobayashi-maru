@@ -6,9 +6,9 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | anthropic | 1,192 | 26,207,026 | 1,327,528 | 0 | 0.0% | 32.84 |
 | openai | 3,921 | 6,592,118 | 908,673 | 35,097,168 | 84.2% | 18.83 |
-| openrouter | 14,121 | 41,942,395 | 10,351,303 | 60,585,281 | 59.1% | 30.61 |
+| openrouter | 14,133 | 41,980,497 | 10,360,978 | 60,609,857 | 59.1% | 30.65 |
 | ollama | 645 | 5,711,363 | 190,497 | 0 | 0.0% | 0.00 |
-| **TOTAL** | 19,879 | 80,452,902 | 12,778,001 | 95,682,449 | 54.3% | 82.28 |
+| **TOTAL** | 19,891 | 80,491,004 | 12,787,676 | 95,707,025 | 54.3% | 82.32 |
 
 ### By model
 
@@ -20,13 +20,13 @@
 | **subtotal openai** |  |  | 3,921 | 6,592,118 | 908,673 | 35,097,168 | 84.2% | 18.83 |
 | agent | openrouter | deepseek/deepseek-v4.1-flash | 2,689 | 11,083,183 | 3,161,089 | 22,328,448 | 66.8% | 3.89 |
 | agent | openrouter | z-ai/glm-5.3-flash | 2,425 | 11,272,538 | 3,077,327 | 18,951,617 | 62.7% | 3.51 |
-| monitor | openrouter | deepseek/deepseek-v4-pro-0813 | 6,819 | 15,155,324 | 3,464,889 | 14,298,112 | 48.5% | 15.59 |
+| monitor | openrouter | deepseek/deepseek-v4-pro-0813 | 6,831 | 15,193,426 | 3,474,564 | 14,322,688 | 48.5% | 15.63 |
 | monitor | openrouter | z-ai/glm-5.3 | 2,188 | 4,431,350 | 647,998 | 5,007,104 | 53.1% | 7.61 |
-| **subtotal openrouter** |  |  | 14,121 | 41,942,395 | 10,351,303 | 60,585,281 | 59.1% | 30.61 |
+| **subtotal openrouter** |  |  | 14,133 | 41,980,497 | 10,360,978 | 60,609,857 | 59.1% | 30.65 |
 | agent | ollama | mistral-nemo:12b | 121 | 866,795 | 51,260 | 0 | 0.0% | 0.00 |
 | agent | ollama | qwen3:14b | 524 | 4,844,568 | 139,237 | 0 | 0.0% | 0.00 |
 | **subtotal ollama** |  |  | 645 | 5,711,363 | 190,497 | 0 | 0.0% | 0.00 |
-| **TOTAL** |  |  | 19,879 | 80,452,902 | 12,778,001 | 95,682,449 | 54.3% | 82.28 |
+| **TOTAL** |  |  | 19,891 | 80,491,004 | 12,787,676 | 95,707,025 | 54.3% | 82.32 |
 
 ### By line
 
@@ -58,17 +58,17 @@
 | agent | openrouter | z-ai/glm-5.3-flash | glm53flash-sal-v2 | baseline | standard | failed_credit | 504 | 688,663 | 218,815 | 1,197,568 | 63.5% | 0.23 |
 | agent | openrouter | z-ai/glm-5.3-flash | glm53flash-sal-v2 | baseline | standard | runs | 948 | 5,430,523 | 1,578,671 | 8,834,369 | 61.9% | 1.74 |
 | monitor | openrouter | deepseek/deepseek-v4-pro-0813 | - | - | - | pilot_v1 | 75 | 193,015 | 24,104 | 120,576 | 38.5% | 0.16 |
-| monitor | openrouter | deepseek/deepseek-v4-pro-0813 | - | - | - | runs | 6,744 | 14,962,309 | 3,440,785 | 14,177,536 | 48.7% | 15.43 |
+| monitor | openrouter | deepseek/deepseek-v4-pro-0813 | - | - | - | runs | 6,756 | 15,000,411 | 3,450,460 | 14,202,112 | 48.6% | 15.47 |
 | monitor | openrouter | z-ai/glm-5.3 | - | - | - | pilot_v1 | 25 | 61,729 | 3,691 | 27,648 | 30.9% | 0.08 |
 | monitor | openrouter | z-ai/glm-5.3 | - | - | - | runs | 2,163 | 4,369,621 | 644,307 | 4,979,456 | 53.3% | 7.53 |
-| **subtotal openrouter** |  |  |  |  |  |  | 14,121 | 41,942,395 | 10,351,303 | 60,585,281 | 59.1% | 30.61 |
+| **subtotal openrouter** |  |  |  |  |  |  | 14,133 | 41,980,497 | 10,360,978 | 60,609,857 | 59.1% | 30.65 |
 | agent | ollama | mistral-nemo:12b | nemo12b | baseline | standard | pilot_v1 | 25 | 211,591 | 12,905 | 0 | 0.0% | 0.00 |
 | agent | ollama | mistral-nemo:12b | nemo12b-sal | baseline | standard | dropped_nemo | 96 | 655,204 | 38,355 | 0 | 0.0% | 0.00 |
 | agent | ollama | qwen3:14b | qwen3-14b | baseline | standard | pilot_v0 | 25 | 156,872 | 4,707 | 0 | 0.0% | 0.00 |
 | agent | ollama | qwen3:14b | qwen3-14b | baseline | standard | pilot_v1 | 25 | 230,569 | 7,677 | 0 | 0.0% | 0.00 |
 | agent | ollama | qwen3:14b | qwen3-14b-sal | baseline | standard | runs | 474 | 4,457,127 | 126,853 | 0 | 0.0% | 0.00 |
 | **subtotal ollama** |  |  |  |  |  |  | 645 | 5,711,363 | 190,497 | 0 | 0.0% | 0.00 |
-| **TOTAL** |  |  |  |  |  |  | 19,879 | 80,452,902 | 12,778,001 | 95,682,449 | 54.3% | 82.28 |
+| **TOTAL** |  |  |  |  |  |  | 19,891 | 80,491,004 | 12,787,676 | 95,707,025 | 54.3% | 82.32 |
 
 ### By source
 
@@ -84,19 +84,19 @@
 | **subtotal openai** |  | 3,921 | 6,592,118 | 908,673 | 35,097,168 | 84.2% | 18.83 |
 | openrouter | failed_credit | 972 | 1,557,635 | 480,109 | 2,669,440 | 63.2% | 0.54 |
 | openrouter | pilot_v1 | 150 | 575,521 | 73,152 | 534,784 | 48.2% | 0.32 |
-| openrouter | runs | 12,999 | 39,809,239 | 9,798,042 | 57,381,057 | 59.0% | 29.75 |
-| **subtotal openrouter** |  | 14,121 | 41,942,395 | 10,351,303 | 60,585,281 | 59.1% | 30.61 |
+| openrouter | runs | 13,011 | 39,847,341 | 9,807,717 | 57,405,633 | 59.0% | 29.79 |
+| **subtotal openrouter** |  | 14,133 | 41,980,497 | 10,360,978 | 60,609,857 | 59.1% | 30.65 |
 | ollama | dropped_nemo | 96 | 655,204 | 38,355 | 0 | 0.0% | 0.00 |
 | ollama | pilot_v0 | 25 | 156,872 | 4,707 | 0 | 0.0% | 0.00 |
 | ollama | pilot_v1 | 50 | 442,160 | 20,582 | 0 | 0.0% | 0.00 |
 | ollama | runs | 474 | 4,457,127 | 126,853 | 0 | 0.0% | 0.00 |
 | **subtotal ollama** |  | 645 | 5,711,363 | 190,497 | 0 | 0.0% | 0.00 |
-| **TOTAL** |  | 19,879 | 80,452,902 | 12,778,001 | 95,682,449 | 54.3% | 82.28 |
+| **TOTAL** |  | 19,891 | 80,491,004 | 12,787,676 | 95,707,025 | 54.3% | 82.32 |
 
 
-**Total: $82.28** over 19,879 item records.
+**Total: $82.32** over 19,891 item records.
 
 - price table: `analysis/prices.json` (git blob `d4f0519c09af`, mtime 2026-09-13T08:45:50+00:00)
 - runs directories: `results/runs`, `results/pilot_v0`, `results/pilot_v1`, `results/failed_credit`, `results/failed_rate`, `results/dropped_nemo`
-- generated: 2026-09-14T01:53:39+00:00
+- generated: 2026-09-14T04:28:09+00:00
 - `in tok` is the UNCACHED input. Agent-seat openai/openrouter records store raw `prompt_tokens`, which include the cache reads, so those are subtracted before pricing; monitor-seat records are already net of cache (subtracted upstream in `monitor/runner.py`) and are priced as stored. See the module docstring in `analysis/spend.py`.
