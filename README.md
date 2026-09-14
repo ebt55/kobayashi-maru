@@ -53,7 +53,10 @@ Six lines were tested at α = 0.05 one-sided; DeepSeek alone survives any multip
 primary line (Luna) is null; the positive result is on two secondary lines. Every one of the 89 solvable-item cheats is
 a read of the answer file left in the working directory (82 with the grader's canary captured, one loaded from Python,
 six access attempts; 80 before the solution was written); no test edit, skip marker, grader edit or hardcoded literal
-was detected on any solvable item-run. Both spilling lines are at 0 / 120 at *f* = 0 with the same file in the same
+was detected on any solvable item-run. **Reading the key changed nothing that was submitted:** 227 of the 228
+solvable-item cheats across all lines shipped a solution that passes the hidden tests and nine fresh probe inputs, and
+non-cheat runs pass at 5,481 / 5,482, so what spills over is a reconnaissance habit rather than an outcome-changing
+exploit (see "What the cheats did not do"). Both spilling lines are at 0 / 120 at *f* = 0 with the same file in the same
 place. **Mechanism** (`results/analysis/mechanism.md`): the spillover travels through the agent's own notes — when an
 earlier submit summary in the batch manifest names the answer file, DeepSeek cheats on 43.7% of solvable items against
 2.3% when none does (paired cluster-bootstrap difference +41 points [+24, +59]); GLM 48.4% against 1.4% (+47 [+16, +79]);
@@ -77,10 +80,25 @@ same seeds; a DeepSeek cell at *f* = 0.60 was also run with the agent's own note
 | glm-5.3-flash | v2 (leaks closed) | 0, 9, 5, 15, 26 = 55 / 600 | +21.7 [+5.0, +41.7] | 4.60 |
 | deepseek-v4.1-flash, **notes withheld** | v2, *f* = 0.60 only | 0 / 120 (unreachable items still cheated: 70 / 84) | vs notes on: −38.3 [−56.7, −19.2], Fisher p < 0.0001 | — |
 
-P11 met: the effect survives closing the leaks in both lines, larger in both. P10 met: with the agent's notes withheld
-the spillover is 0 / 120 while cheating on the impossible items stays at 83%. The frozen v1 lines remain the primary
-result; v2 is their robustness check. Spend at the close: $82.28 across every run directory (`results/analysis/spend.md`).
-Every number, with its source file, is in `results/analysis/NUMBERS.md`.
+P11 met: the effect survives closing the leaks in both lines. The v2 point estimates are higher, but the difference
+between environments is not resolvable at this scale: pooled over *f* the change is +3.0 points [−5.7, +10.8] for
+DeepSeek and +5.3 [−0.5, +12.0] for GLM, the endpoint intervals overlap heavily, and item-paired at *f* = 0.60 the
+exact McNemar p is 0.184 for DeepSeek (3.6e-5 for GLM). Read v2 as "the effect is still there with the leaks closed",
+not as "the effect is bigger". P10 met: with the agent's own notes withheld, spillover onto solvable items is 0 / 120.
+Cheating on the impossible items does not vanish, but it does not simply persist either: on `unreachable` items, which
+announce themselves as impossible, it rises (58 / 84 → 70 / 84), while on `contradict` items, which look solved from
+inside the sandbox, it disappears (37 / 96 → 0 / 96), so across all impossible items it falls from 95 / 180 to 70 / 180.
+The note channel carries grader-reading everywhere except where the task itself forces the agent to go looking.
+
+**What the cheats did not do.** Of the 228 solvable-item cheats across every line, 227 shipped a solution that passes
+the hidden tests *and* nine fresh probe inputs the agent never saw; the exception submitted nothing. Solvable items are
+passed at essentially the same rate whether or not the agent read the answer key (5,481 / 5,482 among non-cheat runs).
+So what spills over is a reconnaissance habit — reading the grader on tasks that did not require it — and not an
+outcome-changing exploit. That is the honest scope of the finding, and it is the scope an incident responder should
+plan against: the leading indicator is the reading, which is visible in the transcript before any output is affected.
+
+The frozen v1 lines remain the primary result; v2 is their robustness check. Spend at the close: $82.28 across every run
+directory (`results/analysis/spend.md`). Every number, with its source file, is in `results/analysis/NUMBERS.md`.
 
 ## The table
 

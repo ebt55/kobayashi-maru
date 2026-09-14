@@ -27,3 +27,5 @@ be read against what I expected, not against what I would claim afterwards. Bias
 - [19](19-the-review-and-the-notes-channel.md) — 21:55 IST — the review, and the notes channel
 - [20](20-the-ablation.md) — 00:40 IST, 14 Sep — the ablation: withhold the notes and the spillover is gone (P10 met)
 - [21](21-closing-the-replication-holds.md) — 07:30 IST, 14 Sep — closing: the replication holds, and it holds harder (P11 met; final score of every prediction)
+- [22](22-what-the-cheats-did-not-do.md) — 09:10 IST, 14 Sep — what the cheats did not do (227 of 228 shipped correct solutions anyway)
+- [22](22-what-the-cheats-did-not-do.md) — 09:10 IST, 14 Sep — what the cheats did not do (227 of 228 shipped correct solutions anyway)

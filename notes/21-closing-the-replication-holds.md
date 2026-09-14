@@ -57,3 +57,7 @@ reviewer did (19). None changed a number that mattered; all changed what I told 
 
 Spend at the close: $82.28 across every directory — the v7 runs, their failed batches and their monitoring cost
 $12. Ebin's target was $60.
+
+Correction added 09:10 IST after review (entry 22): "it holds harder" in this entry's title and the reading
+that the effect is larger in v2 are not supported by the intervals. The effect survives; its magnitude is not
+distinguishable between environments. The title is left as written rather than edited after the fact.
