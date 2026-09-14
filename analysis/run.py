@@ -15,6 +15,7 @@ from pathlib import Path
 
 from analysis.cells import build_cells, write_cells, write_table_md
 from analysis.figure import make_figure
+from analysis.figure_report import make_report_figures
 from analysis.figure_v7 import make_v7_figure
 from analysis.flags import write_flags_md
 from analysis.load import load_runs
@@ -60,6 +61,7 @@ def run_analysis(
         paths[f"impossible_by_mutation.{name}"] = path
     fig_paths = make_figure(df, out_dir, n_boot=n_boot, seed=seed)
     fig_paths += make_v7_figure(df, out_dir, n_boot=n_boot, seed=seed)
+    fig_paths += make_report_figures(df, out_dir, runs_dir, n_boot=n_boot, seed=seed)
     for p in fig_paths:
         paths[p.name] = p
     paths["flags_for_review.md"] = write_flags_md(runs_dir, out_dir)
