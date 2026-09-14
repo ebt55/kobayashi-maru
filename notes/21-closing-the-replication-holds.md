@@ -1,4 +1,4 @@
-# 21 — 07:40 IST, 14 Sep — closing: the replication holds, and it holds harder
+# 21 — 07:30 IST, 14 Sep — closing: the replication holds, and it holds harder
 
 The night had one more failure and two more results.
 
