@@ -1,4 +1,14 @@
-# Spend breakdown
+# Spend breakdown — at the price table frozen 2026-09-13
+
+**Generated 2026-09-14 and left as generated.** Every figure below is priced against
+`analysis/prices-2026-09-13.json` (the table `analysis/prices.json` held when this ran; the git
+blob hash in the footer still verifies against that frozen copy). Total **$82.32**.
+
+A verified price check on 2026-09-15 found two of those entries stale — the OpenRouter monitor
+models `deepseek/deepseek-v4-pro-0813` and `z-ai/glm-5.3` — and the flat
+`cache_read_multiplier: 0.1` wrong in both directions. Re-pricing these identical token counts
+at 2026-09-15 list prices gives **$95.11**: see `spend-2026-09-15.md`. Which of the two is the
+amount actually billed is not settled here — **the provider dashboards are the authority.**
 
 ### By provider
 

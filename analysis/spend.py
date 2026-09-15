@@ -43,8 +43,12 @@ One wrinkle, worth cents: the runner's subtraction is guarded by ``input >= cach
 a monitor call that reports more cached than prompt tokens keeps its raw value. Those are
 left exactly as stored rather than guessed at.
 
-    usd = uncached_in * price_in + cached_in * price_in * cache_read_multiplier
-          + out * price_out
+    usd = uncached_in * price_in + cached_in * price_cached + out * price_out
+
+where ``price_cached`` is the model's own ``cached`` price when the table gives one, and
+``price_in * cache_read_multiplier`` only as a fallback for a model that has none. The flat
+multiplier was the whole rule up to the 2026-09-13 table and it is wrong in both directions:
+DeepSeek cache reads are 0.02x input, Z.AI's about 0.2x, Anthropic's and OpenAI's 0.1x.
 
 ``cache %`` = cached / (uncached_in + cached), i.e. the share of the prompt served from
 cache. Anthropic cache writes (``cache_creation_input_tokens``, billed at 1.25x) are not
@@ -261,13 +265,16 @@ def _price_one(provider: str, model: str, cell: dict, prices: dict,
             f"no price for {provider}/{model} ({seat} seat) -- priced at $0; "
             "add it to analysis/prices.json"
         )
-        pin = pout = 0.0
+        pin = pout = pcached = 0.0
     else:
         pin = float(entry.get("input", 0.0))
         pout = float(entry.get("output", 0.0))
+        # Per-model cache-read price when the table has one; the flat multiplier only as
+        # a fallback. `cached: 0.0` is a real price (ollama), so test the key, not the value.
+        pcached = float(entry["cached"]) if "cached" in entry else pin * mult
     cached = cell["cached"]
     uncached = split_cached(provider, cell["in"], cached, seat)
-    usd = uncached / 1e6 * pin + cell["out"] / 1e6 * pout + cached / 1e6 * pin * mult
+    usd = uncached / 1e6 * pin + cell["out"] / 1e6 * pout + cached / 1e6 * pcached
     return {
         "priced_as": matched,
         "item_runs": cell["runs"],
@@ -277,6 +284,7 @@ def _price_one(provider: str, model: str, cell: dict, prices: dict,
         "cache_read_tokens": cached,
         "price_in_per_mtok": pin,
         "price_out_per_mtok": pout,
+        "price_cached_per_mtok": pcached,
         "priced": entry is not None,
         "usd": round(usd, 4),
     }
@@ -444,7 +452,8 @@ def git_blob_hash(path: Path) -> str:
     return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
 
 
-def footer(rows: list[dict], runs_dirs: list[str], prices_path: Path) -> str:
+def footer(rows: list[dict], runs_dirs: list[str], prices_path: Path,
+           prices: dict | None = None) -> str:
     t = _totals(rows)
     mtime = datetime.fromtimestamp(prices_path.stat().st_mtime,
                                    tz=timezone.utc).isoformat(timespec="seconds")
@@ -454,12 +463,14 @@ def footer(rows: list[dict], runs_dirs: list[str], prices_path: Path) -> str:
         shown = f"analysis/{shown}" if not shown.startswith("analysis/") else shown
     except ValueError:
         shown = prices_path.as_posix()
+    as_of = (prices or {}).get("as_of")
     return "\n".join([
         "",
         f"**Total: ${t['usd']:,.2f}** over {t['item_runs']:,} item records.",
         "",
-        f"- price table: `{shown}` "
-        f"(git blob `{git_blob_hash(prices_path)[:12]}`, mtime {mtime})",
+        f"- price table: `{shown}`"
+        + (f" (prices as of {as_of}; " if as_of else " (")
+        + f"git blob `{git_blob_hash(prices_path)[:12]}`, mtime {mtime})",
         f"- runs directories: {', '.join('`' + d + '`' for d in runs_dirs)}",
         f"- generated: {now}",
         "- `in tok` is the UNCACHED input. Agent-seat openai/openrouter records store raw "
@@ -507,10 +518,11 @@ def main(argv: list[str] | None = None) -> int:
         if warns:
             print("* priced at $0 -- the total is a lower bound.")
         print(
-            f"Cache-read input billed at {float(prices.get('cache_read_multiplier', 0.1)):.0%} "
-            "of the input price; `in tok` is the uncached portion. Agent-seat "
-            "openai/openrouter input is net of cache reads here; monitor-seat input already "
-            "was. Monitor rows count only uncached calls."
+            "Cache-read input billed at each model's own `cached` price where the table gives "
+            f"one, else {float(prices.get('cache_read_multiplier', 0.1)):.0%} of its input "
+            "price; `in tok` is the uncached portion. Agent-seat openai/openrouter input is "
+            "net of cache reads here; monitor-seat input already was. Monitor rows count only "
+            "uncached calls."
         )
 
     if args.md:
@@ -523,7 +535,7 @@ def main(argv: list[str] | None = None) -> int:
         if warns:
             parts += ["\\* priced at $0 -- the total is a lower bound.", ""]
             parts += [f"- WARNING: {w}" for w in warns] + [""]
-        parts.append(footer(rows, list(args.runs), prices_path))
+        parts.append(footer(rows, list(args.runs), prices_path, prices))
         out.write_text("\n".join(parts) + "\n", encoding="utf-8", newline="\n")
         print(f"wrote {out}")
 

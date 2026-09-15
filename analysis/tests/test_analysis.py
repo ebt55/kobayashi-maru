@@ -676,22 +676,43 @@ def test_spend_prices_both_seats(sloped):
     assert seats == {"agent", "monitor"}
     by_model = {(r["seat"], r["model"]): r for r in rows}
     assert warns == []
+    # Rates come from the table under test, not from literals -- a price refresh must not
+    # break this test, only a change to the pricing RULE should.
+    def expected_usd(row: dict) -> float:
+        return (row["input_tokens"] / 1e6 * row["price_in_per_mtok"]
+                + row["output_tokens"] / 1e6 * row["price_out_per_mtok"]
+                + row["cache_read_tokens"] / 1e6 * row["price_cached_per_mtok"])
+
     # the short id prices against the table's dated snapshot
     agent = by_model[("agent", "claude-haiku-4-5")]
     assert agent["priced_as"] == "claude-haiku-4-5-20251001"
     assert agent["usd"] > 0
-    expected_agent = (
-        agent["input_tokens"] / 1e6 * 1.0
-        + agent["output_tokens"] / 1e6 * 5.0
-        + agent["cache_read_tokens"] / 1e6 * 1.0 * 0.1
-    )
-    assert agent["usd"] == pytest.approx(expected_agent, abs=0.01)
+    assert agent["usd"] == pytest.approx(expected_usd(agent), abs=0.01)
     mon = by_model[("monitor", "deepseek/deepseek-v4-pro-0813")]
     assert mon["usd"] > 0
-    expected = mon["input_tokens"] / 1e6 * 0.578 + mon["output_tokens"] / 1e6 * 1.734
-    assert mon["usd"] == pytest.approx(expected, abs=0.01)
+    assert mon["usd"] == pytest.approx(expected_usd(mon), abs=0.01)
     ollama = by_model[("agent", "qwen3:14b")]
     assert ollama["usd"] == 0.0 and ollama["priced"] is True
+
+
+def test_spend_per_model_cached_price_beats_the_flat_multiplier():
+    """A model's own `cached` price wins; the multiplier is only the fallback."""
+    prices = {
+        "cache_read_multiplier": 0.1,
+        "providers": {"p": {
+            "own": {"input": 10.0, "output": 0.0, "cached": 0.2},   # 0.02x, not 0.1x
+            "fallback": {"input": 10.0, "output": 0.0},             # no `cached` key
+            "free": {"input": 10.0, "output": 0.0, "cached": 0.0},  # 0.0 is a real price
+        }},
+    }
+    usage = {("agent", "p", m): {"runs": 1, "in": 0, "out": 0, "cached": 1_000_000}
+             for m in ("own", "fallback", "free")}
+    rows, warns = price_rows(usage, prices)
+    assert warns == []
+    got = {r["model"]: r["usd"] for r in rows}
+    assert got["own"] == pytest.approx(0.2)       # its own price
+    assert got["fallback"] == pytest.approx(1.0)  # 10.0 * 0.1
+    assert got["free"] == pytest.approx(0.0)      # not silently re-read as "missing"
 
 
 def test_spend_cli_runs(sloped, tmp_path):

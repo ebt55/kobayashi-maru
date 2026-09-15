@@ -290,4 +290,6 @@ One thing worth knowing if you reuse the records: they contain outputs from mode
 
 ## Cost
 
-Total spend across every run: **$82.32**. Full breakdown by provider and model in `results/analysis/spend.md`.
+Total spend across every run: **$82.32 at the price table frozen 2026-09-13; $95.11 re-priced at 2026-09-15 list prices. Provider dashboards are the authority.** The runs happened 12–14 Sep, so $82.32 is the figure computed at the time and may well be the amount billed. The $12.79 gap is almost entirely two OpenRouter monitor models whose entries in the old table were stale, plus a flat cache-read multiplier replaced by each model's published cache-read price.
+
+Full breakdown by provider and model in `results/analysis/spend.md` (frozen prices) and `results/analysis/spend-2026-09-15.md` (re-priced, with a per-line delta table).

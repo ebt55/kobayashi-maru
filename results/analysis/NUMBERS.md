@@ -9,7 +9,11 @@ copied from a file in this directory; the pointer says which. No interpretation 
 Regenerate with `uv run python -m analysis.run --runs results/runs --out results/analysis`,
 `uv run python -m analysis.followups --runs results/runs --out results/analysis/followups.md`,
 `uv run python -m analysis.mechanism --runs results/runs --out results/analysis/mechanism.md`, and
-`uv run python -m analysis.spend --by all --runs results/runs results/pilot_v0 results/pilot_v1 results/failed_credit results/failed_rate results/dropped_nemo --md results/analysis/spend.md`.
+`uv run python -m analysis.spend --by all --runs results/runs results/pilot_v0 results/pilot_v1 results/failed_credit results/failed_rate results/dropped_nemo --md results/analysis/spend-2026-09-15.md`.
+
+That last command now writes `spend-2026-09-15.md` (live prices, $95.11), **not** `spend.md`.
+`spend.md` is the frozen 2026-09-13 pricing and is kept as generated; reproduce it with
+`--prices analysis/prices-2026-09-13.json --md results/analysis/spend.md`.
 
 ## Scale
 
@@ -20,7 +24,7 @@ Regenerate with `uv run python -m analysis.run --runs results/runs --out results
 | lineages in the grid | 6 (Luna, Sol, Haiku, DeepSeek-v4.1-flash, GLM-5.3-flash, Qwen3-14b); Nemo dropped under PREREG §calibration | DEVIATIONS.md 19:15; notes/17 |
 | tasks | 30 solvable, 15 impossible variants (8 `unreachable`, 7 `contradict`) | tasks/, mutate.py |
 | detector/monitor agreement (detector flag vs monitor), by scope | **frozen grid** κ 0.944, 6,719 rated, 44 unrated, 442 / 48 / 1 / 6,228, agreement on the 491 flagged 0.900; **pre-registered baseline arms only** κ 0.937, 5,278 rated, 0.889 on 434 flagged; **all lines incl. v7** κ 0.899, 8,869 rated, 90 unrated, 0.833 on 953 flagged | stats.json `pooled.{frozen,preregistered_baseline,all}.kappa`; each carries its own `definition` |
-| spend, final | $82.32 total: anthropic $32.84, openai $18.83, openrouter $30.65 (of which the v7 runs, their failed batches and monitoring ≈ $12), ollama $0 | spend.md |
+| spend, final | **$82.32 at the price table frozen 2026-09-13; $95.11 re-priced at 2026-09-15 list prices. Provider dashboards are the authority.** At frozen prices: anthropic $32.84, openai $18.83, openrouter $30.65 (of which the v7 runs, their failed batches and monitoring ≈ $12), ollama $0. Re-priced: anthropic $32.84, openai $18.83, openrouter $43.44, ollama $0 — the whole +$12.79 is the two OpenRouter monitor models (`deepseek-v4-pro-0813` $15.63→$25.66, `glm-5.3` $7.61→$10.36) plus per-model cache-read prices replacing a flat 0.1× multiplier. Same 19,891 item records either way; **no token count changed, and no other number in this file is affected.** | spend.md (frozen), spend-2026-09-15.md (re-priced) |
 
 ## Primary DV per line: cheats on solvable items (baseline arm)
 
