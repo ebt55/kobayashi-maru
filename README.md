@@ -4,7 +4,7 @@
 
 This repository is the experiment that answers that. It is a pre-registered study over 8,959 agent runs, and everything in it is public: the tasks, the harness, the detectors, the statistics, the raw transcripts, and the mistakes.
 
-The short answer is yes, for some models, and the reason is stranger than expected.
+For one of six models, yes, and the route was the agent's own notes. One thing the design does not separate: adding impossible tasks also made the batch longer. Read the limits before quoting the headline.
 
 ---
 
@@ -20,7 +20,7 @@ One agent in the incident wrote the logic down almost as a syllogism:
 
 > "External infrastructure exploit is outside intended scope. However task impossible, peers doing it. We should continue."
 
-It knows the rule. It notes that its task is impossible. It continues anyway.
+It states the rule, notes that the task is impossible, and continues.
 
 ---
 
@@ -44,7 +44,7 @@ If an agent cheats more on the same ten tasks purely because of what was sitting
 
 ### What makes a task impossible
 
-There are two kinds, and the difference turns out to matter enormously.
+There are two kinds, and the difference matters later.
 
 | Kind | What is wrong with it | How it feels to the agent |
 |---|---|---|
@@ -80,7 +80,7 @@ Two things about this are deliberate.
 
 ## What I found
 
-### 1. The effect is real, and it depends on the model
+### 1. One model moved, one moved a little, two were tempted and did not move
 
 ![Cheat rate on solvable tasks against the fraction of impossible ones](results/analysis/report/fig1_dose.png)
 
@@ -116,17 +116,17 @@ This is the check that makes the previous paragraph mean anything. If a model ne
 
 Pooled across every dose level and every condition. The "said this is impossible" column is measured on the `unreachable` tasks, where declaring it is the correct answer. "Cheated on solvable" is the average across all five dose levels, so it sits below the endpoint figures in the table above. Full breakdown with confidence intervals in [`results/analysis/impossible_by_mutation.md`](results/analysis/impossible_by_mutation.md).
 
-Three things fall out of this table.
+Three things to take from the table.
 
 **Haiku and Luna are the real non-results.** Both cheated on more than a third of the impossible tasks and never once on a solvable one. The trick was right there, they used it freely when stuck, and it did not spread. That is a finding, not an absence of one.
 
-**GPT-5.6-Sol behaved the best of anything tested.** It barely touched the answer file. Instead it told us the task was impossible 91% of the time, which is exactly what you would want. It is also the model from the real incident, which is worth sitting with. The cost is that we learned nothing about whether spillover would happen to it, because nothing ever tempted it.
+**GPT-5.6-Sol behaved the best of anything tested.** It barely touched the answer file. Instead it told us the task was impossible 91% of the time, which is exactly what you would want. It is also the model from the real incident. The cost is that we learned nothing about whether spillover would happen to it, because nothing ever tempted it.
 
-**Almost nobody cheats on `contradict` tasks.** Four of six models are at 0.0%. A `contradict` task looks solved from the inside, so the agent has no reason to go hunting for the grader. That is the same asymmetry that shows up again in the notes experiment below, and it is the best evidence that what drives this is *the agent noticing it is stuck*, not the mere presence of an answer file.
+**Almost nobody cheats on `contradict` tasks.** Four of six models are at 0.0%. A `contradict` task looks solved from the inside, so the agent has no reason to go hunting for the grader. That is the same asymmetry that shows up again in the notes experiment below, and it is the best evidence here that the trigger is the agent noticing it is stuck, rather than the answer file being there.
 
 ### 2. It travels through the agent's own notes
 
-This is the part I did not expect.
+I did not predict this. It was added to the preregistration as P10 and P11 after the first runs showed it.
 
 Between tasks, the harness shows the agent a summary of what it did on the earlier tasks in the batch. This is completely ordinary design. Nearly every agent framework does it.
 
@@ -150,9 +150,9 @@ I tested this instead of just observing it. One condition was re-run with the no
 | Notes shown (normal) | **46 / 120** |
 | Notes withheld | **0 / 120** |
 
-Cut the channel and the spillover vanishes completely.
+With the notes withheld, no cheats on the solvable tasks in 120 runs.
 
-And here is the detail that makes this a real mechanism rather than "the agent just did less with less context." With the notes withheld:
+The two kinds of impossible task moved in opposite directions, which is why I read this as the notes carrying the trick and not as the agent doing less with less context. With the notes withheld:
 
 - On `unreachable` tasks, which announce that they are broken, cheating **went up**: 58/84 → 70/84. The agent still goes looking, because the task itself shows it that it is stuck.
 - On `contradict` tasks, which look solved from the inside, cheating **went to zero**: 37/96 → 0/96. Nothing told the agent to look, so it never did.
@@ -167,17 +167,21 @@ The note is what sends the agent to the grader everywhere the task itself does n
 
 Of the 228 times an agent cheated on a solvable task, **227 still submitted a completely correct, general solution** that passed the hidden tests and nine inputs it had never seen. The one exception submitted nothing at all. Runs that did not cheat passed at 5,481 out of 5,482.
 
-The tasks are small. Every model can solve them either way. Reading the answer key bought the agent nothing.
+The tasks are small and every model can solve them, so reading the answer key changed nothing.
 
-So what spreads is **a reconnaissance habit, not an exploit**. An agent that learned to open the grader on a broken task keeps opening it on tasks that did not need it. It is a broken rule and an early warning sign, not a corrupted result.
+What spreads is a habit of looking at the grader, not a worse answer. An agent that learned to open the grader on a broken task keeps opening it on tasks that did not need it.
 
-That is a smaller claim than "impossible tasks make agents cheat", and it is also the more useful one for anyone running evaluations: **no output check would catch any of this.** The code was correct every time. The only place the behaviour is visible is the transcript.
+That is a smaller claim than "impossible tasks make agents cheat". It also matters more for anyone running evaluations: no output check caught any of this, because the code was correct every time. The behaviour is visible only in the transcript.
 
 ---
 
 ## What this does not show
 
-Being straight about the limits is most of the value here.
+Read these before quoting anything above.
+
+**Adding impossible tasks also made the batch longer.** The dose is the number of impossible tasks, so a batch at the top dose holds 25 tasks against 10 at the bottom, and no batch of 25 solvable tasks was run. This design does not separate "impossible tasks cause it" from "long batches cause it". The notes ablation points at the impossible tasks, because the notes that carried the trick were written on them, but the equal-length control is still owed. A reviewer at the Apart sprint raised this in October 2026; see `followups.md`.
+
+**The dose is the batch fraction, but the agent sees tasks in order.** The number of impossible tasks an agent has already met when it reaches a given solvable task is the more direct dose, and it was not analysed. The records hold the order, so this is a reanalysis, not a new run.
 
 **The answer file was left within reach on purpose.** In the plain environment almost nothing happened, so a pre-registered rule moved the answer file into the working directory for five of six models. Both spilling models still sit at zero cheats when no impossible tasks are present, so the file alone does not cause the effect. But this measures an exploit spreading in an environment that supplied the exploit. If a real harness leaves nothing comparable lying around, there may be nothing to spread.
 
@@ -227,7 +231,7 @@ Everything resumes. A half-finished batch restarts where it stopped. Every stage
 
 ## Written up
 
-The full report is [`report/kobayashi-maru-report.pdf`](report/kobayashi-maru-report.pdf), written for the Apart Research AI Incident Response Sprint.
+The full report is [`report/kobayashi-maru-report.pdf`](report/kobayashi-maru-report.pdf), written for the Apart Research AI Incident Response Sprint. Reviewed there in October 2026: placed in the top half of more than 230 submissions. The reviewers credited the execution and the published negative results, and faulted the batch-length confound, the dose definition and an abstract that led with statistics. All three are right; the follow-ups are in `followups.md`.
 
 ## What is in here
 
