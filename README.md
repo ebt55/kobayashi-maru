@@ -244,7 +244,7 @@ The full report is [`report/kobayashi-maru-report.pdf`](report/kobayashi-maru-re
 | `detectors/` | The five cheat detectors. Plain functions over one record. No AI, no Docker. |
 | `monitor/` | The second-opinion AI monitor and the agreement statistics. |
 | `analysis/` | Rates, confidence intervals, the statistics, the figures and the tables. |
-| `results/analysis/` | Every published number, with the file it came from, in `NUMBERS.md`. See also `table.md` (every model x condition x dose cell), `impossible_by_mutation.md` (the bait table above, with intervals), `stats.json` (the statistics), `hand_review.md` (every flagged run I read by hand) and `spend.md` (where the money went). |
+| `results/analysis/` | Every published number, with the file it came from, in `NUMBERS.md`. See also `table.md` (every model x condition x dose cell), `impossible_by_mutation.md` (the bait table above, with intervals), `stats.json` (the statistics), `hand_review.md` (the orchestrating model's review of every flagged run, from the transcripts), `review_by_ebin/hand_review.md` (ten flagged runs I read myself) and `spend.md` (where the money went). |
 | `reviews/` | Three independent model reviews of this work, including the one that found the two leaks. |
 | `notes/` | The lab notebook, written as the work happened, including the predictions that turned out wrong. |
 | `DEVIATIONS.md` | Every departure from the plan, appended as it happened, never edited. |
