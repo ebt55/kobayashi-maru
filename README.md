@@ -4,7 +4,9 @@
 
 This repository is the experiment that answers that. It is a pre-registered study over 8,959 agent runs, and everything in it is public: the tasks, the harness, the detectors, the statistics, the raw transcripts, and the mistakes.
 
-For one of six models, yes, and the route was the agent's own notes. One thing the design does not separate: adding impossible tasks also made the batch longer. Read the limits before quoting the headline.
+The clearest result is how the cheating spread. An agent that opened the grader's answer file on an impossible task wrote that into its own notes, the harness replayed the notes into later tasks, and the agent then opened the answer file on tasks it could solve. With the notes withheld, cheating on the solvable tasks went from 46 of 120 runs to 0 of 120. That is one model at one dose level.
+
+The dose curve is the weaker result. Of the four models that took the bait, two cheated more on the solvable tasks as impossible ones were added, and only one of them clearly. Adding impossible tasks also made the batch longer, and the design does not fully separate the two. Read the limits before quoting either result.
 
 ---
 
@@ -97,7 +99,7 @@ Six model families were tested. Only four of them ever took the bait at all, and
 | GPT-5.6-Sol | 0 / 600 | 0 → 0 | **Untested** — never took the bait |
 | Qwen3-14B | 0 / 300 | 0 → 0 | **Untested** — never took the bait |
 
-The last two rows matter. A model that never cheats on an impossible task was never tempted, so its clean record on the solvable ones proves nothing. The study said so in advance, in writing, before any of this was run. GPT-5.6-Sol, which is the model from the real incident, mostly just *declared* the impossible tasks impossible and moved on, which is the most sensible behaviour anything showed.
+The last two rows matter. A model that never cheats on an impossible task was never tempted, so its clean record on the solvable ones proves nothing. The study said so in advance, in writing, before any of this was run. GPT-5.6-Sol, which is the model from the real incident, mostly left the answer file alone, reported the missing file and moved on, which is the most sensible behaviour anything showed.
 
 So the honest score is **two of four models that were actually tempted**, not two of six.
 
@@ -105,7 +107,7 @@ So the honest score is **two of four models that were actually tempted**, not tw
 
 This is the check that makes the previous paragraph mean anything. If a model never cheats on an impossible task, its clean record on the solvable ones tells you nothing, because it was never offered the trick in the first place.
 
-| Model | Cheated on `unreachable` | Cheated on `contradict` | Said "this is impossible" | Cheated on solvable |
+| Model | Cheated on `unreachable` | Cheated on `contradict` | Reported the problem | Cheated on solvable |
 |---|---|---|---|---|
 | DeepSeek-V4.1-flash | **64.2%** | 21.1% | 19.6% | **11.0%** |
 | GLM-5.3-flash | **29.5%** | 3.4% | 48.0% | **3.8%** |
@@ -114,13 +116,13 @@ This is the check that makes the previous paragraph mean anything. If a model ne
 | GPT-5.6-Sol | 5.8% | 0.0% | **91.3%** | 0.0% |
 | Qwen3-14B | 0.0% | 0.0% | 18.6% | 0.0% |
 
-Pooled across every dose level and every condition. The "said this is impossible" column is measured on the `unreachable` tasks, where declaring it is the correct answer. "Cheated on solvable" is the average across all five dose levels, so it sits below the endpoint figures in the table above. Full breakdown with confidence intervals in [`results/analysis/impossible_by_mutation.md`](results/analysis/impossible_by_mutation.md).
+Pooled across every dose level and every condition. The "reported the problem" column is measured on the `unreachable` tasks. It is a pattern match on the agent's closing summary, and it fires on plain reports such as "the referenced file is absent" as well as on statements that the task cannot be done. It does not mean the agent said the task was impossible. None of GPT-5.6-Sol's flagged summaries says that: the typical one implements the base function, notes the missing file and submits. "Cheated on solvable" is the average across all five dose levels, so it sits below the endpoint figures in the table above. Full breakdown with confidence intervals in [`results/analysis/impossible_by_mutation.md`](results/analysis/impossible_by_mutation.md).
 
 Three things to take from the table.
 
 **Haiku and Luna are the real non-results.** Both cheated on more than a third of the impossible tasks and never once on a solvable one. The trick was right there, they used it freely when stuck, and it did not spread. That is a finding, not an absence of one.
 
-**GPT-5.6-Sol behaved the best of anything tested.** It barely touched the answer file. Instead it told us the task was impossible 91% of the time, which is exactly what you would want. It is also the model from the real incident. The cost is that we learned nothing about whether spillover would happen to it, because nothing ever tempted it.
+**GPT-5.6-Sol behaved the best of anything tested.** It barely touched the answer file. On 91% of the `unreachable` tasks it left the file alone, wrote the base function and reported that the referenced file was missing. It did not say the task was impossible. It is also the model from the real incident. The cost is that we learned nothing about whether spillover would happen to it, because nothing ever tempted it.
 
 **Almost nobody cheats on `contradict` tasks.** Four of six models are at 0.0%. A `contradict` task looks solved from the inside, so the agent has no reason to go hunting for the grader. That is the same asymmetry that shows up again in the notes experiment below, and it is the best evidence here that the trigger is the agent noticing it is stuck, rather than the answer file being there.
 
@@ -179,9 +181,9 @@ That is a smaller claim than "impossible tasks make agents cheat". It also matte
 
 Read these before quoting anything above.
 
-**Adding impossible tasks also made the batch longer.** The dose is the number of impossible tasks, so a batch at the top dose holds 25 tasks against 10 at the bottom, and no batch of 25 solvable tasks was run. This design does not separate "impossible tasks cause it" from "long batches cause it". The notes ablation points at the impossible tasks, because the notes that carried the trick were written on them, but the equal-length control is still owed. A reviewer at the Apart sprint raised this in October 2026; see `followups.md`.
+**Adding impossible tasks also made the batch longer.** The dose is the number of impossible tasks, so a batch at the top dose holds 25 tasks against 10 at the bottom, and no batch of 25 solvable tasks was run. This design does not separate "impossible tasks cause it" from "long batches cause it". The notes ablation points at the impossible tasks, because the notes that carried the trick were written on them. The published records also speak to it: solvable tasks the agent reached before any impossible task, in batches that did contain impossible tasks, show 0 cheats in 272 runs (68 in each of the four DeepSeek and GLM lines). The agent is told the batch size at the start, so knowing the batch was long did nothing on its own. Later in a batch, length and accumulated notes still rise together, and the equal-length control is still owed. A reviewer at the Apart sprint raised this in October 2026; see `followups.md`.
 
-**The dose is the batch fraction, but the agent sees tasks in order.** The number of impossible tasks an agent has already met when it reaches a given solvable task is the more direct dose, and it was not analysed. The records hold the order, so this is a reanalysis, not a new run.
+**The dose is the batch fraction, but the agent sees tasks in order.** The number of impossible tasks an agent has already met when it reaches a given solvable task is the more direct dose. That regression was run and is in `results/analysis/stats.json` (`cumulative_dose`) and `NUMBERS.md`, but it is not in the submitted report. For DeepSeek the odds of cheating on a solvable task rise with each impossible task already seen (log-odds slope 0.279, *p* = 3.6×10⁻⁶); for GLM the slope is 0.104 (*p* = 0.050). It is confounded with the batch fraction by construction, because a higher dose means both more impossible tasks seen and a longer batch.
 
 **The answer file was left within reach on purpose.** In the plain environment almost nothing happened, so a pre-registered rule moved the answer file into the working directory for five of six models. Both spilling models still sit at zero cheats when no impossible tasks are present, so the file alone does not cause the effect. But this measures an exploit spreading in an environment that supplied the exploit. If a real harness leaves nothing comparable lying around, there may be nothing to spread.
 
