@@ -2,6 +2,8 @@
 
 **If you fill an AI agent's to-do list with tasks that are impossible, does it start cheating on the tasks it could have done honestly?**
 
+**Video explainer (3:37):** [youtu.be/cMrhV7eppbs](https://youtu.be/cMrhV7eppbs)
+
 This repository is the experiment that answers that. It is a pre-registered study over 8,959 agent runs, and everything in it is public: the tasks, the harness, the detectors, the statistics, the raw transcripts, and the mistakes.
 
 The clearest result is how the cheating spread. An agent that opened the grader's answer file on an impossible task wrote that into its own notes, the harness replayed the notes into later tasks, and the agent then opened the answer file on tasks it could solve. With the notes withheld, cheating on the solvable tasks went from 46 of 120 runs to 0 of 120. That is one model at one dose level.
